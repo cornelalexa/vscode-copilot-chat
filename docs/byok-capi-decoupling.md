@@ -1747,11 +1747,11 @@ Primary files:
 
 Implementation tasks:
 
-- Add standalone context key, for example `github.copilot.chat.standalone`.
-- Verify the early identity split remains intact: `reea-srl.reea-copilot` / `Reea Copilot Chat`.
+- [x] Add standalone context key, for example `github.copilot.chat.standalone`.
+- [x] Verify the early identity split remains intact: `reea-srl.reea-copilot` / `Reea Copilot Chat`.
 - In standalone mode:
-  - missing Copilot auth should not set visible disabled/expired/subscription failure states.
-  - quota exceeded and subscription prompts should be suppressed.
+  - [x] missing Copilot auth should not set visible disabled/expired/subscription failure states.
+  - [x] quota exceeded and subscription prompts should be suppressed.
   - sign-in walkthrough entries should be hidden or deprioritized.
   - cloud/review/session menus should be hidden.
   - [x] CustomOAI provider contribution must be available in target product quality; remove or bypass `productQualityType != 'stable'` for standalone packaging if needed.
@@ -1760,8 +1760,8 @@ Implementation tasks:
 
 Tests:
 
-- Context keys reflect standalone active state.
-- Missing token does not set subscription-disabled views welcome in standalone.
+- [x] Context keys reflect standalone active state.
+- [x] Missing token does not set subscription-disabled views welcome in standalone.
 - [x] CustomOAI contribution is available for intended product channel.
 - Cloud-only menus are hidden in standalone context.
 - Package activation still occurs when opening chat/model picker after any future activation-event cleanup.

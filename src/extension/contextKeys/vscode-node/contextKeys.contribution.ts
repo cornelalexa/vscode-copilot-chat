@@ -39,6 +39,8 @@ const debugContextKey = 'github.copilot.chat.debug';
 
 const missingPermissiveSessionContextKey = 'github.copilot.auth.missingPermissiveSession';
 
+export const standaloneContextKey = 'github.copilot.chat.standalone';
+
 export const prExtensionInstalledContextKey = 'github.copilot.prExtensionInstalled';
 
 export class ContextKeysContribution extends Disposable {
@@ -72,6 +74,7 @@ export class ContextKeysContribution extends Disposable {
 		this._updateShowLogViewContext();
 		this._updateDebugContext();
 		this._updatePrExtensionInstalledContext();
+		this._updateStandaloneContext();
 
 		const debugReportFeedback = this._configService.getConfigObservable(ConfigKey.TeamInternal.DebugReportFeedback);
 		this._register(autorun(reader => {
@@ -117,6 +120,21 @@ export class ContextKeysContribution extends Disposable {
 		this._logService.debug(`[context keys] Updating context keys.`);
 		this._cancelPendingOfflineCheck();
 		const allKeys = Object.values(welcomeViewContextKeys);
+
+		if (this.isStandaloneMode()) {
+			await commands.executeCommand('setContext', welcomeViewContextKeys.Activated, true);
+			for (const contextKey of allKeys) {
+				if (contextKey !== welcomeViewContextKeys.Activated) {
+					await commands.executeCommand('setContext', contextKey, false);
+				}
+			}
+			await this._updateQuotaExceededContext();
+			await this._updatePreviewFeaturesDisabledContext();
+			await this._updatePermissiveSessionContext();
+			await this._updateStandaloneContext();
+			return;
+		}
+
 		let error: unknown | undefined = undefined;
 		let key: string | undefined;
 		try {
@@ -176,6 +194,11 @@ export class ContextKeysContribution extends Disposable {
 	}
 
 	private async _updateQuotaExceededContext() {
+		if (this.isStandaloneMode()) {
+			commands.executeCommand('setContext', chatQuotaExceededContextKey, false);
+			return;
+		}
+
 		try {
 			const copilotToken = await this._authenticationService.getCopilotToken();
 			commands.executeCommand('setContext', chatQuotaExceededContextKey, copilotToken.isChatQuotaExceeded);
@@ -185,6 +208,11 @@ export class ContextKeysContribution extends Disposable {
 	}
 
 	private async _updatePreviewFeaturesDisabledContext() {
+		if (this.isStandaloneMode()) {
+			commands.executeCommand('setContext', previewFeaturesDisabledContextKey, false);
+			return;
+		}
+
 		try {
 			const copilotToken = await this._authenticationService.getCopilotToken();
 			const disabled = !copilotToken.isEditorPreviewFeaturesEnabled();
@@ -226,6 +254,11 @@ export class ContextKeysContribution extends Disposable {
 	}
 
 	private async _updatePermissiveSessionContext() {
+		if (this.isStandaloneMode()) {
+			commands.executeCommand('setContext', missingPermissiveSessionContextKey, false);
+			return;
+		}
+
 		let hasPermissiveSession = false;
 		let missingPermissiveSession = false;
 		if (!this._authenticationService.isMinimalMode) {
@@ -240,5 +273,13 @@ export class ContextKeysContribution extends Disposable {
 			missingPermissiveSession = !hasPermissiveSession;
 		}
 		commands.executeCommand('setContext', missingPermissiveSessionContextKey, missingPermissiveSession);
+	}
+
+	private _updateStandaloneContext() {
+		commands.executeCommand('setContext', standaloneContextKey, this.isStandaloneMode());
+	}
+
+	private isStandaloneMode(): boolean {
+		return this._configService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone';
 	}
 }
