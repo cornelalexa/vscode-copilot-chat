@@ -1216,7 +1216,7 @@ Use this checklist as the implementation ledger. Mark items as `[x]` only after 
 - [x] Phase 7: Local Tool and Helper Flow Preservation
 - [x] Phase 8: Search Fallbacks Without Embeddings
 - [x] Phase 9: Cloud/Auth-Only Feature Gating
-- [ ] Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
+- [x] Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
 - [ ] Phase 10A: Stable VS Code Proposed API Audit
 - [ ] Phase 11: Telemetry and Experiment Defaults
 - [ ] Phase 12: Deferred Embeddings and Local Semantic Index
@@ -1752,8 +1752,8 @@ Implementation tasks:
 - In standalone mode:
   - [x] missing Copilot auth should not set visible disabled/expired/subscription failure states.
   - [x] quota exceeded and subscription prompts should be suppressed.
-  - sign-in walkthrough entries should be hidden or deprioritized.
-  - cloud/review/session menus should be hidden.
+	- [x] sign-in walkthrough entries should be hidden or deprioritized.
+	- [x] cloud/review/session menus should be hidden.
   - [x] CustomOAI provider contribution must be available in target product quality; remove or bypass `productQualityType != 'stable'` for standalone packaging if needed.
 - Keep command IDs stable in MVP.
 - Add minimal user-facing configuration messages for “No standalone model configured”.
@@ -1763,13 +1763,13 @@ Tests:
 - [x] Context keys reflect standalone active state.
 - [x] Missing token does not set subscription-disabled views welcome in standalone.
 - [x] CustomOAI contribution is available for intended product channel.
-- Cloud-only menus are hidden in standalone context.
+- [x] Cloud-only menus are hidden in standalone context.
 - Package activation still occurs when opening chat/model picker after any future activation-event cleanup.
 
 Acceptance:
 
-- A standalone user sees a local/BYOK chat path, not a broken Copilot sign-in funnel.
-- OpenAI-compatible local gateways are available in the intended internal distribution channel.
+- [x] A standalone user sees a local/BYOK chat path, not a broken Copilot sign-in funnel.
+- [x] OpenAI-compatible local gateways are available in the intended internal distribution channel.
 
 ### Phase 10A: Stable VS Code Proposed API Audit
 

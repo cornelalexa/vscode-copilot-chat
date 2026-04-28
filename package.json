@@ -2070,55 +2070,55 @@
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.individual.expired%",
-				"when": "github.copilot.interactiveSession.individual.expired"
+				"when": "github.copilot.interactiveSession.individual.expired && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.enterprise%",
-				"when": "github.copilot.interactiveSession.enterprise.disabled"
+				"when": "github.copilot.interactiveSession.enterprise.disabled && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.offline%",
-				"when": "github.copilot.offline"
+				"when": "github.copilot.offline && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.invalidToken%",
-				"when": "github.copilot.interactiveSession.invalidToken"
+				"when": "github.copilot.interactiveSession.invalidToken && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.rateLimited%",
-				"when": "github.copilot.interactiveSession.rateLimited"
+				"when": "github.copilot.interactiveSession.rateLimited && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.gitHubLoginFailed%",
-				"when": "github.copilot.interactiveSession.gitHubLoginFailed"
+				"when": "github.copilot.interactiveSession.gitHubLoginFailed && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.contactSupport%",
-				"when": "github.copilot.interactiveSession.contactSupport"
+				"when": "github.copilot.interactiveSession.contactSupport && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.chatDisabled%",
-				"when": "github.copilot.interactiveSession.chatDisabled"
+				"when": "github.copilot.interactiveSession.chatDisabled && !github.copilot.chat.standalone"
 			},
 			{
 				"icon": "$(chat-sparkle)",
 				"title": "%copilot.title%",
 				"content": "%github.copilot.viewsWelcome.switchToReleaseChannel%",
-				"when": "github.copilot.interactiveSession.switchToReleaseChannel"
+				"when": "github.copilot.interactiveSession.switchToReleaseChannel && !github.copilot.chat.standalone"
 			}
 		],
 		"commands": [
@@ -2243,7 +2243,7 @@
 			{
 				"command": "github.copilot.chat.review",
 				"title": "%github.copilot.command.reviewAndComment%",
-				"enablement": "config.github.copilot.chat.reviewSelection.enabled && !github.copilot.interactiveSession.disabled",
+				"enablement": "config.github.copilot.chat.reviewSelection.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone",
 				"category": "Chat"
 			},
 			{
@@ -2282,41 +2282,41 @@
 				"command": "github.copilot.chat.review.stagedChanges",
 				"title": "%github.copilot.command.reviewStagedChanges%",
 				"icon": "$(code-review)",
-				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled",
+				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone",
 				"category": "Chat"
 			},
 			{
 				"command": "github.copilot.chat.review.unstagedChanges",
 				"title": "%github.copilot.command.reviewUnstagedChanges%",
 				"icon": "$(code-review)",
-				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled",
+				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone",
 				"category": "Chat"
 			},
 			{
 				"command": "github.copilot.chat.review.changes",
 				"title": "%github.copilot.command.reviewChanges%",
 				"icon": "$(code-review)",
-				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled",
+				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone",
 				"category": "Chat"
 			},
 			{
 				"command": "github.copilot.chat.review.stagedFileChange",
 				"title": "%github.copilot.command.reviewFileChange%",
 				"icon": "$(code-review)",
-				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled",
+				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone",
 				"category": "Chat"
 			},
 			{
 				"command": "github.copilot.chat.review.unstagedFileChange",
 				"title": "%github.copilot.command.reviewFileChange%",
 				"icon": "$(code-review)",
-				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled",
+				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone",
 				"category": "Chat"
 			},
 			{
 				"command": "github.copilot.chat.codeReview.run",
 				"title": "%github.copilot.command.codeReviewRun%",
-				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled",
+				"enablement": "github.copilot.chat.reviewDiff.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone",
 				"category": "Chat"
 			},
 			{
@@ -4846,7 +4846,7 @@
 				},
 				{
 					"command": "github.copilot.chat.review",
-					"when": "config.github.copilot.chat.reviewSelection.enabled && !github.copilot.interactiveSession.disabled && chatSetupCompleted && resourceScheme != 'vscode-chat-code-block'",
+					"when": "config.github.copilot.chat.reviewSelection.enabled && !github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone && chatSetupCompleted && resourceScheme != 'vscode-chat-code-block'",
 					"group": "1_chat@6"
 				},
 				{
@@ -4868,7 +4868,7 @@
 				},
 				{
 					"command": "github.copilot.chat.review",
-					"when": "!github.copilot.interactiveSession.disabled && editor.hasSelection && config.github.copilot.chat.reviewSelection.enabled && !inlineChatFileBelongsToChat",
+					"when": "!github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone && editor.hasSelection && config.github.copilot.chat.reviewSelection.enabled && !inlineChatFileBelongsToChat",
 					"group": "2_chat@3"
 				}
 			],
@@ -4880,7 +4880,7 @@
 				},
 				{
 					"command": "github.copilot.chat.checkoutPullRequestReroute",
-					"when": "chatSessionType == copilot-cloud-agent && !github.vscode-pull-request-github.activated && gitOpenRepositoryCount != 0",
+					"when": "chatSessionType == copilot-cloud-agent && !github.copilot.chat.standalone && !github.vscode-pull-request-github.activated && gitOpenRepositoryCount != 0",
 					"group": "navigation@0"
 				},
 				{
@@ -5012,7 +5012,7 @@
 				},
 				{
 					"command": "github.copilot.chat.review",
-					"when": "!github.copilot.interactiveSession.disabled"
+					"when": "!github.copilot.interactiveSession.disabled && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.apply",
@@ -5373,121 +5373,121 @@
 				{
 					"command": "github.copilot.chat.review.markHelpful",
 					"group": "inline@0",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.markUnhelpful",
 					"group": "inline@1",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				}
 			],
 			"commentsView/commentThread/context": [
 				{
 					"command": "github.copilot.chat.review.apply",
 					"group": "context@1",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.discard",
 					"group": "context@2",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.discardAll",
 					"group": "context@3",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				}
 			],
 			"comments/commentThread/additionalActions": [
 				{
 					"submenu": "copilot/reviewComment/additionalActions/applyAndNext",
 					"group": "inline@1",
-					"when": "commentController == github-copilot-review && github.copilot.chat.review.numberOfComments > 1"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone && github.copilot.chat.review.numberOfComments > 1"
 				},
 				{
 					"command": "github.copilot.chat.review.apply",
 					"group": "inline@1",
-					"when": "commentController == github-copilot-review && github.copilot.chat.review.numberOfComments == 1"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone && github.copilot.chat.review.numberOfComments == 1"
 				},
 				{
 					"submenu": "copilot/reviewComment/additionalActions/discardAndNext",
 					"group": "inline@2",
-					"when": "commentController == github-copilot-review && github.copilot.chat.review.numberOfComments > 1"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone && github.copilot.chat.review.numberOfComments > 1"
 				},
 				{
 					"submenu": "copilot/reviewComment/additionalActions/discard",
 					"group": "inline@2",
-					"when": "commentController == github-copilot-review && github.copilot.chat.review.numberOfComments == 1"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone && github.copilot.chat.review.numberOfComments == 1"
 				}
 			],
 			"copilot/reviewComment/additionalActions/applyAndNext": [
 				{
 					"command": "github.copilot.chat.review.applyAndNext",
 					"group": "inline@1",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.apply",
 					"group": "inline@2",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				}
 			],
 			"copilot/reviewComment/additionalActions/discardAndNext": [
 				{
 					"command": "github.copilot.chat.review.discardAndNext",
 					"group": "inline@1",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.discard",
 					"group": "inline@2",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.continueInInlineChat",
 					"group": "inline@3",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				}
 			],
 			"copilot/reviewComment/additionalActions/discard": [
 				{
 					"command": "github.copilot.chat.review.discard",
 					"group": "inline@2",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.continueInInlineChat",
 					"group": "inline@3",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				}
 			],
 			"comments/commentThread/title": [
 				{
 					"command": "github.copilot.chat.review.previous",
 					"group": "inline@1",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.next",
 					"group": "inline@2",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.continueInChat",
 					"group": "inline@3",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				},
 				{
 					"command": "github.copilot.chat.review.discardAll",
 					"group": "inline@4",
-					"when": "commentController == github-copilot-review"
+					"when": "commentController == github-copilot-review && !github.copilot.chat.standalone"
 				}
 			],
 			"scm/title": [
 				{
 					"command": "github.copilot.chat.review.changes",
 					"group": "navigation",
-					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && scmProvider == git && scmProviderRootUri in github.copilot.chat.reviewDiff.enabledRootUris"
+					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && !github.copilot.chat.standalone && scmProvider == git && scmProviderRootUri in github.copilot.chat.reviewDiff.enabledRootUris"
 				}
 			],
 			"scm/sourceControl": [
@@ -5500,12 +5500,12 @@
 			"scm/resourceGroup/context": [
 				{
 					"command": "github.copilot.chat.review.stagedChanges",
-					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && scmProvider == git && scmResourceGroup == index",
+					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && !github.copilot.chat.standalone && scmProvider == git && scmResourceGroup == index",
 					"group": "inline@-3"
 				},
 				{
 					"command": "github.copilot.chat.review.unstagedChanges",
-					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && scmProvider == git && scmResourceGroup == workingTree",
+					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && !github.copilot.chat.standalone && scmProvider == git && scmResourceGroup == workingTree",
 					"group": "inline@-3"
 				}
 			],
@@ -5518,12 +5518,12 @@
 				{
 					"command": "github.copilot.chat.review.stagedFileChange",
 					"group": "3_copilot",
-					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && scmProvider == git && scmResourceGroup == index"
+					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && !github.copilot.chat.standalone && scmProvider == git && scmResourceGroup == index"
 				},
 				{
 					"command": "github.copilot.chat.review.unstagedFileChange",
 					"group": "3_copilot",
-					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && scmProvider == git && scmResourceGroup == workingTree"
+					"when": "config.github.copilot.chat.reviewAgent.enabled && github.copilot.chat.reviewDiff.enabled && !github.copilot.chat.standalone && scmProvider == git && scmResourceGroup == workingTree"
 				}
 			],
 			"scm/inputBox": [
@@ -5654,19 +5654,19 @@
 				},
 				{
 					"command": "github.copilot.cloud.sessions.openInBrowser",
-					"when": "chatSessionType == copilot-cloud-agent",
+					"when": "chatSessionType == copilot-cloud-agent && !github.copilot.chat.standalone",
 					"group": "navigation@10"
 				},
 				{
 					"command": "github.copilot.cloud.sessions.proxy.closeChatSessionPullRequest",
-					"when": "chatSessionType == copilot-cloud-agent",
+					"when": "chatSessionType == copilot-cloud-agent && !github.copilot.chat.standalone",
 					"group": "1_edit@10"
 				}
 			],
 			"chat/multiDiff/context": [
 				{
 					"command": "github.copilot.cloud.sessions.installPRExtension",
-					"when": "chatSessionType == copilot-cloud-agent && !github.copilot.prExtensionInstalled",
+					"when": "chatSessionType == copilot-cloud-agent && !github.copilot.chat.standalone && !github.copilot.prExtensionInstalled",
 					"group": "inline@1"
 				}
 			],
@@ -5874,7 +5874,7 @@
 						"id": "copilot.setup.signIn",
 						"title": "%github.copilot.walkthrough.setup.signIn.title%",
 						"description": "%github.copilot.walkthrough.setup.signIn.description%",
-						"when": "chatEntitlementSignedOut && !view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && !github.copilot.interactiveSession.individual.disabled && !github.copilot.interactiveSession.individual.expired && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
+						"when": "chatEntitlementSignedOut && !github.copilot.chat.standalone && !view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && !github.copilot.interactiveSession.individual.disabled && !github.copilot.interactiveSession.individual.expired && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
 						"media": {
 							"video": {
 								"dark": "https://vscodewalkthroughs.z1.web.core.windows.net/v0.26/workspace.mp4",
@@ -5889,7 +5889,7 @@
 						"id": "copilot.setup.signInNoAction",
 						"title": "%github.copilot.walkthrough.setup.signIn.title%",
 						"description": "%github.copilot.walkthrough.setup.noAction.description%",
-						"when": "chatEntitlementSignedOut && view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && !github.copilot.interactiveSession.individual.disabled && !github.copilot.interactiveSession.individual.expired && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
+						"when": "chatEntitlementSignedOut && !github.copilot.chat.standalone && view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && !github.copilot.interactiveSession.individual.disabled && !github.copilot.interactiveSession.individual.expired && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
 						"media": {
 							"video": {
 								"dark": "https://vscodewalkthroughs.z1.web.core.windows.net/v0.26/workspace.mp4",
@@ -5904,7 +5904,7 @@
 						"id": "copilot.setup.signUp",
 						"title": "%github.copilot.walkthrough.setup.signUp.title%",
 						"description": "%github.copilot.walkthrough.setup.signUp.description%",
-						"when": "chatPlanCanSignUp && !view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && (github.copilot.interactiveSession.individual.disabled || github.copilot.interactiveSession.individual.expired) && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
+						"when": "chatPlanCanSignUp && !github.copilot.chat.standalone && !view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && (github.copilot.interactiveSession.individual.disabled || github.copilot.interactiveSession.individual.expired) && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
 						"media": {
 							"video": {
 								"dark": "https://vscodewalkthroughs.z1.web.core.windows.net/v0.26/workspace.mp4",
@@ -5919,7 +5919,7 @@
 						"id": "copilot.setup.signUpNoAction",
 						"title": "%github.copilot.walkthrough.setup.signUp.title%",
 						"description": "%github.copilot.walkthrough.setup.noAction.description%",
-						"when": "chatPlanCanSignUp && view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && (github.copilot.interactiveSession.individual.disabled || github.copilot.interactiveSession.individual.expired) && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
+						"when": "chatPlanCanSignUp && !github.copilot.chat.standalone && view.workbench.panel.chat.view.copilot.visible && !github.copilot-chat.activated && !github.copilot.offline && (github.copilot.interactiveSession.individual.disabled || github.copilot.interactiveSession.individual.expired) && !github.copilot.interactiveSession.enterprise.disabled && !github.copilot.interactiveSession.contactSupport && !github.copilot.interactiveSession.invalidToken && !github.copilot.interactiveSession.rateLimited && !github.copilot.interactiveSession.gitHubLoginFailed",
 						"media": {
 							"video": {
 								"dark": "https://vscodewalkthroughs.z1.web.core.windows.net/v0.26/workspace.mp4",
