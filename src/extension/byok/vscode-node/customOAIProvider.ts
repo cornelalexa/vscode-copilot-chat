@@ -11,7 +11,7 @@ import { IFetcherService } from '../../../platform/networking/common/fetcherServ
 import { IExperimentationService } from '../../../platform/telemetry/common/nullExperimentationService';
 import { IStringDictionary } from '../../../util/vs/base/common/collections';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
-import { byokKnownModelToAPIInfo, resolveModelInfo } from '../common/byokProvider';
+import { BYOKAuthType, byokKnownModelToAPIInfo, resolveModelInfo } from '../common/byokProvider';
 import { OpenAIEndpoint } from '../node/openAIEndpoint';
 import { AbstractOpenAICompatibleLMProvider, LanguageModelChatConfiguration, OpenAICompatibleLanguageModelChatInformation } from './abstractLanguageModelChatProvider';
 import { IBYOKStorageService } from './byokStorageService';
@@ -120,6 +120,12 @@ export abstract class AbstractCustomOAIBYOKModelProvider extends AbstractOpenAIC
 		const models: OpenAICompatibleLanguageModelChatInformation<CustomOAIModelProviderConfig>[] = [];
 		if (Array.isArray(configuration?.models)) {
 			for (const modelConfig of configuration.models) {
+				await this._byokStorageService.saveModelConfig(modelConfig.id, this._name, {
+					apiKey: configuration.apiKey ?? '',
+					isCustomModel: true,
+					deploymentUrl: modelConfig.url,
+					modelCapabilities: modelConfig,
+				}, BYOKAuthType.PerModelDeployment);
 				models.push({
 					...byokKnownModelToAPIInfo(this._name, modelConfig.id, modelConfig),
 					url: modelConfig.url

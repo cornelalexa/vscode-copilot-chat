@@ -41,6 +41,7 @@ export interface IBYOKStorageService {
 		providerName: string,
 		config: {
 			apiKey: string;
+			isCustomModel: boolean;
 			deploymentUrl?: string;
 			modelCapabilities?: BYOKModelCapabilities;
 		},
@@ -149,8 +150,12 @@ export class BYOKStorageService implements IBYOKStorageService {
 	public async removeModelConfig(modelId: string, providerName: string, isDeletingCustomModel: boolean): Promise<void> {
 		const existingConfigs = await this.getStoredModelConfigs(providerName);
 		const existingConfig = existingConfigs[modelId];
+		if (!existingConfig) {
+			return;
+		}
+
 		const isCustomModel = existingConfig?.isCustomModel || false;
-		if (existingConfig && (isDeletingCustomModel || !isCustomModel)) {
+		if (isDeletingCustomModel || !isCustomModel) {
 			delete existingConfigs[modelId];
 			await this._extensionContext.globalState.update(
 				`copilot-byok-${providerName}-models-config`,

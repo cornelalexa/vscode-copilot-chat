@@ -105,6 +105,12 @@ export abstract class AbstractOpenAICompatibleLMProvider<T extends LanguageModel
 		const modelsUrl = this.getModelsBaseUrl(configuration);
 		if (modelsUrl) {
 			const models = await this.getModelsFromEndpoint(modelsUrl, silent, apiKey);
+			await Promise.all(Object.entries(models).map(([modelId, modelCapabilities]) => this._byokStorageService.saveModelConfig(modelId, this._name, {
+				apiKey: apiKey ?? '',
+				isCustomModel: false,
+				deploymentUrl: modelsUrl,
+				modelCapabilities,
+			}, BYOKAuthType.GlobalApiKey)));
 			return byokKnownModelsToAPIInfo(this._name, models).map(model => ({
 				...model,
 				url: modelsUrl
