@@ -1918,12 +1918,26 @@ Phase 11 validation note:
 
 Purpose:
 
-- Document the later path without blocking MVP.
+- Add provider-neutral embeddings incrementally without blocking MVP.
+
+Status:
+
+- Implemented for OpenAI-compatible standalone embedding providers.
+- Standalone mode registers a `StandaloneEmbeddingsComputer` instead of `RemoteEmbeddingsComputer`.
+- OpenAI-compatible `/v1/embeddings` is supported through `github.copilot.chat.standalone.model.embeddings` for `openai/...`, `openrouter/...`, and `customoai/...` model refs.
+- The standalone embeddings path resolves provider URL/API-key data from BYOK provider storage or built-in provider defaults and never calls Copilot token APIs. Current OpenAI-compatible provider model configurations are persisted into BYOK storage when models are enumerated.
+- Added `Select Standalone Embeddings Model` command (`github.copilot.chat.standalone.selectEmbeddingsModel`) to pick an embedding-looking model from configured OpenAI, OpenRouter, or OpenAI Compatible providers.
+- Standalone workspace chunk search now initializes from local embedding config instead of Copilot token/GitHub embedding type discovery.
+- Standalone workspace semantic index population uses local naive chunking plus configured embeddings instead of CAPI `RequestType.Chunks`.
+- Cache invalidation includes the configured provider/model, embedding dimensions, and chunker version in the embedding type cache key. File content invalidation remains handled by the existing workspace file content-version tracking.
+- Ollama-native embeddings remain optional future work; the implemented standalone semantic path expects an OpenAI-compatible embeddings endpoint.
 
 Primary files:
 
 - `src/platform/embeddings/common/embeddingsComputer.ts`
 - `src/platform/embeddings/common/remoteEmbeddingsComputer.ts`
+- `src/platform/embeddings/common/standaloneEmbeddingsComputer.ts`
+- `src/platform/chunking/node/localChunkingEndpointClient.ts`
 - `src/platform/workspaceChunkSearch/common/githubAvailableEmbeddingTypes.ts`
 - `src/platform/workspaceChunkSearch/node/workspaceChunkSearchService.ts`
 - `src/platform/workspaceChunkSearch/node/workspaceChunkEmbeddingsIndex.ts`
@@ -1933,28 +1947,30 @@ Primary files:
 
 Implementation tasks:
 
-- Add `StandaloneEmbeddingsComputer` implementing `IEmbeddingsComputer`.
-- Add OpenAI-compatible `/v1/embeddings` endpoint support first.
-- Add Ollama/local embeddings support after OpenAI-compatible support if desired.
-- Replace GitHub embedding type discovery with local config.
-- Replace `ChunkingEndpointClientImpl` CAPI calls with local chunking for standalone index population.
+- [x] Add `StandaloneEmbeddingsComputer` implementing `IEmbeddingsComputer`.
+- [x] Add OpenAI-compatible `/v1/embeddings` endpoint support first for OpenAI, OpenRouter, and CustomOAI configured models.
+- [x] Add Ollama/local embeddings support after OpenAI-compatible support if desired: deferred; OpenAI-compatible CustomOAI embeddings are the supported local-provider path for this phase.
+- [x] Replace GitHub embedding type discovery with local config.
+- [x] Replace `ChunkingEndpointClientImpl` CAPI calls with local chunking for standalone index population.
+- [x] Add a picker command for selecting the standalone embeddings model from configured embedding-capable provider models.
 - Include cache invalidation dimensions:
-  - file hash
-  - embedding model id
-  - embedding dimensions
-  - chunker version
-  - provider id
+  - [x] file content version through existing workspace file cache tracking
+  - [x] embedding model id
+  - [x] embedding dimensions
+  - [x] provider id through `vendor/model-id`
+  - [x] chunker version
 
 Tests:
 
-- Embeddings compute without Copilot token.
-- Workspace chunk search initializes from local embedding config.
-- No CAPI `RequestType.Chunks` call in standalone index build.
-- Cache invalidates when embedding dimensions/model changes.
+- [x] Embeddings compute without Copilot token.
+- [x] Workspace chunk search initializes from local embedding config.
+- [x] No CAPI `RequestType.Chunks` call in standalone index build.
+- [x] Cache invalidates when embedding dimensions/model changes.
 
 Acceptance:
 
-- Local semantic search can be enabled independently after MVP.
+- Local semantic search can be enabled independently for OpenAI-compatible standalone embeddings from OpenAI, OpenRouter, or CustomOAI.
+- Remaining verification moves to Phase 13 manual/UI checks with a real configured embeddings endpoint and workspace.
 
 ### Phase 13: End-to-End Verification
 
