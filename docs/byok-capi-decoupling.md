@@ -39,6 +39,15 @@ Second-pass qualification:
 - BYOK provider registration is gated by Copilot auth, and OpenAI-compatible BYOK transport currently still passes through `ChatMLFetcherImpl`, which unconditionally calls `getCopilotToken()` before network fetch. Ungating registration alone is not sufficient.
 - The standalone path must therefore decouple both activation and transport, not only model registration.
 
+Third-pass source verification:
+
+- No source-level contradiction was found that makes the staged path infeasible. The repo already has the needed VS Code language model provider seams, endpoint wrapping seams, and local tool infrastructure, but the auth/product gates are real blockers.
+- Native Anthropic and Gemini BYOK providers have the shortest runtime path after registration is ungated because they bypass `ChatMLFetcherImpl` and call provider SDKs directly. They still depend on `BYOKContrib` registration and conversation activation being available without a Copilot token.
+- OpenAI-compatible BYOK providers, including OpenAI, xAI, OpenRouter, Ollama, Azure API-key mode, and CustomOAI, still need the `ChatMLFetcherImpl.fetchMany(...)` token gate removed or bypassed for raw provider URLs.
+- `ProductionEndpointProvider` falls back to `copilot-base` not only for unresolved Copilot models, but also when `request.model` is missing and when Auto model resolution fails. Standalone mode therefore needs a provider-neutral default model resolution path for undefined or failed model selection, not just replacement of explicit `copilot-base` call sites.
+- `BYOKContrib.fetchKnownModelList(...)` currently has no local fallback or caught failure path. A CDN/network failure before provider construction can block the whole BYOK registration batch, including CustomOAI and Ollama providers that do not strictly need known-model metadata.
+- The `CodebaseTool` already has an anonymous prompt-driven agent path via `provideInput(...)` and `_isCodebaseAgentCall(...)`, but direct tool invocation without that prompt context still falls through to semantic search and returns “Semantic workspace search is not currently available”. The standalone fallback should handle both routes.
+
 ## Existing BYOK Path
 
 BYOK already exists and is structurally useful.
@@ -1021,14 +1030,743 @@ Recommended MVP:
 
 This preserves the main agentic value quickly while avoiding a large embeddings/indexing rewrite as a prerequisite.
 
-## Open Design Decisions
+## Settled MVP Decisions
 
-- Should standalone mode be a fork-wide behavior or a user setting?
-- Should Copilot code paths be removed entirely or isolated behind an optional module?
-- Which model roles should be configurable: default, fast, reasoning, embeddings?
-- Should embedding support require OpenAI-compatible `/v1/embeddings` first, or should Ollama/local embeddings be first-class from the start?
-- Should TF-IDF be integrated into the existing `IWorkspaceChunkSearchService` or exposed as a separate local search strategy?
-- Should telemetry/experimentation services become no-op in standalone mode or be replaced with local diagnostics logs?
+These decisions are the implementation baseline. Reopen them only if coding exposes a concrete blocker.
+
+### Decision 1: Standalone Is a User-Configurable Mode
+
+Standalone/BYOK mode should be a configuration-driven mode inside the current extension shape, not an immediate fork-wide removal of Copilot code.
+
+Rationale:
+
+- It minimizes first-pass blast radius.
+- It lets existing Copilot paths remain available for comparison tests.
+- It avoids a large package rebrand before the core BYOK/local path works.
+
+Implementation implication:
+
+- Add a provider mode setting, for example `github.copilot.chat.providerMode`.
+- Supported initial values should be `copilot` and `standalone`.
+- Default can remain `copilot` during development unless this fork wants standalone as its packaged default.
+- All new no-auth behavior should key from this mode, not from absence of auth alone.
+
+### Decision 2: Use Explicit Model Roles
+
+Standalone model routing should use provider-neutral model roles.
+
+Initial roles:
+
+- `default`: main chat/agent model.
+- `fast`: cheap helper model for title, intent, MCP config, terminal fix, patch healing, and similar helper flows.
+- `reasoning`: optional high-capability model for expensive agent/review-like flows.
+- `embeddings`: deferred until provider-neutral embeddings are implemented.
+
+Implementation implication:
+
+- Add settings for role-to-model mapping.
+- Replace hardcoded `copilot-base` and `copilot-fast` resolution with role resolution.
+- If a role is unset, fall back to `default`.
+- If `default` is unset, use the selected VS Code chat request model or first available standalone/BYOK model.
+- If no model is available, fail with a clear local configuration error instead of prompting for GitHub auth.
+
+### Decision 3: Register BYOK Without Copilot Auth in Standalone Mode
+
+BYOK providers should register in standalone mode without requiring `authService.copilotToken`.
+
+Implementation implication:
+
+- `BYOKContrib` should check standalone mode before applying `isBYOKEnabled(...)`.
+- CDN known-model fetch failure must not block provider registration.
+- Providers that do not need known-model metadata, especially CustomOAI and Ollama, must still register with empty or provider-discovered metadata.
+
+### Decision 4: Minimal Transport Bypass First
+
+The MVP should minimally bypass `getCopilotToken()` for raw BYOK/OpenAI-compatible URLs, not immediately split the whole fetcher stack.
+
+Rationale:
+
+- It preserves existing request shaping, logging, token counting, streaming, and tool-call behavior.
+- It is smaller and easier to test.
+- A provider-neutral transport split can follow after standalone is working.
+
+Implementation implication:
+
+- In `ChatMLFetcherImpl.fetchMany(...)`, detect raw BYOK/OpenAI-compatible endpoints before token acquisition.
+- Do not call `getCopilotToken()` for raw BYOK endpoints.
+- Continue requiring Copilot token for CAPI/Copilot request metadata outside standalone mode.
+- Map provider HTTP errors to generic provider errors, not subscription/quota UI.
+
+### Decision 5: Disable Semantic Search in MVP, Add Local Fallback Immediately After
+
+The first working standalone chat/agent path should not require embeddings.
+
+Implementation implication:
+
+- Do not register VS Code AI semantic search provider in standalone mode unless embeddings are configured.
+- Direct `#codebase` tool invocation should not dead-end with only “Semantic workspace search is not currently available”.
+- Use the existing prompt-driven local exploration route first.
+- Add TF-IDF fallback as the first search-quality improvement after basic standalone chat works.
+
+### Decision 6: Defer Provider-Neutral Embeddings
+
+Provider-neutral embeddings are outside the first MVP.
+
+Implementation implication:
+
+- Keep `IEmbeddingsComputer` replacement as Stage 4.
+- Keep local semantic workspace index as Stage 5.
+- MVP acceptance should not require `copilot.text-embedding-3-small`, GitHub embedding type discovery, or CAPI chunking.
+
+### Decision 7: Do Not Rebrand in the First Pass
+
+Keep Copilot-branded participant IDs, command IDs, settings namespaces, and vendor IDs initially unless they block standalone behavior.
+
+Implementation implication:
+
+- Hide or neutralize cloud/auth/subscription UI in standalone mode.
+- Avoid renaming every contribution up front.
+- Rebrand/package cleanup belongs after the core no-auth path is proven.
+
+### Decision 8: Disable Cloud-Only Features in Standalone Mode
+
+The first standalone implementation should disable:
+
+- remote agents
+- cloud sessions
+- GitHub review/cloud review agent
+- remote GitHub/ADO semantic search
+- external ingest indexing
+- Copilot CLI/cloud agent session providers
+- completions/NES/Xtab
+- snippy/public-code remote checks
+- remote content exclusion
+
+Implementation implication:
+
+- Do not attempt local equivalents in MVP.
+- Hide commands, menus, participants, or providers where their entry points would otherwise produce GitHub auth prompts or CAPI calls.
+
+### Decision 9: Use Local Defaults Instead of Experiment-Controlled Behavior
+
+Standalone mode should use explicit local defaults and local settings instead of Microsoft/GitHub experimentation as behavior input.
+
+Implementation implication:
+
+- Keep telemetry and experimentation services present where required by constructors.
+- Route standalone behavior through deterministic defaults/configuration.
+- Do not let missing experiment assignments or Copilot token fields disable the local/BYOK path.
+
+## Detailed Execution Plan
+
+The goal of this plan is to make coding work mostly mechanical: add tests, make the smallest implementation changes, and verify local behavior at each seam.
+
+### Phase 0: Test Harness and Characterization
+
+Purpose:
+
+- Freeze current behavior before changing auth, endpoint, and transport assumptions.
+- Add tests around the seams that will be edited.
+
+Primary files:
+
+- `src/extension/byok/vscode-node/byokContribution.ts`
+- `src/extension/byok/common/byokProvider.ts`
+- `src/extension/prompt/node/chatMLFetcher.ts`
+- `src/extension/prompt/vscode-node/endpointProviderImpl.ts`
+- `src/extension/conversation/vscode-node/conversationFeature.ts`
+- `src/extension/conversation/vscode-node/languageModelAccess.ts`
+- `src/extension/tools/node/codebaseTool.tsx`
+- `src/extension/contextKeys/vscode-node/contextKeys.contribution.ts`
+
+Tests to add or extend:
+
+- `src/extension/byok/vscode-node/test/byokContribution.spec.ts`
+- `src/extension/byok/common/test/byokProvider.spec.ts`
+- `src/extension/prompt/node/test/chatMLFetcher.spec.ts`
+- `src/extension/test/vscode-node/endpoints.test.ts`
+- `src/extension/conversation/vscode-node/test/conversationFeature.test.ts`
+- `src/extension/conversation/vscode-node/test/languageModelAccess.test.ts`
+- `src/extension/tools/node/test/codebaseTool.spec.tsx`
+- `src/extension/contextKeys/vscode-node/test/contextKeys.contribution.test.ts`
+
+Characterization cases:
+
+- `BYOKContrib` currently registers no providers without `copilotToken`.
+- `BYOKContrib` currently waits for `isBYOKEnabled(...)` outside scenario automation.
+- CDN known-model failure currently prevents registration after `_byokProvidersRegistered` is set.
+- `ChatMLFetcherImpl.fetchMany(...)` currently calls `getCopilotToken()` before fetching an `OpenAIEndpoint`.
+- `ProductionEndpointProvider.getChatEndpoint(...)` falls back to `copilot-base` when request model is missing, Auto fails, or Copilot API model metadata is unresolved.
+- `ConversationFeature` currently activates contributions only after Copilot token availability.
+- `LanguageModelAccess` currently calls `_getToken()` before publishing Copilot models and embeddings.
+- Direct `CodebaseTool.invoke(...)` without semantic search returns an empty tool result with the unavailable message.
+
+Acceptance:
+
+- Tests pass before behavior changes.
+- Each future phase can update these tests from “current behavior” to “standalone behavior” without broad fixture rewrites.
+
+### Phase 1: Provider Mode Configuration
+
+Purpose:
+
+- Add the central switch that every standalone decision can use.
+
+Primary files:
+
+- `src/platform/configuration/common/configurationService.ts`
+- `src/platform/configuration/vscode/configurationServiceImpl.ts`
+- `package.json`
+- `package.nls.json`
+
+Implementation tasks:
+
+- Add config key for provider mode, for example `github.copilot.chat.providerMode`.
+- Define helper API such as `isStandaloneMode()` or `getProviderMode()` near configuration service utilities.
+- Add config keys for model roles:
+  - `github.copilot.chat.standalone.model.default`
+  - `github.copilot.chat.standalone.model.fast`
+  - `github.copilot.chat.standalone.model.reasoning`
+  - `github.copilot.chat.standalone.model.embeddings`
+- Decide accepted model reference format. Recommended format:
+  - VS Code LM selector style: `{ vendor, family?, id? }` if the settings schema can support objects cleanly.
+  - String fallback format: `vendor/model-id`, for example `customoai/qwen3-coder` or `ollama/llama3.1`.
+- Add validation helpers that parse role settings without throwing during extension activation.
+
+Tests:
+
+- Provider mode defaults to `copilot`.
+- Provider mode can be read as `standalone`.
+- Unknown provider mode values fall back to `copilot` or produce a clear config validation error.
+- Role settings resolve independently and `fast` falls back to `default` when unset.
+
+Acceptance:
+
+- No existing Copilot tests change behavior when mode is unset.
+- Standalone checks can be added without duplicating config parsing logic.
+
+### Phase 2: BYOK Registration Without Copilot Auth
+
+Purpose:
+
+- Make BYOK/local providers visible in VS Code LM APIs with no GitHub account.
+
+Primary files:
+
+- `src/extension/byok/vscode-node/byokContribution.ts`
+- `src/extension/byok/common/byokProvider.ts`
+- `src/extension/byok/vscode-node/abstractLanguageModelChatProvider.ts`
+- `src/extension/byok/vscode-node/customOAIProvider.ts`
+- `src/extension/byok/vscode-node/ollamaProvider.ts`
+
+Implementation tasks:
+
+- Change `BYOKContrib._authChange(...)` into a provider-registration policy method:
+  - standalone mode: allow without `copilotToken`.
+  - copilot mode: preserve existing `copilotToken && isBYOKEnabled(...)`.
+- Rename `_authChange` if useful, because standalone registration will also respond to config changes.
+- Register on configuration change for provider mode and BYOK provider settings if the service exposes a suitable event.
+- Make known-model fetch best-effort:
+  - catch fetch/JSON/version errors.
+  - log a warning.
+  - continue with `{}`.
+- Only set `_byokProvidersRegistered = true` once registration is actually proceeding and not before an awaited operation that can fail.
+- Ensure provider construction tolerates missing known-model entries:
+  - Anthropic/Gemini/OpenAI/xAI get `knownModels[ProviderName] ?? {}` or `undefined` only where constructors support it.
+  - CustomOAI, Azure, OpenRouter, and Ollama should not depend on CDN metadata.
+
+Tests:
+
+- Standalone mode registers providers when `authService.copilotToken` is undefined.
+- Copilot mode keeps existing `isBYOKEnabled(...)` behavior.
+- CDN fetch failure still registers CustomOAI and Ollama.
+- CDN fetch with unexpected `version` still registers all providers with empty metadata.
+- Multiple auth/config changes do not double-register providers.
+- Registration does not call `getGitHubSession()` or `getCopilotToken()` in standalone mode.
+
+Acceptance:
+
+- VS Code LM provider contributions for CustomOAI/Ollama/OpenAI/etc. exist without GitHub auth in standalone mode.
+- Existing Copilot/BYOK gating remains unchanged in default mode.
+
+### Phase 3: Conversation Activation Policy
+
+Purpose:
+
+- Make chat participants, tools, commands, and local providers activate without Copilot token in standalone mode.
+
+Primary files:
+
+- `src/extension/conversation/vscode-node/conversationFeature.ts`
+- `src/extension/extension/vscode-node/contributions.ts`
+- `src/extension/workspaceSemanticSearch/node/semanticSearchTextSearchProvider.ts`
+- `src/extension/prompt/vscode-node/settingsEditorSearchServiceImpl.ts`
+
+Implementation tasks:
+
+- Add an activation policy helper:
+  - `copilot` mode: activated when `authenticationService.copilotToken` exists.
+  - `standalone` mode: activated immediately or after basic provider registration readiness.
+- Avoid activating Copilot-only providers in standalone:
+  - semantic search provider stays disabled until embeddings replacement exists.
+  - settings semantic provider disabled or registered only if it has a lexical fallback.
+  - remote agent/cloud/review contributions disabled.
+- Preserve local chat participant registration and `vscodeNodeChatContributions` needed for:
+  - tools
+  - intents
+  - terminal commands that do not require cloud
+  - MCP execution
+  - local file/edit/search workflows
+- Ensure `activationBlocker` completes in standalone mode without waiting for token.
+- Set `github.copilot.interactiveSession.disabled` based on standalone chat availability, not missing Copilot token.
+
+Tests:
+
+- Standalone mode activates `ConversationFeature` with no token.
+- Standalone activation registers participants and local command contributions.
+- Standalone activation does not register semantic text search provider without embeddings.
+- Copilot mode still waits for token.
+- Deactivation on sign-out only applies in Copilot mode.
+
+Acceptance:
+
+- Chat UI can open and route to local/BYOK models in standalone mode.
+- Missing GitHub auth does not hide the local/BYOK chat surface.
+
+### Phase 4: Model Registry and Endpoint Role Resolution
+
+Purpose:
+
+- Replace hardcoded Copilot endpoint fallback with provider-neutral resolution.
+
+Primary files:
+
+- `src/extension/prompt/vscode-node/endpointProviderImpl.ts`
+- `src/platform/endpoint/common/endpointProvider.ts`
+- `src/platform/endpoint/common/modelAliasRegistry.ts`
+- `src/platform/endpoint/node/modelMetadataFetcher.ts`
+- `src/platform/endpoint/vscode-node/extChatEndpoint.ts`
+- `src/extension/conversation/vscode-node/languageModelAccess.ts`
+
+Implementation tasks:
+
+- Add role-aware endpoint resolution:
+  - `getChatEndpointForRole('default' | 'fast' | 'reasoning')`, or equivalent helper outside the public interface if preferred.
+  - Existing `getChatEndpoint('copilot-base' | 'copilot-fast')` can stay for Copilot mode initially.
+- Standalone resolution order:
+  1. Request model if supplied.
+  2. Configured role model.
+  3. Configured default model.
+  4. First available non-Copilot VS Code LM model.
+  5. Clear “no standalone model configured” error.
+- Keep `ExtensionContributedChatEndpoint` as the bridge for BYOK/local VS Code LM models.
+- Do not call `ModelMetadataFetcher.getAllChatModels()` in standalone just to populate Copilot metadata.
+- Do not synthesize `AutoChatEndpoint` in standalone until there is a provider-neutral auto router.
+- Update helper flows that hardcode `copilot-fast` or `copilot-base` to use role resolution:
+  - `src/extension/mcp/vscode-node/mcpToolCallingLoop.tsx`
+  - `src/extension/tools/node/applyPatchTool.tsx`
+  - `src/extension/tools/node/abstractReplaceStringTool.tsx`
+  - `src/extension/prompt/node/intentDetector.tsx`
+  - `src/extension/prompt/node/title.ts`
+  - `src/extension/prompt/node/gitCommitMessageGenerator.ts`
+  - `src/extension/conversation/vscode-node/terminalFixGenerator.ts`
+  - `src/extension/prompt/vscode-node/settingsEditorSearchServiceImpl.ts`
+  - `src/extension/workspaceSemanticSearch/node/semanticSearchTextSearchProvider.ts`
+- Leave less critical cloud/debug/test generation call sites for later only if their commands are disabled in standalone.
+
+Tests:
+
+- Missing request model resolves to configured standalone default.
+- Failed Auto resolution resolves to configured standalone default, not `copilot-base`.
+- `fast` role falls back to `default`.
+- Non-Copilot VS Code LM model still becomes `ExtensionContributedChatEndpoint`.
+- Copilot mode still uses `ModelMetadataFetcher` and existing aliases.
+- No standalone endpoint resolution calls `getCopilotToken()`.
+
+Acceptance:
+
+- A configured CustomOAI/Ollama/Anthropic/Gemini model can be selected as the chat endpoint.
+- Helper flows use configured `fast`/`default` roles instead of hardcoded Copilot families.
+
+### Phase 5: OpenAI-Compatible Transport Token Bypass
+
+Purpose:
+
+- Make OpenAI-compatible BYOK endpoints send requests without Copilot token.
+
+Primary files:
+
+- `src/extension/prompt/node/chatMLFetcher.ts`
+- `src/extension/byok/node/openAIEndpoint.ts`
+- `src/platform/networking/common/networking.ts`
+- `src/platform/endpoint/common/capiClient.ts`
+- `src/platform/endpoint/node/capiClientImpl.ts`
+
+Implementation tasks:
+
+- Add a reliable raw-provider detection helper:
+  - `OpenAIEndpoint` instance check is available in extension layer.
+  - `isBYOKModel(endpoint)` currently returns client-side/server-side/non-BYOK and can be reused or made more explicit.
+  - `endpoint.urlOrRequestMetadata` string means raw URL; CAPI metadata object means Copilot/CAPI route.
+- In `ChatMLFetcherImpl.fetchMany(...)`:
+  - validate payload before token acquisition as today.
+  - if raw BYOK endpoint, skip `getCopilotToken()`.
+  - scrub provider auth using endpoint `getExtraHeaders()` and request logger rules, not Copilot username.
+  - call `_fetchAndStreamChat(...)` with optional Copilot token or split the internal call enough that raw providers do not need it.
+- Keep CAPI path unchanged for Copilot mode.
+- For raw BYOK path:
+  - use `requestOptions.secretKey` or endpoint headers as intended.
+  - avoid quota dialog/reporting based on Copilot token fields.
+  - map HTTP 401/403/429/5xx to generic provider errors with provider status details.
+- Ensure WebSocket path is disabled or bypassed for raw BYOK unless explicitly supported.
+
+Tests:
+
+- OpenAIEndpoint raw URL request does not call `getCopilotToken()`.
+- Raw URL request includes BYOK `Authorization` or `api-key` headers.
+- CAPI request still calls `getCopilotToken()` in Copilot mode.
+- Raw BYOK 401 maps to generic auth/provider error, not Copilot subscription error.
+- Raw BYOK 429 maps to generic provider rate-limit error, not Copilot quota dialog.
+- Existing Copilot fetcher tests continue to pass.
+
+Acceptance:
+
+- CustomOAI/OpenAI/Ollama/xAI/OpenRouter/Azure API-key mode can stream responses without GitHub auth.
+- Native Anthropic/Gemini continue to work through their SDK provider path.
+
+### Phase 6: Language Model Access and Embeddings Exposure
+
+Purpose:
+
+- Prevent Copilot model publication and embedding provider registration from blocking standalone chat.
+
+Primary files:
+
+- `src/extension/conversation/vscode-node/languageModelAccess.ts`
+- `src/platform/embeddings/common/remoteEmbeddingsComputer.ts`
+- `src/platform/endpoint/node/modelMetadataFetcher.ts`
+- `src/platform/endpoint/node/embeddingsEndpoint.ts`
+
+Implementation tasks:
+
+- In standalone mode, either:
+  - do not register the Copilot `vscode.lm` provider, or
+  - register it with no Copilot models and no auth prompt.
+- Do not call `_getToken()` for model info in standalone mode.
+- Do not register `copilot.text-embedding-3-small` in standalone mode.
+- Keep BYOK providers registered through `BYOKContrib`; do not force them through `LanguageModelAccess`.
+- Ensure external extensions using `vscode.lm.selectChatModels({ vendor: 'copilot' })` get no standalone models unless a deliberate compatibility shim is added later.
+
+Tests:
+
+- Standalone mode does not call `getCopilotToken()` from `LanguageModelAccess`.
+- Standalone mode does not register Copilot embeddings provider.
+- Copilot mode still registers Copilot LM and embeddings provider after token.
+- BYOK providers remain independently visible.
+
+Acceptance:
+
+- Missing Copilot token does not cause model picker or embeddings registration churn in standalone.
+
+### Phase 7: Local Tool and Helper Flow Preservation
+
+Purpose:
+
+- Keep the high-value agentic workflows working with standalone endpoints.
+
+Primary files:
+
+- `src/extension/tools/node/readFileTool.tsx`
+- `src/extension/tools/node/listDirTool.tsx`
+- `src/extension/tools/node/findFilesTool.tsx`
+- `src/extension/tools/node/findTextInFilesTool.tsx`
+- `src/extension/tools/node/searchWorkspaceSymbolsTool.tsx`
+- `src/extension/tools/node/applyPatchTool.tsx`
+- `src/extension/tools/node/abstractReplaceStringTool.tsx`
+- `src/extension/tools/node/createFileTool.tsx`
+- `src/extension/tools/node/insertEditTool.tsx`
+- `src/extension/tools/node/getErrorsTool.tsx`
+- `src/extension/tools/node/testFailureTool.tsx`
+- `src/extension/mcp/vscode-node/mcpToolCallingLoop.tsx`
+- `src/extension/mcp/vscode-node/commands.ts`
+
+Implementation tasks:
+
+- Confirm local filesystem/search/edit/terminal/test tools do not require Copilot token after conversation activation is decoupled.
+- Replace helper endpoint resolution with model roles where helper model calls exist.
+- Disable only healing/helper flows if no role endpoint is available; keep core edit tools functional.
+- Ensure tool availability does not depend on semantic search or embeddings.
+- Keep MCP registry/config/tool execution active.
+- For assisted MCP config generation, use `fast` role.
+
+Tests:
+
+- Core file tools invoke in standalone mode with a mock BYOK endpoint.
+- Apply patch succeeds without `copilot-fast`.
+- Patch healing uses `fast` role when configured.
+- MCP config generation uses `fast` role.
+- MCP execution does not require Copilot token.
+- `findFiles`, `findTextInFiles`, and workspace symbols remain available in standalone.
+
+Acceptance:
+
+- Agent mode can read, edit, search, run terminal/test/diagnostic workflows, and call MCP tools with a configured standalone model.
+
+### Phase 8: Search Fallbacks Without Embeddings
+
+Purpose:
+
+- Prevent semantic-search loss from making codebase exploration unusable.
+
+Primary files:
+
+- `src/extension/tools/node/codebaseTool.tsx`
+- `src/extension/prompt/node/codebaseToolCalling.ts`
+- `src/platform/tfidf/node/tfidf.ts`
+- `src/platform/tfidf/node/tfidfWorker.ts`
+- `src/platform/workspaceChunkSearch/node/workspaceChunkSearchService.ts`
+- `src/platform/search/common/searchService.ts`
+- `src/extension/tools/node/findFilesTool.tsx`
+- `src/extension/tools/node/findTextInFilesTool.tsx`
+- `src/extension/tools/node/searchWorkspaceSymbolsTool.tsx`
+
+Implementation tasks:
+
+- First fallback:
+  - direct `CodebaseTool.invoke(...)` should route to local agent/tool exploration when semantic search is unavailable and no scoped directories force semantic path.
+  - preserve existing prompt-driven `provideInput(...)` route.
+- Second fallback:
+  - add TF-IDF search strategy for direct `#codebase` queries.
+  - respect ignore rules and scoped directories.
+  - return chunk-like prompt references compatible with `WorkspaceContextWrapper` or a new local context prompt element.
+- Do not register `SemanticSearchTextSearchProvider` in standalone until embeddings exist.
+- Add clear tool result messages distinguishing:
+  - local lexical/codebase fallback used
+  - semantic search unavailable
+  - no local results found
+
+Tests:
+
+- Direct `#codebase` invocation in standalone does not return empty solely because semantic search is unavailable.
+- Prompt-driven anonymous codebase agent path still works.
+- TF-IDF fallback respects ignored files.
+- Scoped directories are honored.
+- Semantic provider remains unregistered without embeddings.
+
+Acceptance:
+
+- Agent can discover relevant files without embeddings using local search and/or TF-IDF.
+
+### Phase 9: Cloud/Auth-Only Feature Gating
+
+Purpose:
+
+- Stop standalone mode from surfacing commands that inevitably require GitHub/CAPI.
+
+Primary files:
+
+- `src/extension/conversation/vscode-node/remoteAgents.ts`
+- `src/extension/chatSessions/vscode-node/copilotCloudSessionsProvider.ts`
+- `src/extension/review/node/githubReviewAgent.ts`
+- `src/extension/review/node/doReview.ts`
+- `src/extension/completions/vscode-node/completionsCoreContribution.ts`
+- `src/extension/inlineEdits/vscode-node/inlineEditProviderFeature.ts`
+- `src/extension/xtab/node/xtabProvider.ts`
+- `src/extension/xtab/node/xtabNextCursorPredictor.ts`
+- `src/platform/ignore/node/remoteContentExclusion.ts`
+- `src/platform/snippy/common/snippyFetcher.ts`
+- `src/extension/extension/vscode-node/contributions.ts`
+
+Implementation tasks:
+
+- Add centralized capability checks, for example:
+  - `isCopilotCloudEnabled()`
+  - `isStandaloneMode()`
+  - `isSemanticSearchEnabled()`
+  - `isInlineCompletionsEnabledInStandalone()` initially false.
+- In standalone mode, do not instantiate or register:
+  - `RemoteAgentContribution`
+  - cloud session providers
+  - GitHub review agent commands/providers
+  - completions/NES/Xtab providers
+  - remote content exclusion/snippy remote fetchers
+- Preserve local ignore service behavior.
+- Keep local git commit message generation if it uses standalone endpoint roles and does not require GitHub APIs.
+
+Tests:
+
+- Standalone contribution collection skips remote/cloud/review/completions providers.
+- Commands hidden or disabled in standalone do not prompt for GitHub auth.
+- Local ignore service still filters context.
+- Copilot mode still registers existing features.
+
+Acceptance:
+
+- Standalone mode does not unexpectedly open GitHub sign-in for cloud-only features.
+
+### Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
+
+Purpose:
+
+- Make the UI coherent enough for standalone users without full rebrand.
+
+Primary files:
+
+- `package.json`
+- `package.nls.json`
+- `src/extension/contextKeys/vscode-node/contextKeys.contribution.ts`
+- `src/extension/conversation/vscode-node/conversationFeature.ts`
+- `src/platform/authentication/common/authentication.ts`
+- `src/platform/authentication/vscode-node/session.ts`
+
+Implementation tasks:
+
+- Add standalone context key, for example `github.copilot.chat.standalone`.
+- In standalone mode:
+  - missing Copilot auth should not set visible disabled/expired/subscription failure states.
+  - quota exceeded and subscription prompts should be suppressed.
+  - sign-in walkthrough entries should be hidden or deprioritized.
+  - cloud/review/session menus should be hidden.
+  - CustomOAI provider contribution must be available in target product quality; remove or bypass `productQualityType != 'stable'` for standalone packaging if needed.
+- Keep command IDs stable in MVP.
+- Add minimal user-facing configuration messages for “No standalone model configured”.
+
+Tests:
+
+- Context keys reflect standalone active state.
+- Missing token does not set subscription-disabled views welcome in standalone.
+- CustomOAI contribution is available for intended product channel.
+- Cloud-only menus are hidden in standalone context.
+
+Acceptance:
+
+- A standalone user sees a local/BYOK chat path, not a broken Copilot sign-in funnel.
+
+### Phase 11: Telemetry and Experiment Defaults
+
+Purpose:
+
+- Keep constructors and metrics code stable while removing experiment-driven behavior from standalone decisions.
+
+Primary files:
+
+- `src/platform/telemetry/common/nullExperimentationService.ts`
+- `src/platform/telemetry/vscode-node/experimentationService.ts`
+- `src/platform/configuration/common/configurationService.ts`
+- `src/extension/prompt/node/chatMLFetcher.ts`
+- `src/extension/conversation/vscode-node/languageModelAccess.ts`
+
+Implementation tasks:
+
+- Keep `IExperimentationService` injected for existing code.
+- Add standalone-safe wrappers for behavior decisions that currently read experiments:
+  - default language model
+  - prompt variants
+  - tool search behavior
+  - semantic search behavior
+  - provider-specific feature toggles
+- In standalone mode, use explicit config/defaults.
+- Avoid reading Copilot token fields for behavior decisions in standalone.
+- Telemetry events may remain no-op/null depending on existing service, but must not require token-derived SKU/org/quota data.
+
+Tests:
+
+- Standalone default model does not depend on `chat.defaultLanguageModel` experiment.
+- Missing token fields do not disable tool calling or model picker.
+- Telemetry code paths do not throw when Copilot token is undefined.
+
+Acceptance:
+
+- Standalone behavior is deterministic from local config.
+
+### Phase 12: Deferred Embeddings and Local Semantic Index
+
+Purpose:
+
+- Document the later path without blocking MVP.
+
+Primary files:
+
+- `src/platform/embeddings/common/embeddingsComputer.ts`
+- `src/platform/embeddings/common/remoteEmbeddingsComputer.ts`
+- `src/platform/workspaceChunkSearch/common/githubAvailableEmbeddingTypes.ts`
+- `src/platform/workspaceChunkSearch/node/workspaceChunkSearchService.ts`
+- `src/platform/workspaceChunkSearch/node/workspaceChunkEmbeddingsIndex.ts`
+- `src/platform/workspaceChunkSearch/node/workspaceChunkAndEmbeddingCache.ts`
+- `src/platform/chunking/common/chunkingEndpointClientImpl.ts`
+- `src/platform/chunking/node/naiveChunker.ts`
+
+Implementation tasks:
+
+- Add `StandaloneEmbeddingsComputer` implementing `IEmbeddingsComputer`.
+- Add OpenAI-compatible `/v1/embeddings` endpoint support first.
+- Add Ollama/local embeddings support after OpenAI-compatible support if desired.
+- Replace GitHub embedding type discovery with local config.
+- Replace `ChunkingEndpointClientImpl` CAPI calls with local chunking for standalone index population.
+- Include cache invalidation dimensions:
+  - file hash
+  - embedding model id
+  - embedding dimensions
+  - chunker version
+  - provider id
+
+Tests:
+
+- Embeddings compute without Copilot token.
+- Workspace chunk search initializes from local embedding config.
+- No CAPI `RequestType.Chunks` call in standalone index build.
+- Cache invalidates when embedding dimensions/model changes.
+
+Acceptance:
+
+- Local semantic search can be enabled independently after MVP.
+
+### Phase 13: End-to-End Verification
+
+Purpose:
+
+- Verify standalone behavior through unit tests, integration tests, and UI smoke checks.
+
+Automated checks:
+
+- Focused BYOK tests.
+- Focused endpoint provider tests.
+- Focused `ChatMLFetcherImpl` transport tests.
+- Focused conversation activation tests.
+- Focused codebase fallback tests.
+- Existing language model access tests.
+- Existing OpenAI/Azure endpoint request-shaping tests.
+- Typecheck after code changes.
+
+Manual/UI checks:
+
+- Start extension in standalone mode with no GitHub session.
+- Configure Ollama or CustomOAI model.
+- Confirm model appears in VS Code model picker.
+- Send basic chat request.
+- Run agent request that reads a file.
+- Run agent request that edits a file.
+- Run terminal/diagnostics/test-related request.
+- Call MCP tool if a local MCP server is configured.
+- Invoke `#codebase` with semantic search disabled and confirm local fallback behavior.
+- Confirm no GitHub sign-in prompt appears during these flows.
+- Confirm cloud/review/completion entry points are hidden or disabled.
+
+Definition of done for MVP:
+
+- Standalone mode can run chat and agent workflows with a configured BYOK/local model and no GitHub auth.
+- OpenAI-compatible and native BYOK paths both work without Copilot token where applicable.
+- Local tools, editing, terminal, diagnostics, MCP, and local search remain available.
+- Semantic/cloud/completion features are disabled cleanly or have explicit fallback.
+- Tests cover the auth gate, BYOK registration, endpoint role resolution, transport bypass, conversation activation, and direct `#codebase` fallback.
+
+## Remaining Deferred Decisions
+
+- Whether standalone becomes the packaged default after MVP.
+- Whether Copilot code paths are removed entirely after compatibility testing.
+- Whether TF-IDF should live inside `IWorkspaceChunkSearchService` long term or remain a separate local search strategy.
+- Whether embeddings should support Ollama/local providers in the same phase as OpenAI-compatible `/v1/embeddings`.
+- Whether full product rebrand happens after MVP or remains a compatibility layer.
 
 ## Summary
 
