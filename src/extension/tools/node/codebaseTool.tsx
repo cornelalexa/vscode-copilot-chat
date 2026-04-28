@@ -8,6 +8,7 @@ import { PromptElement, PromptReference, TokenLimit } from '@vscode/prompt-tsx';
 import type * as vscode from 'vscode';
 import { IAuthenticationService } from '../../../platform/authentication/common/authentication';
 import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
+import { ILocalCodeSearchService } from '../../../platform/tfidf/common/localCodeSearchService';
 import { ITelemetryService } from '../../../platform/telemetry/common/telemetry';
 import { IWorkspaceChunkSearchService } from '../../../platform/workspaceChunkSearch/node/workspaceChunkSearchService';
 import { raceTimeoutAndCancellationError } from '../../../util/common/racePromise';
@@ -46,6 +47,7 @@ export class CodebaseTool implements vscode.LanguageModelTool<ICodebaseToolParam
 		@IConfigurationService private readonly configurationService: IConfigurationService,
 		@IAuthenticationService private readonly authenticationService: IAuthenticationService,
 		@IWorkspaceChunkSearchService private readonly workspaceChunkSearchService: IWorkspaceChunkSearchService,
+		@ILocalCodeSearchService private readonly localCodeSearchService: ILocalCodeSearchService,
 		@ITelemetryService private readonly telemetryService: ITelemetryService,
 	) { }
 
@@ -66,7 +68,7 @@ export class CodebaseTool implements vscode.LanguageModelTool<ICodebaseToolParam
 		// If workspace chunk search is not available, return an empty result with this info
 		if (!hasSemanticSearch) {
 			if (this.configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
-				return this.getStandaloneSearchFallback(query);
+				return this.getStandaloneSearchFallback(query, options.input.scopedDirectories?.map(dir => URI.file(dir)));
 			}
 
 			const result = new ExtendedLanguageModelToolResult([]);
@@ -128,7 +130,21 @@ export class CodebaseTool implements vscode.LanguageModelTool<ICodebaseToolParam
 		return result;
 	}
 
-	private getStandaloneSearchFallback(query: string) {
+	private async getStandaloneSearchFallback(query: string, scopedDirectories: URI[] | undefined) {
+		const localResults = await this.localCodeSearchService.search(query, { maxResults: 8, scopedDirectories });
+		if (localResults.length) {
+			const result = new ExtendedLanguageModelToolResult([
+				new LanguageModelTextPart(`Semantic workspace search is not available in standalone mode. Using local lexical TF-IDF fallback for: ${query}
+
+${localResults.map((chunk, index) => `${index + 1}. ${chunk.file.fsPath}\n${this.truncateSnippet(chunk.rawText ?? chunk.text)}`).join('\n\n')}`)
+			]);
+			result.toolResultMessage = localResults.length === 1
+				? new MarkdownString(l10n.t`Searched local codebase fallback for "${query}", 1 result`)
+				: new MarkdownString(l10n.t`Searched local codebase fallback for "${query}", ${localResults.length} results`);
+			result.toolResultDetails = localResults.map(result => result.file);
+			return result;
+		}
+
 		const result = new ExtendedLanguageModelToolResult([
 			new LanguageModelTextPart(`Semantic workspace search is not available in standalone mode. Use local tools to explore the codebase for: ${query}
 
@@ -139,6 +155,11 @@ Suggested fallback sequence:
 		]);
 		result.toolResultMessage = new MarkdownString(l10n.t`Using local search fallback instructions because semantic workspace search is not available`);
 		return result;
+	}
+
+	private truncateSnippet(text: string): string {
+		const normalized = text.trim().replace(/\s+/g, ' ');
+		return normalized.length > 500 ? `${normalized.slice(0, 500)}...` : normalized;
 	}
 
 	private async invokeCodebaseAgent(input: IBuildPromptContext, token: CancellationToken) {

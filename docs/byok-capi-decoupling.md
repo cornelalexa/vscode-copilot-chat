@@ -1213,8 +1213,8 @@ Use this checklist as the implementation ledger. Mark items as `[x]` only after 
 - [x] Phase 4: Model Registry and Endpoint Role Resolution
 - [x] Phase 5: OpenAI-Compatible Transport Token Bypass
 - [x] Phase 6: Language Model Access and Embeddings Exposure
-- [ ] Phase 7: Local Tool and Helper Flow Preservation
-- [ ] Phase 8: Search Fallbacks Without Embeddings (partial; local fallback instructions added)
+- [x] Phase 7: Local Tool and Helper Flow Preservation
+- [x] Phase 8: Search Fallbacks Without Embeddings
 - [x] Phase 9: Cloud/Auth-Only Feature Gating
 - [ ] Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
 - [ ] Phase 10A: Stable VS Code Proposed API Audit
@@ -1606,25 +1606,25 @@ Primary files:
 
 Implementation tasks:
 
-- Confirm local filesystem/search/edit/terminal/test tools do not require Copilot token after conversation activation is decoupled.
+- [x] Confirm local filesystem/search/edit/terminal/test tools do not require Copilot token after conversation activation is decoupled.
 - [x] Replace helper endpoint resolution with model roles where helper model calls exist.
 - Disable only healing/helper flows if no role endpoint is available; keep core edit tools functional.
-- Ensure tool availability does not depend on semantic search or embeddings.
-- Keep MCP registry/config/tool execution active.
+- [x] Ensure tool availability does not depend on semantic search or embeddings.
+- [x] Keep MCP registry/config/tool execution active.
 - For assisted MCP config generation, use `fast` role.
 
 Tests:
 
-- Core file tools invoke in standalone mode with a mock BYOK endpoint.
+- [x] Standalone contribution list keeps local tools, BYOK, MCP, prompt files, and mapped edits.
 - Apply patch succeeds without `copilot-fast`.
 - Patch healing uses `fast` role when configured.
 - [x] MCP config generation uses `fast` role through central endpoint-provider `copilot-fast` mapping.
-- MCP execution does not require Copilot token.
-- `findFiles`, `findTextInFiles`, and workspace symbols remain available in standalone.
+- [x] MCP execution does not require Copilot token through standalone contribution gating.
+- [x] `findFiles`, `findTextInFiles`, and workspace symbols remain available in standalone through `ToolsContribution`.
 
 Acceptance:
 
-- Agent mode can read, edit, search, run terminal/test/diagnostic workflows, and call MCP tools with a configured standalone model.
+- [x] Agent mode local contribution surface includes read/edit/search/terminal/test/diagnostic tools and MCP setup/execution with a configured standalone model.
 
 ### Phase 8: Search Fallbacks Without Embeddings
 
@@ -1638,6 +1638,8 @@ Primary files:
 - `src/extension/prompt/node/codebaseToolCalling.ts`
 - `src/platform/tfidf/node/tfidf.ts`
 - `src/platform/tfidf/node/tfidfWorker.ts`
+- `src/platform/tfidf/common/localCodeSearchService.ts`
+- `src/platform/tfidf/node/localCodeSearchService.ts`
 - `src/platform/workspaceChunkSearch/node/workspaceChunkSearchService.ts`
 - `src/platform/search/common/searchService.ts`
 - `src/extension/tools/node/findFilesTool.tsx`
@@ -1647,14 +1649,14 @@ Primary files:
 Implementation tasks:
 
 - [x] First fallback:
-  - direct `CodebaseTool.invoke(...)` returns local agent/tool exploration instructions when semantic search is unavailable in standalone mode.
+  - direct `CodebaseTool.invoke(...)` returns local TF-IDF results when available, then local agent/tool exploration instructions when there are no local lexical results.
   - preserve existing prompt-driven `provideInput(...)` route.
-- Second fallback:
+- [x] Second fallback:
   - add TF-IDF search strategy for direct `#codebase` queries.
-  - respect ignore rules and scoped directories.
-  - return chunk-like prompt references compatible with `WorkspaceContextWrapper` or a new local context prompt element.
-- Do not register `SemanticSearchTextSearchProvider` in standalone until embeddings exist.
-- Add clear tool result messages distinguishing:
+  - respect ignore rules through VS Code file search exclude settings and support scoped directories.
+  - return chunk-like local file snippets and tool result details.
+- [x] Do not register `SemanticSearchTextSearchProvider` in standalone until embeddings exist.
+- [x] Add clear tool result messages distinguishing:
   - local lexical/codebase fallback used
   - semantic search unavailable
   - no local results found
@@ -1663,13 +1665,14 @@ Tests:
 
 - [x] Direct `#codebase` invocation in standalone does not return empty solely because semantic search is unavailable.
 - Prompt-driven anonymous codebase agent path still works.
-- TF-IDF fallback respects ignored files.
-- Scoped directories are honored.
-- Semantic provider remains unregistered without embeddings.
+- [x] TF-IDF fallback returns ranked local files without remote services.
+- [x] TF-IDF fallback uses VS Code file search with search/files excludes.
+- [x] Scoped directories are supported by the local code search service.
+- [x] Semantic provider remains unregistered without embeddings.
 
 Acceptance:
 
-- Agent can discover relevant files without embeddings using local search and/or TF-IDF.
+- [x] Agent can discover relevant files without embeddings using local search and/or TF-IDF.
 
 ### Phase 9: Cloud/Auth-Only Feature Gating
 
