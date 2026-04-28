@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import type { Disposable, LanguageModelChatInformation, LanguageModelDataPart, LanguageModelTextPart, LanguageModelThinkingPart, LanguageModelToolCallPart, LanguageModelToolResultPart } from 'vscode';
 import { CopilotToken } from '../../../platform/authentication/common/copilotToken';
+import type { ChatProviderMode } from '../../../platform/configuration/common/configurationService';
 import { ICAPIClientService } from '../../../platform/endpoint/common/capiClient';
 import { EndpointEditToolName, IChatModelInformation, ModelSupportedEndpoint } from '../../../platform/endpoint/common/endpointProvider';
 import { isScenarioAutomation } from '../../../platform/env/common/envService';
@@ -162,6 +163,14 @@ export function isBYOKEnabled(copilotToken: Omit<CopilotToken, 'token'>, capiCli
 	const isGHE = capiClientService.dotcomAPIURL !== 'https://api.github.com';
 	const byokAllowed = (copilotToken.isInternal || copilotToken.isIndividual) && !isGHE;
 	return byokAllowed;
+}
+
+export function isBYOKRegistrationEnabled(copilotToken: Omit<CopilotToken, 'token'> | undefined, capiClientService: ICAPIClientService, providerMode: ChatProviderMode): boolean {
+	if (providerMode === 'standalone') {
+		return true;
+	}
+
+	return !!copilotToken && isBYOKEnabled(copilotToken, capiClientService);
 }
 
 /**

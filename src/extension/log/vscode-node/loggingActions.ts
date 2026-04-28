@@ -471,6 +471,9 @@ function collectFetcherTelemetry(accessor: ServicesAccessor): void {
 	const logService = accessor.get(ILogService);
 	const configurationService = accessor.get(IConfigurationService);
 	const expService = accessor.get(IExperimentationService);
+	if (configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+		return;
+	}
 
 	if (!vscode.env.isTelemetryEnabled || extensionContext.extensionMode !== vscode.ExtensionMode.Production || isScenarioAutomation) {
 		return;

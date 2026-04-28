@@ -11,7 +11,7 @@ import { CopilotToken } from '../../../platform/authentication/common/copilotTok
 import { IBlockedExtensionService } from '../../../platform/chat/common/blockedExtensionService';
 import { ChatFetchResponseType, ChatLocation, getErrorDetailsFromChatFetchError } from '../../../platform/chat/common/commonTypes';
 import { getTextPart } from '../../../platform/chat/common/globalStringUtils';
-import { IConfigurationService } from '../../../platform/configuration/common/configurationService';
+import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { EmbeddingType, getWellKnownEmbeddingTypeInfo, IEmbeddingsComputer } from '../../../platform/embeddings/common/embeddingsComputer';
 import { IEndpointProvider } from '../../../platform/endpoint/common/endpointProvider';
 import { CustomDataPartMimeTypes } from '../../../platform/endpoint/common/endpointTypes';
@@ -179,12 +179,19 @@ export class LanguageModelAccess extends Disposable implements IExtensionContrib
 		@IEmbeddingsComputer private readonly _embeddingsComputer: IEmbeddingsComputer,
 		@IVSCodeExtensionContext private readonly _vsCodeExtensionContext: IVSCodeExtensionContext,
 		@IAutomodeService private readonly _automodeService: IAutomodeService,
+		@IConfigurationService private readonly _configurationService: IConfigurationService,
 		@IExperimentationService private readonly _expService: IExperimentationService,
 	) {
 		super();
 
 		this._lmWrapper = this._instantiationService.createInstance(CopilotLanguageModelWrapper);
 		this._promptBaseCountCache = this._instantiationService.createInstance(LanguageModelAccessPromptBaseCountCache);
+
+		if (this.isStandaloneMode()) {
+			this._logService.info('[LanguageModelAccess] Skipping Copilot language model and embeddings providers in standalone mode.');
+			this.activationBlocker = Promise.resolve();
+			return;
+		}
 
 		if (this._vsCodeExtensionContext.extensionMode === ExtensionMode.Test && !isScenarioAutomation) {
 			this._logService.warn('[LanguageModelAccess] LanguageModels and Embeddings are NOT AVAILABLE in test mode.');
@@ -444,6 +451,10 @@ export class LanguageModelAccess extends Disposable implements IExtensionContrib
 			this._logService.error(e);
 			return undefined;
 		}
+	}
+
+	private isStandaloneMode(): boolean {
+		return this._configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone';
 	}
 }
 

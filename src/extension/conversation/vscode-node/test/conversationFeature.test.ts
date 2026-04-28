@@ -10,6 +10,9 @@ import * as vscode from 'vscode';
 import { IAuthenticationService } from '../../../../platform/authentication/common/authentication';
 import { CopilotToken, createTestExtendedTokenInfo } from '../../../../platform/authentication/common/copilotToken';
 import { setCopilotToken, StaticGitHubAuthenticationService } from '../../../../platform/authentication/common/staticGitHubAuthenticationService';
+import { ConfigKey, IConfigurationService } from '../../../../platform/configuration/common/configurationService';
+import { DefaultsOnlyConfigurationService } from '../../../../platform/configuration/common/defaultsOnlyConfigurationService';
+import { InMemoryConfigurationService } from '../../../../platform/configuration/test/common/inMemoryConfigurationService';
 import { FailingDevContainerConfigurationService, IDevContainerConfigurationService } from '../../../../platform/devcontainer/common/devContainerConfigurationService';
 import { ICombinedEmbeddingIndex, VSCodeCombinedIndexImpl } from '../../../../platform/embeddings/common/vscodeIndex';
 import { IVSCodeExtensionContext } from '../../../../platform/extContext/common/extensionContext';
@@ -30,8 +33,13 @@ suite('Conversation feature test suite', function () {
 	let instaService: IInstantiationService;
 	let sandbox: sinon.SinonSandbox;
 
-	function createAccessor() {
+	function createAccessor(options: { standalone?: boolean } = {}) {
 		const testingServiceCollection = createExtensionTestingServices();
+		const configurationService = new InMemoryConfigurationService(new DefaultsOnlyConfigurationService());
+		if (options.standalone) {
+			configurationService.setConfig(ConfigKey.Advanced.ProviderMode, 'standalone');
+		}
+		testingServiceCollection.define(IConfigurationService, configurationService);
 		testingServiceCollection.define(ICombinedEmbeddingIndex, new SyncDescriptor(VSCodeCombinedIndexImpl, [/*useRemoteCache*/ false]));
 		testingServiceCollection.define(INewWorkspacePreviewContentManager, new SyncDescriptor(NewWorkspacePreviewContentManagerImpl));
 		testingServiceCollection.define(IGitCommitMessageService, new NoopGitCommitMessageService());
@@ -131,6 +139,23 @@ suite('Conversation feature test suite', function () {
 			setCopilotToken(accessor.get(IAuthenticationService), copilotToken);
 
 			assert.deepStrictEqual(conversationFeature.activated, true);
+		} finally {
+			conversationFeature.dispose();
+		}
+	});
+
+	test('Standalone mode activates without a Copilot token and skips semantic search providers', async function () {
+		createAccessor({ standalone: true });
+		const textSearchProviderStub = sandbox.stub(vscode.workspace, 'registerTextSearchProvider').returns({ dispose() { } });
+		const settingsSearchProviderStub = sandbox.stub(vscode.ai, 'registerSettingsSearchProvider').returns({ dispose() { } });
+
+		const conversationFeature = instaService.createInstance(ConversationFeature);
+		try {
+			assert.deepStrictEqual(accessor.get(IAuthenticationService).copilotToken, undefined);
+			assert.deepStrictEqual(conversationFeature.enabled, true);
+			assert.deepStrictEqual(conversationFeature.activated, true);
+			assert.deepStrictEqual(textSearchProviderStub.callCount, 0);
+			assert.deepStrictEqual(settingsSearchProviderStub.callCount, 0);
 		} finally {
 			conversationFeature.dispose();
 		}

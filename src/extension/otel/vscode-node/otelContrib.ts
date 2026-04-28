@@ -5,6 +5,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
+import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { ILogService } from '../../../platform/log/common/logService';
 import { DEFAULT_OTLP_ENDPOINT } from '../../../platform/otel/common/otelConfig';
 import { IOTelService } from '../../../platform/otel/common/otelService';
@@ -24,8 +25,14 @@ export class OTelContrib extends Disposable implements IExtensionContribution {
 		@IOTelSqliteStore private readonly _sqliteStore: OTelSqliteStore,
 		@ILogService private readonly _logService: ILogService,
 		@ITelemetryService private readonly _telemetryService: ITelemetryService,
+		@IConfigurationService private readonly _configurationService: IConfigurationService,
 	) {
 		super();
+		if (this._configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+			this._logService.trace('[OTel] Contribution disabled in standalone mode');
+			return;
+		}
+
 		if (this._otelService.config.enabled) {
 			this._logService.info(`[OTel] Instrumentation enabled — exporter=${this._otelService.config.exporterType} endpoint=${this._otelService.config.otlpEndpoint} captureContent=${this._otelService.config.captureContent}`);
 		} else {

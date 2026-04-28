@@ -13,4 +13,15 @@ describe('configuration service settings', () => {
 		expect(ConfigKey.Advanced.ProviderMode.defaultValue).toBe('copilot');
 		expect(ConfigKey.Advanced.ProviderMode.isPublic).toBe(true);
 	});
+
+	it('defines standalone model role settings with empty defaults', () => {
+		expect(ConfigKey.Advanced.StandaloneDefaultModel.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.default');
+		expect(ConfigKey.Advanced.StandaloneFastModel.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.fast');
+		expect(ConfigKey.Advanced.StandaloneReasoningModel.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.reasoning');
+		expect(ConfigKey.Advanced.StandaloneEmbeddingsModel.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.embeddings');
+		expect(ConfigKey.Advanced.StandaloneDefaultModel.defaultValue).toBe('');
+		expect(ConfigKey.Advanced.StandaloneFastModel.defaultValue).toBe('');
+		expect(ConfigKey.Advanced.StandaloneReasoningModel.defaultValue).toBe('');
+		expect(ConfigKey.Advanced.StandaloneEmbeddingsModel.defaultValue).toBe('');
+	});
 });

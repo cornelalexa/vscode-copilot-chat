@@ -5,6 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { ChatRequest, LanguageModelChat } from 'vscode';
+import { ConfigKey } from '../../../platform/configuration/common/configurationService';
 import { IChatModelInformation, ICompletionModelInformation, IEmbeddingModelInformation } from '../../../platform/endpoint/common/endpointProvider';
 import { IModelMetadataFetcher } from '../../../platform/endpoint/node/modelMetadataFetcher';
 import { IChatEndpoint } from '../../../platform/networking/common/networking';
@@ -53,7 +54,28 @@ class FakeModelMetadataFetcher implements IModelMetadataFetcher {
 }
 
 describe('ProductionEndpointProvider characterization', () => {
-	function createProvider() {
+	const localModels = [
+		{
+			id: 'default-model',
+			vendor: 'customoai',
+			name: 'Default Model',
+			version: '1.0.0',
+			family: 'default-model',
+			maxInputTokens: 4096,
+			capabilities: {},
+		} as LanguageModelChat,
+		{
+			id: 'fast-model',
+			vendor: 'ollama',
+			name: 'Fast Model',
+			version: '1.0.0',
+			family: 'fast-model',
+			maxInputTokens: 4096,
+			capabilities: {},
+		} as LanguageModelChat,
+	];
+
+	function createProvider(options: { providerMode?: 'copilot' | 'standalone'; defaultModel?: string; fastModel?: string; models?: readonly LanguageModelChat[] } = {}) {
 		const modelFetcher = new FakeModelMetadataFetcher();
 		const instantiationService = {
 			createInstance: (ctor: { name: string }, ...args: unknown[]) => {
@@ -74,10 +96,27 @@ describe('ProductionEndpointProvider characterization', () => {
 		const provider = new ProductionEndpointProvider(
 			{ resolveAutoModeEndpoint: async () => { throw new Error('not used'); } } as any,
 			{ trace: () => { } } as any,
-			{} as any,
+			{
+				getConfig: (key: unknown) => {
+					if (key === ConfigKey.Advanced.ProviderMode) {
+						return options.providerMode ?? 'copilot';
+					}
+					if (key === ConfigKey.Advanced.StandaloneDefaultModel) {
+						return options.defaultModel ?? '';
+					}
+					if (key === ConfigKey.Advanced.StandaloneFastModel) {
+						return options.fastModel ?? '';
+					}
+					if (key === ConfigKey.Advanced.StandaloneReasoningModel) {
+						return '';
+					}
+					return undefined;
+				}
+			} as any,
 			instantiationService as any,
 			{} as any,
 		);
+		(provider as any).selectStandaloneModels = async () => options.models ?? localModels;
 		return { provider, modelFetcher };
 	}
 
@@ -105,5 +144,42 @@ describe('ProductionEndpointProvider characterization', () => {
 		await provider.getChatEndpoint({ model: undefined } as unknown as ChatRequest);
 
 		expect(modelFetcher.requestedFamilies).toEqual(['copilot-base']);
+	});
+
+	it('resolves missing request model to configured standalone default without Copilot metadata', async () => {
+		const { provider, modelFetcher } = createProvider({ providerMode: 'standalone', defaultModel: 'customoai/default-model' });
+
+		const endpoint = await provider.getChatEndpoint({ model: undefined } as unknown as ChatRequest);
+
+		expect(endpoint.model).toBe('default-model');
+		expect(endpoint.modelProvider).toBe('customoai');
+		expect(modelFetcher.requestedFamilies).toEqual([]);
+	});
+
+	it('resolves copilot-fast family to standalone fast role and falls back to default when unset', async () => {
+		const withFast = createProvider({ providerMode: 'standalone', defaultModel: 'customoai/default-model', fastModel: 'ollama/fast-model' });
+		const fastEndpoint = await withFast.provider.getChatEndpoint('copilot-fast');
+		expect(fastEndpoint.model).toBe('fast-model');
+		expect(fastEndpoint.modelProvider).toBe('ollama');
+
+		const withoutFast = createProvider({ providerMode: 'standalone', defaultModel: 'customoai/default-model' });
+		const fallbackEndpoint = await withoutFast.provider.getChatEndpoint('copilot-fast');
+		expect(fallbackEndpoint.model).toBe('default-model');
+		expect(fallbackEndpoint.modelProvider).toBe('customoai');
+	});
+
+	it('uses the first non-Copilot model in standalone mode when no default is configured', async () => {
+		const { provider } = createProvider({
+			providerMode: 'standalone',
+			models: [
+				{ ...localModels[0], id: 'ignored-copilot-model', vendor: 'copilot' } as LanguageModelChat,
+				localModels[1],
+			]
+		});
+
+		const endpoint = await provider.getChatEndpoint('copilot-base');
+
+		expect(endpoint.model).toBe('fast-model');
+		expect(endpoint.modelProvider).toBe('ollama');
 	});
 });

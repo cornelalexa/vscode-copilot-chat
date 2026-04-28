@@ -565,6 +565,8 @@ export type CommitMessageGenerationInstruction = { file: string } | { text: stri
 
 export const XTabProviderId = 'XtabProvider';
 
+export type ChatProviderMode = 'copilot' | 'standalone';
+
 export namespace ConfigKey {
 
 	/**
@@ -587,6 +589,12 @@ export namespace ConfigKey {
 	 * Advanced settings that are available for all users to configure.
 	 */
 	export namespace Advanced {
+		export const ProviderMode = defineSetting<ChatProviderMode>('chat.providerMode', ConfigType.Simple, 'copilot');
+		export const StandaloneDefaultModel = defineSetting<string>('chat.standalone.model.default', ConfigType.Simple, '');
+		export const StandaloneFastModel = defineSetting<string>('chat.standalone.model.fast', ConfigType.Simple, '');
+		export const StandaloneReasoningModel = defineSetting<string>('chat.standalone.model.reasoning', ConfigType.Simple, '');
+		export const StandaloneEmbeddingsModel = defineSetting<string>('chat.standalone.model.embeddings', ConfigType.Simple, '');
+
 		/** Allows forcing a particular model.
 		 * Note: this should not be used while self-hosting because it might lead to
 		 * a fundamental different experience compared to our end-users.

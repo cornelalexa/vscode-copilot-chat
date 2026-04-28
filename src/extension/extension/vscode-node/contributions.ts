@@ -6,7 +6,6 @@
 import { PromptFileContribution } from '../../agents/vscode-node/promptFileContrib';
 import { AuthenticationContrib } from '../../authentication/vscode-node/authentication.contribution';
 import { BYOKContrib } from '../../byok/vscode-node/byokContribution';
-import { ChatDebugFileLoggerContribution } from '../../chat/vscode-node/chatDebugFileLoggerService';
 import { ChatQuotaContribution } from '../../chat/vscode-node/chatQuota.contribution';
 import { ChatSessionContextContribution } from '../../chatSessionContext/vscode-node/chatSessionContextProvider';
 import { ChatSessionsContrib } from '../../chatSessions/vscode-node/chatSessions';
@@ -47,7 +46,6 @@ import { SettingsSchemaFeature } from '../../settingsSchema/vscode-node/settings
 import { SurveyCommandContribution } from '../../survey/vscode-node/surveyCommands';
 import { SetupTestsContribution } from '../../testing/vscode/setupTestContributions';
 import { ToolsContribution } from '../../tools/vscode-node/tools';
-import { OTelChatDebugLogProviderContribution } from '../../trajectory/vscode-node/otelChatDebugLogProvider';
 import { InlineCompletionContribution } from '../../typescriptContext/vscode-node/languageContextService';
 import { NesRenameContribution } from '../../typescriptContext/vscode-node/nesRenameService';
 import * as workspaceIndexingContribution from '../../workspaceChunkSearch/vscode-node/workspaceChunkSearch.contribution';
@@ -123,6 +121,18 @@ export const vscodeNodeChatContributions: IExtensionContributionFactory[] = [
 	asContributionFactory(LanguageModelProxyContrib),
 	asContributionFactory(PromptFileContribution),
 	newWorkspaceContribution,
-	asContributionFactory(OTelChatDebugLogProviderContribution),
-	asContributionFactory(ChatDebugFileLoggerContribution),
+];
+
+export const vscodeNodeStandaloneChatContributions: IExtensionContributionFactory[] = [
+	asContributionFactory(ConfigurationMigrationContribution),
+	asContributionFactory(RequestLogTree),
+	asContributionFactory(OnboardTerminalTestsContribution),
+	asContributionFactory(ToolsContribution),
+	asContributionFactory(AiMappedEditsContrib),
+	asContributionFactory(LogWorkspaceStateContribution),
+	asContributionFactory(BYOKContrib),
+	asContributionFactory(McpSetupCommands),
+	asContributionFactory(LanguageModelProxyContrib),
+	asContributionFactory(PromptFileContribution),
+	newWorkspaceContribution,
 ];

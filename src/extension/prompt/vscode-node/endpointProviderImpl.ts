@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { LanguageModelChat, type ChatRequest } from 'vscode';
+import { LanguageModelChat, lm, type ChatRequest } from 'vscode';
 import { IAuthenticationService } from '../../../platform/authentication/common/authentication';
-import { IConfigurationService } from '../../../platform/configuration/common/configurationService';
+import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { ChatEndpointFamily, EmbeddingsEndpointFamily, IChatModelInformation, ICompletionModelInformation, IEmbeddingModelInformation, IEndpointProvider } from '../../../platform/endpoint/common/endpointProvider';
 import { AutoChatEndpoint } from '../../../platform/endpoint/node/autoChatEndpoint';
 import { IAutomodeService } from '../../../platform/endpoint/node/automodeService';
@@ -66,6 +66,9 @@ export class ProductionEndpointProvider extends Disposable implements IEndpointP
 		this._logService.trace(`Resolving chat model`);
 
 		if (typeof requestOrFamilyOrModel === 'string') {
+			if (this.isStandaloneMode()) {
+				return this.resolveStandaloneEndpoint(this.getStandaloneRoleForFamily(requestOrFamilyOrModel));
+			}
 			const modelMetadata = await this._modelFetcher.getChatModelFromFamily(requestOrFamilyOrModel);
 			return this.getOrCreateChatEndpointInstance(modelMetadata!);
 		}
@@ -73,11 +76,18 @@ export class ProductionEndpointProvider extends Disposable implements IEndpointP
 		const model = 'model' in requestOrFamilyOrModel ? requestOrFamilyOrModel.model : requestOrFamilyOrModel;
 
 		if (!model) {
+			if (this.isStandaloneMode()) {
+				return this.resolveStandaloneEndpoint('default');
+			}
 			return this.getChatEndpoint('copilot-base');
 		}
 
 		if (model.vendor !== 'copilot') {
 			return this._instantiationService.createInstance(ExtensionContributedChatEndpoint, model);
+		}
+
+		if (this.isStandaloneMode()) {
+			return this.resolveStandaloneEndpoint('default');
 		}
 
 		if (model.id === AutoChatEndpoint.pseudoModelId) {
@@ -92,6 +102,57 @@ export class ProductionEndpointProvider extends Disposable implements IEndpointP
 		const modelMetadata = await this._modelFetcher.getChatModelFromApiModel(model);
 		// If we fail to resolve a model since this is panel we give copilot base. This really should never happen as the picker is powered by the same service.
 		return modelMetadata ? this.getOrCreateChatEndpointInstance(modelMetadata) : this.getChatEndpoint('copilot-base');
+	}
+
+	private isStandaloneMode(): boolean {
+		return this._configService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone';
+	}
+
+	private getStandaloneRoleForFamily(family: string): 'default' | 'fast' | 'reasoning' {
+		if (family === 'copilot-fast') {
+			return 'fast';
+		}
+		return 'default';
+	}
+
+	private getStandaloneRoleConfig(role: 'default' | 'fast' | 'reasoning'): string {
+		switch (role) {
+			case 'fast':
+				return this._configService.getConfig(ConfigKey.Advanced.StandaloneFastModel) || this._configService.getConfig(ConfigKey.Advanced.StandaloneDefaultModel);
+			case 'reasoning':
+				return this._configService.getConfig(ConfigKey.Advanced.StandaloneReasoningModel) || this._configService.getConfig(ConfigKey.Advanced.StandaloneDefaultModel);
+			default:
+				return this._configService.getConfig(ConfigKey.Advanced.StandaloneDefaultModel);
+		}
+	}
+
+	private async resolveStandaloneEndpoint(role: 'default' | 'fast' | 'reasoning'): Promise<IChatEndpoint> {
+		const models = await this.selectStandaloneModels();
+		const configuredModel = this.getStandaloneRoleConfig(role);
+		const model = configuredModel ? this.findStandaloneModel(models, configuredModel) : models.find(model => model.vendor !== 'copilot');
+
+		if (!model) {
+			throw new Error(configuredModel
+				? `Standalone model '${configuredModel}' is not available. Configure github.copilot.chat.standalone.model.${role} with a valid vendor/model-id.`
+				: 'No standalone language model is available. Configure a BYOK provider or set github.copilot.chat.standalone.model.default.');
+		}
+
+		return this._instantiationService.createInstance(ExtensionContributedChatEndpoint, model);
+	}
+
+	protected async selectStandaloneModels(): Promise<readonly LanguageModelChat[]> {
+		return lm.selectChatModels({});
+	}
+
+	private findStandaloneModel(models: readonly LanguageModelChat[], configuredModel: string): LanguageModelChat | undefined {
+		const separator = configuredModel.indexOf('/');
+		if (separator < 1 || separator === configuredModel.length - 1) {
+			return undefined;
+		}
+
+		const vendor = configuredModel.slice(0, separator);
+		const id = configuredModel.slice(separator + 1);
+		return models.find(model => model.vendor === vendor && model.id === id);
 	}
 
 	async getEmbeddingsEndpoint(family?: EmbeddingsEndpointFamily): Promise<IEmbeddingsEndpoint> {

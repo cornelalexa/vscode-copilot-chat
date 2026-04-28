@@ -4,9 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import assert from 'assert';
+import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { IChatMLFetcher } from '../../../../platform/chat/common/chatMLFetcher';
 import { MockChatMLFetcher } from '../../../../platform/chat/test/common/mockChatMLFetcher';
+import { ConfigKey, IConfigurationService } from '../../../../platform/configuration/common/configurationService';
+import { DefaultsOnlyConfigurationService } from '../../../../platform/configuration/common/defaultsOnlyConfigurationService';
+import { InMemoryConfigurationService } from '../../../../platform/configuration/test/common/inMemoryConfigurationService';
 import { IEndpointProvider } from '../../../../platform/endpoint/common/endpointProvider';
 import { IVSCodeExtensionContext } from '../../../../platform/extContext/common/extensionContext';
 import { IChatEndpoint } from '../../../../platform/networking/common/networking';
@@ -14,7 +18,7 @@ import { ITestingServicesAccessor } from '../../../../platform/test/node/service
 import { CancellationToken } from '../../../../util/vs/base/common/cancellation';
 import { IInstantiationService } from '../../../../util/vs/platform/instantiation/common/instantiation';
 import { createExtensionTestingServices } from '../../../test/vscode-node/services';
-import { CopilotLanguageModelWrapper } from '../languageModelAccess';
+import { CopilotLanguageModelWrapper, LanguageModelAccess } from '../languageModelAccess';
 
 
 suite('CopilotLanguageModelWrapper', () => {
@@ -86,5 +90,39 @@ suite('CopilotLanguageModelWrapper', () => {
 		test('good tool name', async () => {
 			await runTest([vscode.LanguageModelChatMessage.User('hello2')], [{ name: 'hello_world', description: 'my tool' }]);
 		});
+	});
+});
+
+suite('LanguageModelAccess', () => {
+	let accessor: ITestingServicesAccessor;
+	let instaService: IInstantiationService;
+	let sandbox: sinon.SinonSandbox;
+
+	setup(() => {
+		sandbox = sinon.createSandbox();
+		const testingServiceCollection = createExtensionTestingServices();
+		const configurationService = new InMemoryConfigurationService(new DefaultsOnlyConfigurationService());
+		configurationService.setConfig(ConfigKey.Advanced.ProviderMode, 'standalone');
+		testingServiceCollection.define(IConfigurationService, configurationService);
+		accessor = testingServiceCollection.createTestingAccessor();
+		instaService = accessor.get(IInstantiationService);
+	});
+
+	teardown(() => {
+		sandbox.restore();
+	});
+
+	test('standalone mode does not register Copilot language model or embeddings providers', async () => {
+		const registerLanguageModelStub = sandbox.stub(vscode.lm, 'registerLanguageModelChatProvider').returns({ dispose() { } });
+		const registerEmbeddingsStub = sandbox.stub(vscode.lm, 'registerEmbeddingsProvider').returns({ dispose() { } });
+
+		const languageModelAccess = instaService.createInstance(LanguageModelAccess);
+		try {
+			await languageModelAccess.activationBlocker;
+			assert.strictEqual(registerLanguageModelStub.callCount, 0);
+			assert.strictEqual(registerEmbeddingsStub.callCount, 0);
+		} finally {
+			languageModelAccess.dispose();
+		}
 	});
 });

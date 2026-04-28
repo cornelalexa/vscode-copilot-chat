@@ -212,7 +212,9 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 					reason: payloadValidationResult.reason,
 				};
 			} else {
-				const copilotToken = await this._authenticationService.getCopilotToken();
+				const copilotToken = shouldBypassCopilotTokenForRawEndpoint(chatEndpoint, requestOptions.secretKey)
+					? { token: '', username: '' } as CopilotToken
+					: await this._authenticationService.getCopilotToken();
 				usernameToScrub = copilotToken.username;
 				const fetchResult = await this._fetchAndStreamChat(
 					chatEndpoint,
@@ -2128,6 +2130,10 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 		}
 		return errorDetail.replaceAll(/(?<=logged in as )(?!<login>)[^\s]+/ig, '!<login>!'); // marking fallback with !
 	}
+}
+
+function shouldBypassCopilotTokenForRawEndpoint(chatEndpoint: IChatEndpoint, secretKey: string | undefined): boolean {
+	return !!secretKey && typeof chatEndpoint.urlOrRequestMetadata === 'string';
 }
 
 /**

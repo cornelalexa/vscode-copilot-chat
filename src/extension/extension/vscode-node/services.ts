@@ -157,6 +157,7 @@ import { registerServices as registerCommonServices } from '../vscode/services';
 
 export function registerServices(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext): void {
 	const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
+	const isStandaloneMode = workspace.getConfiguration('github.copilot.chat').get<string>('providerMode') === 'standalone';
 
 	registerCommonServices(builder, extensionContext);
 
@@ -181,7 +182,10 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	const internalAIKey = extensionContext.extension.packageJSON.internalAIKey ?? '';
 	const internalLargeEventAIKey = extensionContext.extension.packageJSON.internalLargeStorageAriaKey ?? '';
 	const ariaKey = extensionContext.extension.packageJSON.ariaKey ?? '';
-	if (isTestMode || isScenarioAutomation) {
+	if (isStandaloneMode) {
+		setupStandaloneTelemetry(builder);
+		builder.define(ICopilotTokenManager, new SyncDescriptor(VSCodeCopilotTokenManager));
+	} else if (isTestMode || isScenarioAutomation) {
 		setupTelemetry(builder, extensionContext, internalAIKey, internalLargeEventAIKey, ariaKey);
 		// If we're in testing mode, then most code will be called from an actual test,
 		// and not from here. However, some objects will capture the `accessor` we pass
@@ -276,7 +280,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	const otelSettings = workspace.getConfiguration('github.copilot.chat.otel');
 	const otelConfig = resolveOTelConfig({
 		env: process.env,
-		settingEnabled: otelSettings.get<boolean>('enabled'),
+		settingEnabled: isStandaloneMode ? false : otelSettings.get<boolean>('enabled'),
 		settingExporterType: otelSettings.get<'otlp-grpc' | 'otlp-http' | 'console' | 'file'>('exporterType'),
 		settingOtlpEndpoint: otelSettings.get<string>('otlpEndpoint'),
 		settingCaptureContent: otelSettings.get<boolean>('captureContent'),
@@ -299,6 +303,11 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	} else {
 		builder.define(IOTelService, new InMemoryOTelService(otelConfig));
 	}
+}
+
+function setupStandaloneTelemetry(builder: IInstantiationServiceBuilder) {
+	builder.define(ITelemetryService, new NullTelemetryService());
+	builder.define(IExperimentationService, new NullExperimentationService());
 }
 
 function setupMSFTExperimentationService(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext) {

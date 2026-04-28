@@ -25,7 +25,7 @@ import { DisposableStore, IDisposable, combinedDisposable } from '../../../util/
 import { URI } from '../../../util/vs/base/common/uri';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
 import { ContributionCollection, IExtensionContribution } from '../../common/contributions';
-import { vscodeNodeChatContributions } from '../../extension/vscode-node/contributions';
+import { vscodeNodeChatContributions, vscodeNodeStandaloneChatContributions } from '../../extension/vscode-node/contributions';
 import { IMergeConflictService } from '../../git/common/mergeConflictService';
 import { registerInlineChatCommands } from '../../inlineChat/vscode-node/inlineChatCommands';
 import { INewWorkspacePreviewContentManager } from '../../intents/node/newIntent';
@@ -90,8 +90,11 @@ export class ConversationFeature implements IExtensionContribution {
 
 		const activationBlockerDeferred = new DeferredPromise<void>();
 		this.activationBlocker = activationBlockerDeferred.p;
-		if (authenticationService.copilotToken) {
-			this.logService.info(`ConversationFeature: Copilot token already available`);
+		if (this.isStandaloneMode() || authenticationService.copilotToken) {
+			this.logService.info(this.isStandaloneMode() ? `ConversationFeature: standalone mode active` : `ConversationFeature: Copilot token already available`);
+			if (this.isStandaloneMode()) {
+				this.enabled = true;
+			}
 			this.activated = true;
 			activationBlockerDeferred.complete();
 		} else {
@@ -100,6 +103,14 @@ export class ConversationFeature implements IExtensionContribution {
 		}
 
 		this._disposables.add(authenticationService.onDidAuthenticationChange(async () => {
+			if (this.isStandaloneMode()) {
+				this.logService.info(`ConversationFeature: standalone mode ignores Copilot authentication changes`);
+				this.enabled = true;
+				this.activated = true;
+				activationBlockerDeferred.complete();
+				return;
+			}
+
 			const hasSession = !!authenticationService.copilotToken;
 			this.logService.info(`ConversationFeature: onDidAuthenticationChange has token: ${hasSession}`);
 			if (hasSession) {
@@ -148,7 +159,7 @@ export class ConversationFeature implements IExtensionContribution {
 			this._activatedDisposables.add(this.registerCommands(options));
 			this._activatedDisposables.add(this.registerRelatedInformationProviders());
 			this._activatedDisposables.add(this.registerParticipants(options));
-			this._activatedDisposables.add(this.instantiationService.createInstance(ContributionCollection, vscodeNodeChatContributions));
+			this._activatedDisposables.add(this.instantiationService.createInstance(ContributionCollection, this.isStandaloneMode() ? vscodeNodeStandaloneChatContributions : vscodeNodeChatContributions));
 		}
 	}
 
@@ -170,6 +181,11 @@ export class ConversationFeature implements IExtensionContribution {
 		} else {
 			this._searchProviderRegistered = true;
 
+			if (this.isStandaloneMode()) {
+				this.logService.debug('ConversationFeature: Skipping semantic search provider registration - standalone mode has no embeddings provider yet');
+				return;
+			}
+
 			// Don't register for no auth user
 			if (this.authenticationService.copilotToken?.isNoAuthUser) {
 				this.logService.debug('ConversationFeature: Skipping search provider registration - no GitHub session available');
@@ -186,7 +202,16 @@ export class ConversationFeature implements IExtensionContribution {
 		}
 
 		this._settingsSearchProviderRegistered = true;
+		if (this.isStandaloneMode()) {
+			this.logService.debug('ConversationFeature: Skipping settings semantic search provider registration - standalone mode has no embeddings provider yet');
+			return;
+		}
+
 		return vscode.ai.registerSettingsSearchProvider(this.settingsEditorSearchService);
+	}
+
+	private isStandaloneMode(): boolean {
+		return this.configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone';
 	}
 
 	private registerProviders(): IDisposable {

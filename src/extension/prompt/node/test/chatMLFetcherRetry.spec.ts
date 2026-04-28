@@ -45,6 +45,7 @@ describe('ChatMLFetcherImpl retry logic', () => {
 	let configurationService: InMemoryConfigurationService;
 	let cancellationTokenSource: CancellationTokenSource;
 	let endpoint: IChatEndpoint;
+	let authenticationService: TestAuthenticationService;
 
 	beforeEach(() => {
 		disposables = new DisposableStore();
@@ -58,6 +59,7 @@ describe('ChatMLFetcherImpl retry logic', () => {
 		const logService = new TestLogService();
 		const telemetryService = new NullTelemetryService();
 		const experimentationService = new NullExperimentationService();
+		authenticationService = new TestAuthenticationService();
 
 		endpoint = createMockEndpoint();
 
@@ -66,7 +68,7 @@ describe('ChatMLFetcherImpl retry logic', () => {
 			telemetryService,
 			new NullRequestLogger(),
 			logService,
-			new TestAuthenticationService() as unknown as IAuthenticationService,
+			authenticationService as unknown as IAuthenticationService,
 			createMockInteractionService(),
 			createMockChatQuotaService(),
 			new TestCAPIClientService() as unknown as ICAPIClientService,
@@ -102,6 +104,34 @@ describe('ChatMLFetcherImpl retry logic', () => {
 			finishedCb: undefined,
 		};
 	}
+
+	it('requests a Copilot token before fetching even for a raw non-CAPI endpoint URL', async () => {
+		mockFetcherService.queueResponse(createSuccessResponse('Hello!'));
+		endpoint = {
+			...endpoint,
+			url: 'https://example.test/v1/chat/completions',
+			urlOrRequestMetadata: 'https://example.test/v1/chat/completions',
+		} as IChatEndpoint;
+
+		await fetcher.fetchMany(createBaseOpts(), cancellationTokenSource.token);
+
+		expect(authenticationService.getCopilotTokenCallCount).toBe(1);
+	});
+
+	it('does not request a Copilot token when a raw endpoint already has a secret key', async () => {
+		mockFetcherService.queueResponse(createSuccessResponse('Hello!'));
+		endpoint = {
+			...endpoint,
+			url: 'https://example.test/v1/chat/completions',
+			urlOrRequestMetadata: 'https://example.test/v1/chat/completions',
+		} as IChatEndpoint;
+		const opts = createBaseOpts();
+		opts.requestOptions.secretKey = 'byok-api-key';
+
+		await fetcher.fetchMany(opts, cancellationTokenSource.token);
+
+		expect(authenticationService.getCopilotTokenCallCount).toBe(0);
+	});
 
 	describe('server error retry with configured status codes', () => {
 		it('retries on 500 status code when configured', async () => {
@@ -447,7 +477,10 @@ class MockFetcherService {
  * Extended mock authentication service that returns a valid token.
  */
 class TestAuthenticationService extends MockAuthenticationService {
+	public getCopilotTokenCallCount = 0;
+
 	override getCopilotToken(_force?: boolean): Promise<CopilotToken> {
+		this.getCopilotTokenCallCount++;
 		return Promise.resolve({
 			token: 'test-token',
 			username: 'test-user',
