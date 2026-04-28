@@ -19,7 +19,7 @@ import { StopWatch } from '../../../util/vs/base/common/stopwatch';
 import { URI } from '../../../util/vs/base/common/uri';
 import { generateUuid } from '../../../util/vs/base/common/uuid';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
-import { ExtendedLanguageModelToolResult, LanguageModelPromptTsxPart, MarkdownString } from '../../../vscodeTypes';
+import { ExtendedLanguageModelToolResult, LanguageModelPromptTsxPart, LanguageModelTextPart, MarkdownString } from '../../../vscodeTypes';
 import { getUniqueReferences } from '../../prompt/common/conversation';
 import { IBuildPromptContext } from '../../prompt/common/intents';
 import { CodebaseToolCallingLoop } from '../../prompt/node/codebaseToolCalling';
@@ -65,6 +65,10 @@ export class CodebaseTool implements vscode.LanguageModelTool<ICodebaseToolParam
 		const hasSemanticSearch = await this.workspaceChunkSearchService.isAvailable();
 		// If workspace chunk search is not available, return an empty result with this info
 		if (!hasSemanticSearch) {
+			if (this.configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+				return this.getStandaloneSearchFallback(query);
+			}
+
 			const result = new ExtendedLanguageModelToolResult([]);
 			result.toolResultMessage = new MarkdownString(l10n.t`Semantic workspace search is not currently available`);
 			return result;
@@ -121,6 +125,19 @@ export class CodebaseTool implements vscode.LanguageModelTool<ICodebaseToolParam
 		result.toolResultDetails = references
 			.map(r => r.anchor)
 			.filter(r => isUri(r) || isLocation(r));
+		return result;
+	}
+
+	private getStandaloneSearchFallback(query: string) {
+		const result = new ExtendedLanguageModelToolResult([
+			new LanguageModelTextPart(`Semantic workspace search is not available in standalone mode. Use local tools to explore the codebase for: ${query}
+
+Suggested fallback sequence:
+1. Use findTextInFiles with literal or regex terms from the query.
+2. Use findFiles for likely filenames, extensions, or directories.
+3. Use readFile on promising matches and continue iteratively.`)
+		]);
+		result.toolResultMessage = new MarkdownString(l10n.t`Using local search fallback instructions because semantic workspace search is not available`);
 		return result;
 	}
 

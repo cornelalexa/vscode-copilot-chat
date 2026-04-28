@@ -1214,7 +1214,7 @@ Use this checklist as the implementation ledger. Mark items as `[x]` only after 
 - [x] Phase 5: OpenAI-Compatible Transport Token Bypass
 - [x] Phase 6: Language Model Access and Embeddings Exposure
 - [ ] Phase 7: Local Tool and Helper Flow Preservation
-- [ ] Phase 8: Search Fallbacks Without Embeddings
+- [ ] Phase 8: Search Fallbacks Without Embeddings (partial; local fallback instructions added)
 - [x] Phase 9: Cloud/Auth-Only Feature Gating
 - [ ] Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
 - [ ] Phase 10A: Stable VS Code Proposed API Audit
@@ -1607,7 +1607,7 @@ Primary files:
 Implementation tasks:
 
 - Confirm local filesystem/search/edit/terminal/test tools do not require Copilot token after conversation activation is decoupled.
-- Replace helper endpoint resolution with model roles where helper model calls exist.
+- [x] Replace helper endpoint resolution with model roles where helper model calls exist.
 - Disable only healing/helper flows if no role endpoint is available; keep core edit tools functional.
 - Ensure tool availability does not depend on semantic search or embeddings.
 - Keep MCP registry/config/tool execution active.
@@ -1618,7 +1618,7 @@ Tests:
 - Core file tools invoke in standalone mode with a mock BYOK endpoint.
 - Apply patch succeeds without `copilot-fast`.
 - Patch healing uses `fast` role when configured.
-- MCP config generation uses `fast` role.
+- [x] MCP config generation uses `fast` role through central endpoint-provider `copilot-fast` mapping.
 - MCP execution does not require Copilot token.
 - `findFiles`, `findTextInFiles`, and workspace symbols remain available in standalone.
 
@@ -1646,8 +1646,8 @@ Primary files:
 
 Implementation tasks:
 
-- First fallback:
-  - direct `CodebaseTool.invoke(...)` should route to local agent/tool exploration when semantic search is unavailable and no scoped directories force semantic path.
+- [x] First fallback:
+  - direct `CodebaseTool.invoke(...)` returns local agent/tool exploration instructions when semantic search is unavailable in standalone mode.
   - preserve existing prompt-driven `provideInput(...)` route.
 - Second fallback:
   - add TF-IDF search strategy for direct `#codebase` queries.
@@ -1661,7 +1661,7 @@ Implementation tasks:
 
 Tests:
 
-- Direct `#codebase` invocation in standalone does not return empty solely because semantic search is unavailable.
+- [x] Direct `#codebase` invocation in standalone does not return empty solely because semantic search is unavailable.
 - Prompt-driven anonymous codebase agent path still works.
 - TF-IDF fallback respects ignored files.
 - Scoped directories are honored.
