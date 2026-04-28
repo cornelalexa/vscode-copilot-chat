@@ -1034,6 +1034,39 @@ This preserves the main agentic value quickly while avoiding a large embeddings/
 
 These decisions are the implementation baseline. Reopen them only if coding exposes a concrete blocker.
 
+## Secondary Opinion Review
+
+The file `docs/byok-op-opinion.md` was reviewed as a secondary implementation opinion. The primary plan in this document remains authoritative, especially its test-driven, configuration-driven standalone mode. Several concrete hints from the secondary opinion are useful and should be incorporated as implementation checks.
+
+### Useful Hints Accepted
+
+- `StaticExtendedTokenInfoCopilotTokenManager` exists in `src/platform/authentication/node/copilotTokenManager.ts` and can be useful for tests or as a temporary compatibility shim. It should not replace the planned standalone activation policy as the primary design, because a synthetic Copilot token can hide remaining cloud/CAPI dependencies by making token-gated code look available.
+- Native Anthropic/Gemini BYOK providers have a shorter standalone path after `BYOKContrib` registration because they use provider SDKs directly. OpenAI-compatible providers still need the `ChatMLFetcherImpl` raw-provider token bypass.
+- `NullTelemetryService` and `NullExperimentationService` already exist and are registered in test paths. Standalone mode should use these or equivalent no-op services instead of production telemetry/experimentation.
+- OTel wiring in `src/extension/extension/vscode-node/services.ts` dynamically loads OTLP exporters. Given the production audit findings around OpenTelemetry/protobufjs, standalone mode should explicitly force no-op/in-memory OTel and avoid OTLP exporter loading.
+- `FetcherTelemetryContribution` and `OTelContrib` are concrete contribution entries in `src/extension/extension/vscode-node/contributions.ts`. They should be gated or removed in standalone mode.
+- `customoai` is present in `package.json` and should be checked for product-quality gating during Phase 10 so OpenAI-compatible local gateways are available in the target internal build.
+- `onLanguageModelChat:copilot` is a package activation event. Do not remove activation events or proposed API declarations until manual activation testing proves they are unnecessary; rebrand/cleanup is intentionally deferred.
+- Contribution pruning should be centralized in `src/extension/extension/vscode-node/contributions.ts`. The secondary opinion's keep/remove tables are useful as a concrete checklist for Phase 9.
+- CAPI stubbing can be useful as a later safety tripwire after the BYOK path is working. A throwing CAPI service can reveal hidden cloud callers during manual testing.
+
+### Ideas Rejected Or Deferred
+
+- Do not make a fake paid Copilot token the main MVP strategy. It is expedient, but it preserves Copilot-shaped product state and risks accidentally enabling quota, cloud, review, semantic search, or telemetry paths that should be disabled in standalone mode.
+- Do not globally force `isBYOKEnabled()` to `true` without checking provider mode. In Copilot mode, existing behavior should remain unchanged. In standalone mode, BYOK should be always available without token.
+- Do not immediately replace all `CAPIClientImpl.makeRequest(...)` behavior with a throwing stub before basic standalone chat works. First make BYOK registration, activation, model resolution, and raw transport pass tests. Then add a standalone-only CAPI tripwire or disabled-cloud feature gates.
+- Do not rewrite `ProductionEndpointProvider.getChatEndpoint(...)` to route every string request blindly to the default model without role semantics. The primary plan's role-based resolution is safer because helper flows can use `fast`, `default`, or `reasoning` intentionally.
+- Do not rely on synthetic token flags such as `sku: individual_pro` or `telemetry: disabled` as security controls. Use explicit standalone capability checks and no-op services.
+
+### Plan Adjustments From Review
+
+- Add test cases for standalone OTel behavior: OTLP exporter packages are not dynamically imported when standalone mode is active.
+- Add Phase 9 contribution-pruning checklist entries for `FetcherTelemetryContribution`, `OTelContrib`, `WorkspaceRecorderFeature`, `ChatQuotaContribution`, `GitHubMcpContrib`, `RemoteAgentContribution`, `IgnoredFileProviderContribution`, and cloud session/review/completion surfaces.
+- Add Phase 10 package-surface check for `customoai` availability in the intended internal distribution channel.
+- Add an early package identity change because current VS Code builds may ship Copilot Chat internally and cannot reliably disable it as a separate marketplace extension.
+- Add optional post-MVP safety step: enable a standalone-only CAPI throw-stub once the direct BYOK path is proven, then use manual testing to catch unexpected cloud callers.
+- Add validation requirement: verify no startup traffic to Microsoft/GitHub/CDN telemetry or cloud endpoints in standalone mode, including `applicationinsights`, `exp-tas`, `api.github.com`, `api.githubcopilot.com`, and `main.vscode-cdn.net`.
+
 ### Decision 1: Standalone Is a User-Configurable Mode
 
 Standalone/BYOK mode should be a configuration-driven mode inside the current extension shape, not an immediate fork-wide removal of Copilot code.
@@ -1118,15 +1151,21 @@ Implementation implication:
 - Keep local semantic workspace index as Stage 5.
 - MVP acceptance should not require `copilot.text-embedding-3-small`, GitHub embedding type discovery, or CAPI chunking.
 
-### Decision 7: Do Not Rebrand in the First Pass
+### Decision 7: Use A Distinct Extension Identity From The Start
 
-Keep Copilot-branded participant IDs, command IDs, settings namespaces, and vendor IDs initially unless they block standalone behavior.
+Use a distinct extension identity immediately so the fork can load beside the Copilot Chat extension that ships with current VS Code builds.
 
 Implementation implication:
 
+- Change package identity early:
+  - `publisher`: `Reea.Srl`
+  - `name`: `reea-copilot`
+  - `displayName`: `Reea Copilot Chat`
+- This gives the fork a distinct extension id: `Reea.Srl.reea-copilot`.
+- Keep deeper command IDs, participant IDs, settings namespaces, and vendor IDs stable during the first behavior-focused pass unless they cause real conflicts.
 - Hide or neutralize cloud/auth/subscription UI in standalone mode.
-- Avoid renaming every contribution up front.
-- Rebrand/package cleanup belongs after the core no-auth path is proven.
+- Avoid renaming every contribution up front because broad ID churn increases risk.
+- Full product rebrand/package cleanup belongs after the core no-auth path is proven.
 
 ### Decision 8: Disable Cloud-Only Features in Standalone Mode
 
@@ -1166,6 +1205,7 @@ The goal of this plan is to make coding work mostly mechanical: add tests, make 
 Use this checklist as the implementation ledger. Mark items as `[x]` only after the phase acceptance criteria are met and the relevant tests pass.
 
 - [ ] Phase 0: Test Harness and Characterization
+- [ ] Phase 0A: Distinct Extension Identity
 - [ ] Phase 1: Provider Mode Configuration
 - [ ] Phase 2: BYOK Registration Without Copilot Auth
 - [ ] Phase 3: Conversation Activation Policy
@@ -1232,6 +1272,39 @@ Acceptance:
 
 - Tests pass before behavior changes.
 - Each future phase can update these tests from “current behavior” to “standalone behavior” without broad fixture rewrites.
+
+### Phase 0A: Distinct Extension Identity
+
+Purpose:
+
+- Allow the fork to load in current VS Code builds where Copilot Chat may be shipped/bundled and cannot be disabled as a normal marketplace extension.
+- Avoid extension id collisions before manual testing starts.
+
+Primary files:
+
+- `package.json`
+- `package-lock.json`, if package metadata changes cause npm lock metadata updates
+- `package.nls.json`, only if display strings need adjustment
+
+Implementation tasks:
+
+- Change package identity:
+  - `publisher`: `Reea.Srl`
+  - `name`: `reea-copilot`
+  - `displayName`: `Reea Copilot Chat`
+- Remove or neutralize Microsoft/GitHub marketplace metadata only if it causes package/install confusion during local VSIX testing.
+- Keep command ids, settings namespaces, chat participant ids, provider/vendor ids, and proposed API declarations unchanged for the first pass unless they demonstrably conflict.
+
+Tests/checks:
+
+- `npm run typecheck` after identity edits.
+- Package metadata inspection confirms extension id is `Reea.Srl.reea-copilot`.
+- Manual dev-host launch confirms both the built-in Copilot Chat and this fork can coexist without extension id collision.
+
+Acceptance:
+
+- The fork can be launched or installed locally without replacing/conflicting with the built-in `GitHub.copilot-chat` identity.
+- No broad rebrand has been done beyond the minimum identity split.
 
 ### Phase 1: Provider Mode Configuration
 
@@ -1612,6 +1685,14 @@ Implementation tasks:
   - `isSemanticSearchEnabled()`
   - `isInlineCompletionsEnabledInStandalone()` initially false.
 - In standalone mode, do not instantiate or register:
+  - `FetcherTelemetryContribution`
+  - `OTelContrib` when it would enable/export telemetry rather than local debug views
+  - `WorkspaceRecorderFeature`
+  - `ChatQuotaContribution`
+  - `SurveyCommandContribution`
+  - `FeedbackCommandContribution`
+  - `WalkthroughCommandContribution` entries that require Copilot signup
+  - `GitHubMcpContrib`
   - `RemoteAgentContribution`
   - cloud session providers
   - GitHub review agent commands/providers
@@ -1630,6 +1711,7 @@ Tests:
 Acceptance:
 
 - Standalone mode does not unexpectedly open GitHub sign-in for cloud-only features.
+- Optional post-MVP safety: a standalone-only CAPI throw-stub can be enabled after the BYOK path works to catch any remaining unexpected cloud callers.
 
 ### Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
 
@@ -1649,6 +1731,7 @@ Primary files:
 Implementation tasks:
 
 - Add standalone context key, for example `github.copilot.chat.standalone`.
+- Verify the early identity split remains intact: `Reea.Srl.reea-copilot` / `Reea Copilot Chat`.
 - In standalone mode:
   - missing Copilot auth should not set visible disabled/expired/subscription failure states.
   - quota exceeded and subscription prompts should be suppressed.
@@ -1664,10 +1747,12 @@ Tests:
 - Missing token does not set subscription-disabled views welcome in standalone.
 - CustomOAI contribution is available for intended product channel.
 - Cloud-only menus are hidden in standalone context.
+- Package activation still occurs when opening chat/model picker after any future activation-event cleanup.
 
 Acceptance:
 
 - A standalone user sees a local/BYOK chat path, not a broken Copilot sign-in funnel.
+- OpenAI-compatible local gateways are available in the intended internal distribution channel.
 
 ### Phase 11: Telemetry and Experiment Defaults
 
@@ -1695,16 +1780,20 @@ Implementation tasks:
 - In standalone mode, use explicit config/defaults.
 - Avoid reading Copilot token fields for behavior decisions in standalone.
 - Telemetry events may remain no-op/null depending on existing service, but must not require token-derived SKU/org/quota data.
+- Force no-op or in-memory OTel in standalone mode and avoid loading OTLP exporter packages.
 
 Tests:
 
 - Standalone default model does not depend on `chat.defaultLanguageModel` experiment.
 - Missing token fields do not disable tool calling or model picker.
 - Telemetry code paths do not throw when Copilot token is undefined.
+- Standalone mode does not dynamically import OTLP exporters.
+- Standalone startup does not emit telemetry or experimentation network requests.
 
 Acceptance:
 
 - Standalone behavior is deterministic from local config.
+- Standalone mode has no startup traffic to Microsoft/GitHub/CDN telemetry or cloud endpoints.
 
 ### Phase 12: Deferred Embeddings and Local Semantic Index
 
