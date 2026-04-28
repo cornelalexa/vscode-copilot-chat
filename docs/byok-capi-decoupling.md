@@ -1161,6 +1161,33 @@ Implementation implication:
 
 The goal of this plan is to make coding work mostly mechanical: add tests, make the smallest implementation changes, and verify local behavior at each seam.
 
+## Progress Tracker
+
+Use this checklist as the implementation ledger. Mark items as `[x]` only after the phase acceptance criteria are met and the relevant tests pass.
+
+- [ ] Phase 0: Test Harness and Characterization
+- [ ] Phase 1: Provider Mode Configuration
+- [ ] Phase 2: BYOK Registration Without Copilot Auth
+- [ ] Phase 3: Conversation Activation Policy
+- [ ] Phase 4: Model Registry and Endpoint Role Resolution
+- [ ] Phase 5: OpenAI-Compatible Transport Token Bypass
+- [ ] Phase 6: Language Model Access and Embeddings Exposure
+- [ ] Phase 7: Local Tool and Helper Flow Preservation
+- [ ] Phase 8: Search Fallbacks Without Embeddings
+- [ ] Phase 9: Cloud/Auth-Only Feature Gating
+- [ ] Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
+- [ ] Phase 11: Telemetry and Experiment Defaults
+- [ ] Phase 12: Deferred Embeddings and Local Semantic Index
+- [ ] Phase 13: End-to-End Verification
+
+Per-phase completion rule:
+
+- [ ] Tests for the phase are written or updated first.
+- [ ] Implementation is complete with the smallest practical code change.
+- [ ] Focused tests for the phase pass.
+- [ ] Relevant broader checks pass or are documented as intentionally deferred.
+- [ ] Any new blocker or scope change is reflected back into this document.
+
 ### Phase 0: Test Harness and Characterization
 
 Purpose:
