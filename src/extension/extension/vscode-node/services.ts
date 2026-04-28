@@ -282,13 +282,13 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	// OTel service — resolve config from env + settings, create appropriate impl
 	const otelSettings = workspace.getConfiguration('github.copilot.chat.otel');
 	const otelConfig = resolveOTelConfig({
-		env: process.env,
+		env: isStandaloneMode ? {} : process.env,
 		settingEnabled: isStandaloneMode ? false : otelSettings.get<boolean>('enabled'),
 		settingExporterType: otelSettings.get<'otlp-grpc' | 'otlp-http' | 'console' | 'file'>('exporterType'),
 		settingOtlpEndpoint: otelSettings.get<string>('otlpEndpoint'),
-		settingCaptureContent: otelSettings.get<boolean>('captureContent'),
+		settingCaptureContent: isStandaloneMode ? false : otelSettings.get<boolean>('captureContent'),
 		settingOutfile: otelSettings.get<string>('outfile') || undefined,
-		settingDbSpanExporter: otelSettings.get<boolean>('dbSpanExporter.enabled'),
+		settingDbSpanExporter: isStandaloneMode ? false : otelSettings.get<boolean>('dbSpanExporter.enabled'),
 		extensionVersion: extensionContext.extension.packageJSON.version ?? '0.0.0',
 		sessionId: env.sessionId,
 	});

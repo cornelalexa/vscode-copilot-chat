@@ -22,6 +22,19 @@ describe('resolveOTelConfig', () => {
 		expect(config.enabled).toBe(false);
 	});
 
+	it('can be hard-disabled by passing standalone-safe empty env and false settings', () => {
+		const config = resolveOTelConfig(makeInput({
+			env: {},
+			settingEnabled: false,
+			settingCaptureContent: false,
+			settingDbSpanExporter: false,
+		}));
+
+		expect(config.enabled).toBe(false);
+		expect(config.captureContent).toBe(false);
+		expect(config.dbSpanExporter).toBe(false);
+	});
+
 	it('enables when COPILOT_OTEL_ENABLED=true', () => {
 		const config = resolveOTelConfig(makeInput({
 			env: { 'COPILOT_OTEL_ENABLED': 'true' },

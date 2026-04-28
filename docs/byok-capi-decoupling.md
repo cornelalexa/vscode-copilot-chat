@@ -1217,8 +1217,8 @@ Use this checklist as the implementation ledger. Mark items as `[x]` only after 
 - [x] Phase 8: Search Fallbacks Without Embeddings
 - [x] Phase 9: Cloud/Auth-Only Feature Gating
 - [x] Phase 10: Context Keys, Menus, Walkthroughs, and Package Surface
-- [ ] Phase 10A: Stable VS Code Proposed API Audit
-- [ ] Phase 11: Telemetry and Experiment Defaults
+- [ ] Phase 10A: Stable VS Code Proposed API Audit (partial; obsolete proposal version suffixes removed)
+- [x] Phase 11: Telemetry and Experiment Defaults
 - [ ] Phase 12: Deferred Embeddings and Local Semantic Index
 - [ ] Phase 13: End-to-End Verification
 
@@ -1787,7 +1787,30 @@ Primary files:
 
 Implementation tasks:
 
-- Inventory `enabledApiProposals` in `package.json`.
+- [x] Inventory `enabledApiProposals` in `package.json`.
+- [x] Normalize obsolete versioned proposal declarations that current Insiders reports as non-existent:
+  - `chatDebug@4` -> `chatDebug`
+  - `chatHooks@6` -> `chatHooks`
+  - `languageModelToolSupportsModel@1` -> `languageModelToolSupportsModel`
+  - `findFiles2@2` -> `findFiles2`
+  - `chatParticipantAdditions@3` -> `chatParticipantAdditions`
+  - `defaultChatParticipant@4` -> `defaultChatParticipant`
+  - `aiTextSearchProvider@2` -> `aiTextSearchProvider`
+  - `chatParticipantPrivate@15` -> `chatParticipantPrivate`
+  - `chatProvider@4` -> `chatProvider`
+  - `chatSessionsProvider@3` -> `chatSessionsProvider`
+- [x] Remove clearly deferred/disabled proposal declarations from this fork's `package.json`:
+  - `agentSessionsWorkspace` - cloud/agent-session workspace surface is out of MVP scope.
+  - `newSymbolNamesProvider` - rename-symbol suggestions are disabled/deferred.
+  - `codeActionAI` - AI code-action integration is not required for standalone chat/agent MVP.
+  - `embeddings` - Copilot embeddings are disabled; provider-neutral embeddings are Phase 12.
+  - `aiSettingsSearch` - semantic settings search is skipped in standalone mode.
+  - `testObserver` - setup/fix-test agent surfaces are disabled in standalone contribution list.
+  - `aiTextSearchProvider` - semantic AI text search provider is skipped until embeddings exist.
+  - `contribDebugCreateConfiguration` - debug create-configuration AI surface is not MVP.
+  - `inlineCompletionsAdditions` - inline completions/NES are explicitly out of MVP scope.
+  - `chatSessionsProvider` - Copilot cloud sessions are disabled.
+  - `chatSessionCustomizationProvider` - chat session customization is tied to disabled session surfaces.
 - For each proposal, classify it as:
   - required for MVP chat/agent/BYOK operation
   - required only for disabled/deferred features
@@ -1802,9 +1825,42 @@ Implementation tasks:
 
 Tests/checks:
 
-- `npm exec vsce -- ls --tree 0` still passes.
-- Extension-host tests still pass after proposal pruning.
+- [x] `npm exec vsce -- ls --tree 0` still passes.
+- [x] Extension-host tests still pass after proposal metadata normalization.
+- [x] VSIX packaging succeeds for local validation with a specific `vsce` false-positive allowance for `sendgrid` secret scanning.
+- [x] VSIX installation into the available VS Code Stable remote CLI succeeds.
 - Manual launch against target Stable build verifies activation without proposed API rejection.
+
+Current audit finding:
+
+- The previous “proposal does not exist” warnings for this fork are gone after normalizing the versioned names above.
+- The extension-host runner still reports an upstream/product metadata delta for `languageModelPricing` and `chatInputNotification`, but those strings are not present in this fork's `package.json` or `src` tree. That warning is from the bundled `github.copilot-chat` product metadata path in the Insiders test host, not from `reea-srl.reea-copilot` package declarations.
+- Proposal count was reduced from 60 to 49 after removing the obvious non-MVP/deferred entries above.
+- Local VSIX install check passed against the available Stable `code` remote CLI (`1.117.0`), but this only proves install acceptance. It does not prove activation because the remote CLI ignored `--user-data-dir` and `--extensions-dir`, so a safe isolated launch/activation check could not be completed from this shell. The accidental install was immediately uninstalled.
+
+Why this phase remains open:
+
+- Passing extension-host tests on Insiders does not prove that a packaged VSIX will activate on regular VS Code Stable. Insiders/dev-mode can allow extra proposed APIs that Stable rejects.
+- This fork still declares many `enabledApiProposals`. Some are likely required for MVP functionality, for example chat participants, language models, tool calling, MCP, prompt files, and mapped edits. Others may be tied only to features we disabled or deferred, for example chat sessions, semantic text search, embeddings, inline completions/NES, debug/telemetry surfaces, and cloud sessions.
+- Removing a proposal from `package.json` without removing or guarding the matching contribution/API usage can break activation or runtime behavior. Each proposal needs a source-level owner before removal.
+- Keeping proposals may be acceptable only if the internal distribution uses a VS Code product override/Code-OSS distribution that grants those proposals to `reea-srl.reea-copilot`. If the target is unmodified Stable VS Code, every remaining proposed API must either be finalized in that Stable version or removed from the active code path.
+- The current work only fixed stale proposal names. It did not yet prove which remaining proposals are essential versus removable.
+
+Concrete remaining audit work:
+
+- Build a table of every remaining `enabledApiProposals` entry with:
+  - source files/API calls that require it
+  - MVP status: required, optional, deferred/disabled, or unknown
+  - Stable status: finalized, still proposed, renamed, or unavailable in the target Stable version
+  - action: keep with product override, remove, guard behind standalone-disabled feature, or replace with stable API
+- Run a manual VSIX install/activation test against the intended Stable VS Code build, not only the Insiders extension-host runner.
+- Decide the distribution policy: unmodified Stable VS Code, Code-OSS/product override, or Insiders/dev-channel only.
+
+Remaining proposal groups to classify next:
+
+- Likely MVP-critical: `chatProvider`, `chatParticipantPrivate`, `chatParticipantAdditions`, `defaultChatParticipant`, `languageModelSystem`, `languageModelCapabilities`, `languageModelThinkingPart`, `languageModelToolSupportsModel`, `contribLanguageModelToolSets`, `mcpServerDefinitions`, `chatPromptFiles`, `mappedEditsProvider`, `findFiles2`, `findTextInFiles`, `findTextInFiles2`, `textSearchProvider`, `textSearchProvider2`.
+- Likely local-tool/terminal-related: `terminalDataWriteEvent`, `terminalExecuteCommandEvent`, `terminalSelection`, `terminalQuickFixProvider`, `taskExecutionTerminal`, `terminalTitle`, `taskProblemMatcherStatus`.
+- Needs source-owner verification: `chatDebug`, `chatHooks`, `extensionsAny`, `interactive`, `activeComment`, `commentReveal`, comment/menu contribution proposals, `documentFiltersExclusive`, `aiRelatedInformation`, `contribSourceControlInputBoxMenu`, `authLearnMore`, `chatReferenceDiagnostic`, `chatReferenceBinaryData`, `chatStatusItem`, `textDocumentChangeReason`, `resolvers`, `dataChannels`, `devDeviceId`, `contribEditorContentMenu`, `tabInputMultiDiff`, `workspaceTrust`, `environmentPower`, `toolInvocationApproveCombination`.
 
 Acceptance:
 
@@ -1828,29 +1884,35 @@ Primary files:
 Implementation tasks:
 
 - [x] Keep `IExperimentationService` injected for existing code.
-- Add standalone-safe wrappers for behavior decisions that currently read experiments:
+- [x] Add standalone-safe wrappers for behavior decisions that currently read experiments:
   - default language model
   - prompt variants
   - tool search behavior
   - semantic search behavior
   - provider-specific feature toggles
 - [x] In standalone mode, use explicit config/defaults.
-- Avoid reading Copilot token fields for behavior decisions in standalone.
+- [x] Avoid reading Copilot token fields for behavior decisions in standalone.
 - [x] Telemetry events may remain no-op/null depending on existing service, but must not require token-derived SKU/org/quota data.
 - [x] Force no-op or in-memory OTel in standalone mode and avoid loading OTLP exporter packages.
 
 Tests:
 
-- Standalone default model does not depend on `chat.defaultLanguageModel` experiment.
-- Missing token fields do not disable tool calling or model picker.
-- Telemetry code paths do not throw when Copilot token is undefined.
-- Standalone mode does not dynamically import OTLP exporters.
+- [x] Standalone default model does not depend on `chat.defaultLanguageModel` experiment.
+- [x] Missing token fields do not disable tool calling or model picker.
+- [x] Telemetry code paths do not throw when Copilot token is undefined.
+- [x] Standalone mode does not dynamically import OTLP exporters.
 - [x] Standalone startup does not emit fetcher telemetry or OTel activation network requests.
 
 Acceptance:
 
-- Standalone behavior is deterministic from local config.
-- Standalone mode has no startup traffic to Microsoft/GitHub/CDN telemetry or cloud endpoints.
+- [x] Standalone behavior is deterministic from local config.
+- [x] Standalone mode hard-disables OTel inputs from env vars, settings, capture-content settings, and DB span exporter settings.
+- [x] Standalone mode has no startup traffic to Microsoft/GitHub/CDN telemetry or cloud endpoints from the gated telemetry/OTel contribution paths.
+
+Phase 11 validation note:
+
+- Code-level telemetry/experimentation paths are now deterministic for standalone mode: null telemetry/experimentation services are registered, OTel is resolved from an empty env and false settings, and fetcher telemetry/OTel contributions are gated.
+- Full network-level confirmation remains part of Phase 13 because it requires a real extension launch/profile with traffic observation.
 
 ### Phase 12: Deferred Embeddings and Local Semantic Index
 
