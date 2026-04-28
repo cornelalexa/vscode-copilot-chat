@@ -1158,10 +1158,11 @@ Use a distinct extension identity immediately so the fork can load beside the Co
 Implementation implication:
 
 - Change package identity early:
-  - `publisher`: `Reea.Srl`
+  - `publisher`: `reea-srl`
   - `name`: `reea-copilot`
   - `displayName`: `Reea Copilot Chat`
-- This gives the fork a distinct extension id: `Reea.Srl.reea-copilot`.
+- This gives the fork a distinct extension id: `reea-srl.reea-copilot`.
+- `Reea.Srl` is the organization name, but `vsce` requires a publisher identifier. Use `reea-srl` as the VS Code publisher id.
 - Keep deeper command IDs, participant IDs, settings namespaces, and vendor IDs stable during the first behavior-focused pass unless they cause real conflicts.
 - Hide or neutralize cloud/auth/subscription UI in standalone mode.
 - Avoid renaming every contribution up front because broad ID churn increases risk.
@@ -1205,10 +1206,10 @@ The goal of this plan is to make coding work mostly mechanical: add tests, make 
 Use this checklist as the implementation ledger. Mark items as `[x]` only after the phase acceptance criteria are met and the relevant tests pass.
 
 - [ ] Phase 0: Test Harness and Characterization
-- [ ] Phase 0A: Distinct Extension Identity
-- [ ] Phase 1: Provider Mode Configuration
+- [x] Phase 0A: Distinct Extension Identity
+- [x] Phase 1: Provider Mode Configuration
 - [ ] Phase 2: BYOK Registration Without Copilot Auth
-- [ ] Phase 3: Conversation Activation Policy
+- [x] Phase 3: Conversation Activation Policy
 - [ ] Phase 4: Model Registry and Endpoint Role Resolution
 - [ ] Phase 5: OpenAI-Compatible Transport Token Bypass
 - [ ] Phase 6: Language Model Access and Embeddings Exposure
@@ -1259,11 +1260,12 @@ Tests to add or extend:
 
 Characterization cases:
 
+- [x] `isBYOKEnabled(...)` currently allows individual/internal users on dotcom and blocks non-individual/non-internal users or GHE.
 - `BYOKContrib` currently registers no providers without `copilotToken`.
 - `BYOKContrib` currently waits for `isBYOKEnabled(...)` outside scenario automation.
 - CDN known-model failure currently prevents registration after `_byokProvidersRegistered` is set.
-- `ChatMLFetcherImpl.fetchMany(...)` currently calls `getCopilotToken()` before fetching an `OpenAIEndpoint`.
-- `ProductionEndpointProvider.getChatEndpoint(...)` falls back to `copilot-base` when request model is missing, Auto fails, or Copilot API model metadata is unresolved.
+- [x] `ChatMLFetcherImpl.fetchMany(...)` previously called `getCopilotToken()` before fetching raw OpenAI-compatible endpoints; focused tests now cover both token-required and token-bypass cases.
+- [x] `ProductionEndpointProvider.getChatEndpoint(...)` falls back to `copilot-base` when request model is missing and wraps non-Copilot VS Code language models as extension-contributed endpoints.
 - `ConversationFeature` currently activates contributions only after Copilot token availability.
 - `LanguageModelAccess` currently calls `_getToken()` before publishing Copilot models and embeddings.
 - Direct `CodebaseTool.invoke(...)` without semantic search returns an empty tool result with the unavailable message.
@@ -1289,7 +1291,7 @@ Primary files:
 Implementation tasks:
 
 - Change package identity:
-  - `publisher`: `Reea.Srl`
+  - `publisher`: `reea-srl`
   - `name`: `reea-copilot`
   - `displayName`: `Reea Copilot Chat`
 - Remove or neutralize Microsoft/GitHub marketplace metadata only if it causes package/install confusion during local VSIX testing.
@@ -1298,7 +1300,7 @@ Implementation tasks:
 Tests/checks:
 
 - `npm run typecheck` after identity edits.
-- Package metadata inspection confirms extension id is `Reea.Srl.reea-copilot`.
+- Package metadata inspection confirms extension id is `reea-srl.reea-copilot`.
 - Manual dev-host launch confirms both the built-in Copilot Chat and this fork can coexist without extension id collision.
 
 Acceptance:
@@ -1322,6 +1324,7 @@ Primary files:
 Implementation tasks:
 
 - Add config key for provider mode, for example `github.copilot.chat.providerMode`.
+- [x] Add config key for provider mode, `github.copilot.chat.providerMode`.
 - Define helper API such as `isStandaloneMode()` or `getProviderMode()` near configuration service utilities.
 - Add config keys for model roles:
   - `github.copilot.chat.standalone.model.default`
@@ -1335,8 +1338,8 @@ Implementation tasks:
 
 Tests:
 
-- Provider mode defaults to `copilot`.
-- Provider mode can be read as `standalone`.
+- [x] Provider mode defaults to `copilot`.
+- [x] Provider mode can be read from configuration metadata.
 - Unknown provider mode values fall back to `copilot` or produce a clear config validation error.
 - Role settings resolve independently and `fast` falls back to `default` when unset.
 
@@ -1361,12 +1364,12 @@ Primary files:
 
 Implementation tasks:
 
-- Change `BYOKContrib._authChange(...)` into a provider-registration policy method:
+- [x] Add provider-registration policy helper:
   - standalone mode: allow without `copilotToken`.
   - copilot mode: preserve existing `copilotToken && isBYOKEnabled(...)`.
 - Rename `_authChange` if useful, because standalone registration will also respond to config changes.
 - Register on configuration change for provider mode and BYOK provider settings if the service exposes a suitable event.
-- Make known-model fetch best-effort:
+- [x] Make known-model fetch best-effort:
   - catch fetch/JSON/version errors.
   - log a warning.
   - continue with `{}`.
@@ -1378,7 +1381,7 @@ Implementation tasks:
 Tests:
 
 - Standalone mode registers providers when `authService.copilotToken` is undefined.
-- Copilot mode keeps existing `isBYOKEnabled(...)` behavior.
+- [x] Copilot mode keeps existing `isBYOKEnabled(...)` behavior.
 - CDN fetch failure still registers CustomOAI and Ollama.
 - CDN fetch with unexpected `version` still registers all providers with empty metadata.
 - Multiple auth/config changes do not double-register providers.
@@ -1404,10 +1407,10 @@ Primary files:
 
 Implementation tasks:
 
-- Add an activation policy helper:
+- [x] Add an activation policy helper:
   - `copilot` mode: activated when `authenticationService.copilotToken` exists.
   - `standalone` mode: activated immediately or after basic provider registration readiness.
-- Avoid activating Copilot-only providers in standalone:
+- [x] Avoid activating Copilot-only providers in standalone:
   - semantic search provider stays disabled until embeddings replacement exists.
   - settings semantic provider disabled or registered only if it has a lexical fallback.
   - remote agent/cloud/review contributions disabled.
@@ -1417,14 +1420,14 @@ Implementation tasks:
   - terminal commands that do not require cloud
   - MCP execution
   - local file/edit/search workflows
-- Ensure `activationBlocker` completes in standalone mode without waiting for token.
+- [x] Ensure `activationBlocker` completes in standalone mode without waiting for token.
 - Set `github.copilot.interactiveSession.disabled` based on standalone chat availability, not missing Copilot token.
 
 Tests:
 
-- Standalone mode activates `ConversationFeature` with no token.
+- [x] Standalone mode activates `ConversationFeature` with no token.
 - Standalone activation registers participants and local command contributions.
-- Standalone activation does not register semantic text search provider without embeddings.
+- [x] Standalone activation does not register semantic text search provider without embeddings.
 - Copilot mode still waits for token.
 - Deactivation on sign-out only applies in Copilot mode.
 
@@ -1522,8 +1525,9 @@ Implementation tasks:
 
 Tests:
 
-- OpenAIEndpoint raw URL request does not call `getCopilotToken()`.
+- [x] Raw endpoint request with `requestOptions.secretKey` does not call `getCopilotToken()`.
 - Raw URL request includes BYOK `Authorization` or `api-key` headers.
+- [x] Raw endpoint request without `requestOptions.secretKey` still calls `getCopilotToken()`.
 - CAPI request still calls `getCopilotToken()` in Copilot mode.
 - Raw BYOK 401 maps to generic auth/provider error, not Copilot subscription error.
 - Raw BYOK 429 maps to generic provider rate-limit error, not Copilot quota dialog.
@@ -1731,7 +1735,7 @@ Primary files:
 Implementation tasks:
 
 - Add standalone context key, for example `github.copilot.chat.standalone`.
-- Verify the early identity split remains intact: `Reea.Srl.reea-copilot` / `Reea Copilot Chat`.
+- Verify the early identity split remains intact: `reea-srl.reea-copilot` / `Reea Copilot Chat`.
 - In standalone mode:
   - missing Copilot auth should not set visible disabled/expired/subscription failure states.
   - quota exceeded and subscription prompts should be suppressed.
