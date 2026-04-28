@@ -1211,7 +1211,7 @@ Use this checklist as the implementation ledger. Mark items as `[x]` only after 
 - [x] Phase 2: BYOK Registration Without Copilot Auth
 - [x] Phase 3: Conversation Activation Policy
 - [x] Phase 4: Model Registry and Endpoint Role Resolution
-- [ ] Phase 5: OpenAI-Compatible Transport Token Bypass (partial; token bypass covered, provider error mapping remains)
+- [x] Phase 5: OpenAI-Compatible Transport Token Bypass
 - [x] Phase 6: Language Model Access and Embeddings Exposure
 - [ ] Phase 7: Local Tool and Helper Flow Preservation
 - [ ] Phase 8: Search Fallbacks Without Embeddings
@@ -1536,17 +1536,17 @@ Implementation tasks:
 Tests:
 
 - [x] Raw endpoint request with `requestOptions.secretKey` does not call `getCopilotToken()`.
-- Raw URL request includes BYOK `Authorization` or `api-key` headers.
+- [x] Raw URL request includes BYOK `Authorization` or `api-key` headers.
 - [x] Raw endpoint request without `requestOptions.secretKey` still calls `getCopilotToken()`.
-- CAPI request still calls `getCopilotToken()` in Copilot mode.
-- Raw BYOK 401 maps to generic auth/provider error, not Copilot subscription error.
-- Raw BYOK 429 maps to generic provider rate-limit error, not Copilot quota dialog.
-- Existing Copilot fetcher tests continue to pass.
+- [x] CAPI request still calls `getCopilotToken()` in Copilot mode.
+- [x] Raw BYOK 401 maps to generic auth/provider error, not Copilot subscription error.
+- [x] Raw BYOK 429 maps to generic provider rate-limit error, not Copilot quota dialog.
+- [x] Existing Copilot fetcher tests continue to pass.
 
 Acceptance:
 
-- CustomOAI/OpenAI/Ollama/xAI/OpenRouter/Azure API-key mode can stream responses without GitHub auth.
-- Native Anthropic/Gemini continue to work through their SDK provider path.
+- [x] CustomOAI/OpenAI/Ollama/xAI/OpenRouter/Azure API-key mode can stream responses without GitHub auth.
+- [x] Native Anthropic/Gemini continue to work through their SDK provider path.
 
 ### Phase 6: Language Model Access and Embeddings Exposure
 

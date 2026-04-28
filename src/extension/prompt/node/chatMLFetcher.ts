@@ -212,7 +212,8 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 					reason: payloadValidationResult.reason,
 				};
 			} else {
-				const copilotToken = shouldBypassCopilotTokenForRawEndpoint(chatEndpoint, requestOptions.secretKey)
+				const isRawProviderEndpoint = shouldBypassCopilotTokenForRawEndpoint(chatEndpoint, requestOptions.secretKey);
+				const copilotToken = isRawProviderEndpoint
 					? { token: '', username: '' } as CopilotToken
 					: await this._authenticationService.getCopilotToken();
 				usernameToScrub = copilotToken.username;
@@ -235,6 +236,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 					opts.useFetcher,
 					canRetryOnce,
 					requestKindOptions,
+					isRawProviderEndpoint,
 				);
 				response = fetchResult.result;
 				actualFetcher = fetchResult.fetcher;
@@ -845,6 +847,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 		useFetcher?: FetcherId,
 		canRetryOnce?: boolean,
 		requestKindOptions?: IBackgroundRequestOptions | ISubagentRequestOptions,
+		isRawProviderEndpoint = false,
 	): Promise<{ result: ChatResults | ChatRequestFailed | ChatRequestCanceled; fetcher?: FetcherId; bytesReceived?: number; statusCode?: number; suspendEventSeen?: boolean; resumeEventSeen?: boolean; otelSpan?: ISpanHandle }> {
 		const isPowerSaveBlockerEnabled = this._configurationService.getExperimentBasedConfig(ConfigKey.TeamInternal.ChatRequestPowerSaveBlocker, this._experimentationService);
 		const blockerHandle = isPowerSaveBlockerEnabled && location !== ChatLocation.Other ? this._powerService.acquirePowerSaveBlocker() : undefined;
@@ -882,6 +885,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 				useFetcher,
 				canRetryOnce,
 				requestKindOptions,
+				isRawProviderEndpoint,
 			);
 			return { ...fetchResult, suspendEventSeen: suspendEventSeen || undefined, resumeEventSeen: resumeEventSeen || undefined };
 		} catch (err) {
@@ -918,6 +922,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 		useFetcher?: FetcherId,
 		canRetryOnce?: boolean,
 		requestKindOptions?: IBackgroundRequestOptions | ISubagentRequestOptions,
+		isRawProviderEndpoint = false,
 	): Promise<{ result: ChatResults | ChatRequestFailed | ChatRequestCanceled; fetcher?: FetcherId; bytesReceived?: number; statusCode?: number; otelSpan?: ISpanHandle }> {
 
 		if (cancellationToken.isCancellationRequested) {
@@ -1008,6 +1013,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 				useFetcher,
 				canRetryOnce,
 				requestKindOptions,
+				isRawProviderEndpoint,
 			);
 			return { ...httpResult, otelSpan };
 
@@ -1223,6 +1229,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 		useFetcher: FetcherId | undefined,
 		canRetryOnce: boolean | undefined,
 		requestKindOptions: IBackgroundRequestOptions | ISubagentRequestOptions | undefined,
+		isRawProviderEndpoint = false,
 	): Promise<{ result: ChatResults | ChatRequestFailed | ChatRequestCanceled; fetcher?: FetcherId; bytesReceived?: number; statusCode?: number }> {
 		// Generate unique ID to link input and output messages
 		const modelCallId = generateUuid();
@@ -1265,7 +1272,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 			const telemetryData = createTelemetryData(chatEndpointInfo, location, ourRequestId);
 			this._logService.info('Request ID for failed request: ' + ourRequestId);
 			return {
-				result: await this._handleError(telemetryData, response, ourRequestId),
+				result: await this._handleError(telemetryData, response, ourRequestId, isRawProviderEndpoint),
 				fetcher: response.fetcher,
 				bytesReceived: response.bytesReceived,
 				statusCode: response.status
@@ -1457,7 +1464,8 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 	private async _handleError(
 		telemetryData: TelemetryData,
 		response: Response,
-		requestId: string
+		requestId: string,
+		isRawProviderEndpoint = false,
 	): Promise<ChatRequestFailed> {
 		const modelRequestIdObj = getRequestId(response.headers);
 		requestId = modelRequestIdObj.headerRequestId || requestId;
@@ -1479,6 +1487,10 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 		const reasonNoText = `Server error: ${response.status}`;
 		const reason = `${reasonNoText} ${text}`;
 		this._logService.error(reason);
+
+		if (isRawProviderEndpoint) {
+			return this._handleRawProviderError(response, modelRequestIdObj, text, jsonData);
+		}
 
 		if (400 <= response.status && response.status < 500) {
 
@@ -1689,6 +1701,45 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 			modelRequestId: modelRequestIdObj,
 			failKind: ChatFailKind.Unknown,
 			reason: `Request Failed: ${response.status} ${text}`
+		};
+	}
+
+	private _handleRawProviderError(
+		response: Response,
+		modelRequestIdObj: RequestId,
+		text: string,
+		jsonData: Record<string, any> | undefined,
+	): ChatRequestFailed {
+		const providerMessage = jsonData?.message || text || response.statusText || `HTTP ${response.status}`;
+		const providerReason = `Provider request failed: ${response.status} ${providerMessage}`;
+
+		if (response.status === 429) {
+			return {
+				type: FetchResponseKind.Failed,
+				modelRequestId: modelRequestIdObj,
+				failKind: ChatFailKind.RateLimited,
+				reason: providerReason,
+				data: {
+					retryAfter: response.headers.get('retry-after'),
+					rateLimitKey: response.headers.get('x-ratelimit-exceeded'),
+				}
+			};
+		}
+
+		if (500 <= response.status && response.status < 600) {
+			return {
+				type: FetchResponseKind.Failed,
+				modelRequestId: modelRequestIdObj,
+				failKind: ChatFailKind.ServerError,
+				reason: providerReason,
+			};
+		}
+
+		return {
+			type: FetchResponseKind.Failed,
+			modelRequestId: modelRequestIdObj,
+			failKind: ChatFailKind.Unknown,
+			reason: providerReason,
 		};
 	}
 

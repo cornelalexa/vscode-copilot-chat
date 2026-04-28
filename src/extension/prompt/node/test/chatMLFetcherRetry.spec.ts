@@ -19,7 +19,7 @@ import { MockAuthenticationService } from '../../../../platform/ignore/node/test
 import { MockCAPIClientService } from '../../../../platform/ignore/node/test/mockCAPIClientService';
 import { ElectronFetchErrorChromiumDetails, ILogService } from '../../../../platform/log/common/logService';
 import { FinishedCallback } from '../../../../platform/networking/common/fetch';
-import { IFetcherService, IHeaders, Response } from '../../../../platform/networking/common/fetcherService';
+import { FetchOptions, IFetcherService, IHeaders, Response } from '../../../../platform/networking/common/fetcherService';
 import { IChatEndpoint } from '../../../../platform/networking/common/networking';
 import { NullChatWebSocketManager } from '../../../../platform/networking/node/chatWebSocketManager';
 import { NoopOTelService } from '../../../../platform/otel/common/noopOtelService';
@@ -120,17 +120,66 @@ describe('ChatMLFetcherImpl retry logic', () => {
 
 	it('does not request a Copilot token when a raw endpoint already has a secret key', async () => {
 		mockFetcherService.queueResponse(createSuccessResponse('Hello!'));
-		endpoint = {
-			...endpoint,
-			url: 'https://example.test/v1/chat/completions',
-			urlOrRequestMetadata: 'https://example.test/v1/chat/completions',
-		} as IChatEndpoint;
+		endpoint = createRawEndpoint(endpoint);
 		const opts = createBaseOpts();
 		opts.requestOptions.secretKey = 'byok-api-key';
 
 		await fetcher.fetchMany(opts, cancellationTokenSource.token);
 
 		expect(authenticationService.getCopilotTokenCallCount).toBe(0);
+	});
+
+	it('sends raw provider request with BYOK authorization header', async () => {
+		mockFetcherService.queueResponse(createSuccessResponse('Hello!'));
+		endpoint = createRawEndpoint(endpoint);
+		const opts = createBaseOpts();
+		opts.requestOptions.secretKey = 'byok-api-key';
+
+		await fetcher.fetchMany(opts, cancellationTokenSource.token);
+
+		expect(mockFetcherService.fetchOptionsUsed[0]?.headers?.Authorization).toBe('Bearer byok-api-key');
+	});
+
+	it('maps raw provider 401 to generic failure without resetting Copilot token', async () => {
+		mockFetcherService.queueResponse(createErrorResponse(401, 'Invalid provider API key'));
+		endpoint = createRawEndpoint(endpoint);
+		const opts = createBaseOpts();
+		opts.requestOptions.secretKey = 'byok-api-key';
+
+		const result = await fetcher.fetchMany(opts, cancellationTokenSource.token);
+
+		expect(result.type).toBe(ChatFetchResponseType.Failed);
+		expect('reason' in result ? result.reason : '').toContain('Provider request failed: 401');
+		expect(authenticationService.getCopilotTokenCallCount).toBe(0);
+		expect(authenticationService.resetCopilotTokenCallCount).toBe(0);
+	});
+
+	it('maps raw provider 402 to generic failure instead of Copilot quota exceeded', async () => {
+		mockFetcherService.queueResponse(createErrorResponse(402, 'Provider billing required'));
+		endpoint = createRawEndpoint(endpoint);
+		const opts = createBaseOpts();
+		opts.requestOptions.secretKey = 'byok-api-key';
+
+		const result = await fetcher.fetchMany(opts, cancellationTokenSource.token);
+
+		expect(result.type).toBe(ChatFetchResponseType.Failed);
+		expect('reason' in result ? result.reason : '').toContain('Provider request failed: 402');
+		expect(authenticationService.getCopilotTokenCallCount).toBe(0);
+		expect(authenticationService.resetCopilotTokenCallCount).toBe(0);
+	});
+
+	it('maps raw provider 429 to generic rate limit without resetting Copilot token', async () => {
+		mockFetcherService.queueResponse(createErrorResponse(429, 'Provider rate limit'));
+		endpoint = createRawEndpoint(endpoint);
+		const opts = createBaseOpts();
+		opts.requestOptions.secretKey = 'byok-api-key';
+
+		const result = await fetcher.fetchMany(opts, cancellationTokenSource.token);
+
+		expect(result.type).toBe(ChatFetchResponseType.RateLimited);
+		expect('reason' in result ? result.reason : '').toContain('Provider rate limit');
+		expect(authenticationService.getCopilotTokenCallCount).toBe(0);
+		expect(authenticationService.resetCopilotTokenCallCount).toBe(0);
 	});
 
 	describe('server error retry with configured status codes', () => {
@@ -417,14 +466,20 @@ class MockFetcherService {
 	 * Used to verify that the retry logic correctly switches fetchers.
 	 */
 	private _fetcherIdsUsed: (string | undefined)[] = [];
+	private _fetchOptionsUsed: FetchOptions[] = [];
 
 	get fetcherIdsUsed(): (string | undefined)[] {
 		return this._fetcherIdsUsed;
 	}
 
-	async fetch(_url: string, options?: any): Promise<Response> {
+	get fetchOptionsUsed(): readonly FetchOptions[] {
+		return this._fetchOptionsUsed;
+	}
+
+	async fetch(_url: string, options: FetchOptions): Promise<Response> {
 		this._fetchCallCount++;
 		this._fetcherIdsUsed.push(options?.useFetcher);
+		this._fetchOptionsUsed.push(options);
 		const next = this._responseQueue.shift();
 		if (!next) {
 			throw new Error('No more queued responses');
@@ -478,6 +533,7 @@ class MockFetcherService {
  */
 class TestAuthenticationService extends MockAuthenticationService {
 	public getCopilotTokenCallCount = 0;
+	public resetCopilotTokenCallCount = 0;
 
 	override getCopilotToken(_force?: boolean): Promise<CopilotToken> {
 		this.getCopilotTokenCallCount++;
@@ -485,6 +541,10 @@ class TestAuthenticationService extends MockAuthenticationService {
 			token: 'test-token',
 			username: 'test-user',
 		} as CopilotToken);
+	}
+
+	override resetCopilotToken(_httpError?: number): void {
+		this.resetCopilotTokenCallCount++;
 	}
 }
 
@@ -566,6 +626,14 @@ function createMockEndpoint(): IChatEndpoint {
 			throw new Error('Not implemented');
 		},
 	} as unknown as IChatEndpoint;
+}
+
+function createRawEndpoint(endpoint: IChatEndpoint): IChatEndpoint {
+	return {
+		...endpoint,
+		url: 'https://example.test/v1/chat/completions',
+		urlOrRequestMetadata: 'https://example.test/v1/chat/completions',
+	} as IChatEndpoint;
 }
 
 function createMockChatQuotaService(): IChatQuotaService {
