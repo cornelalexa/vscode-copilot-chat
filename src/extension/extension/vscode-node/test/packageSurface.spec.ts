@@ -27,6 +27,11 @@ function collectObjects(value: unknown, predicate: (obj: Record<string, unknown>
 }
 
 describe('standalone package surface', () => {
+	it('contributes a command to select the standalone embeddings model', () => {
+		const commands = packageJson.contributes.commands as Array<{ command: string; title: string }>;
+		expect(commands.some(command => command.command === 'github.copilot.chat.standalone.selectEmbeddingsModel')).toBe(true);
+	});
+
 	it('hides Copilot sign-in and subscription welcome surfaces in standalone mode', () => {
 		const authWelcomeEntries = collectObjects(packageJson.contributes.chatViewsWelcome, obj => typeof obj.when === 'string' && /interactiveSession|offline|chatDisabled|switchToReleaseChannel/.test(obj.when));
 		const walkthroughEntries = collectObjects(packageJson.contributes.walkthroughs, obj => typeof obj.id === 'string' && /^copilot\.setup\.(signIn|signUp)/.test(obj.id));

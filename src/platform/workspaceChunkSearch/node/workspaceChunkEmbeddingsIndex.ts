@@ -19,6 +19,7 @@ import { IInstantiationService } from '../../../util/vs/platform/instantiation/c
 import { IAuthenticationService } from '../../authentication/common/authentication';
 import { FileChunk, FileChunkAndScore, FileChunkWithEmbedding, FileChunkWithOptionalEmbedding } from '../../chunking/common/chunk';
 import { ComputeBatchInfo, EmbeddingsComputeQos, IChunkingEndpointClient } from '../../chunking/common/chunkingEndpointClient';
+import { ConfigKey, IConfigurationService } from '../../configuration/common/configurationService';
 import { distance, Embedding, EmbeddingType, rankEmbeddings } from '../../embeddings/common/embeddingsComputer';
 import { IVSCodeExtensionContext } from '../../extContext/common/extensionContext';
 import { logExecTime } from '../../log/common/logExecTime';
@@ -64,6 +65,7 @@ export class WorkspaceChunkEmbeddingsIndex extends Disposable {
 		@ITelemetryService private readonly _telemetryService: ITelemetryService,
 		@IWorkspaceFileIndex private readonly _workspaceIndex: IWorkspaceFileIndex,
 		@IChunkingEndpointClient private readonly _chunkingEndpointClient: IChunkingEndpointClient,
+		@IConfigurationService private readonly _configurationService: IConfigurationService,
 	) {
 		super();
 
@@ -171,7 +173,7 @@ export class WorkspaceChunkEmbeddingsIndex extends Disposable {
 			return;
 		}
 
-		const authToken = (await this._authService.getGitHubSession('any', { silent: true }))?.accessToken;
+		const authToken = await this.tryGetAuthToken({ silent: true });
 		if (authToken) {
 			await this.getChunksAndEmbeddings(authToken, file, new ComputeBatchInfo(), EmbeddingsComputeQos.Batch, telemetryInfo.callTracker.add('WorkspaceChunkEmbeddingsIndex::triggerIndexingOfFile'), token);
 		}
@@ -351,9 +353,7 @@ export class WorkspaceChunkEmbeddingsIndex extends Disposable {
 
 		// Telemetry event name kept as 'getAllWorkspaceEmbeddings' for dashboard backward compatibility
 		return logExecTime(this._logService, 'WorkspaceChunkEmbeddingIndex.indexAllWorkspaceFiles', async () => {
-			const authToken = trigger === 'auto'
-				? (await this._authService.getGitHubSession('any', { silent: true }))?.accessToken
-				: (await this._authService.getGitHubSession('any', { createIfNone: { detail: l10n.t('Sign in to GitHub to index workspace files.') } }))?.accessToken;
+			const authToken = await this.tryGetAuthToken(trigger === 'auto' ? { silent: true } : undefined);
 			if (!authToken) {
 				throw new Error('Unable to get auth token');
 			}
@@ -506,7 +506,15 @@ export class WorkspaceChunkEmbeddingsIndex extends Disposable {
 		return this._chunkingEndpointClient.computeChunks(authToken, this._embeddingType, file, batchInfo, qos, cachedChunks, telemetryInfo, token);
 	}
 
-	private async tryGetAuthToken(): Promise<string | undefined> {
+	private async tryGetAuthToken(options?: { readonly silent: boolean }): Promise<string | undefined> {
+		if (this._configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+			return 'standalone';
+		}
+
+		if (options?.silent) {
+			return (await this._authService.getGitHubSession('any', { silent: true }))?.accessToken;
+		}
+
 		return (await this._authService.getGitHubSession('any', { createIfNone: { detail: l10n.t('Sign in to GitHub to index workspace files.') } }))?.accessToken;
 	}
 }

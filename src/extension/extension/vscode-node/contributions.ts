@@ -6,6 +6,7 @@
 import { PromptFileContribution } from '../../agents/vscode-node/promptFileContrib';
 import { AuthenticationContrib } from '../../authentication/vscode-node/authentication.contribution';
 import { BYOKContrib } from '../../byok/vscode-node/byokContribution';
+import { StandaloneEmbeddingsPickerContribution } from '../../byok/vscode-node/standaloneEmbeddingsPicker';
 import { ChatQuotaContribution } from '../../chat/vscode-node/chatQuota.contribution';
 import { ChatSessionContextContribution } from '../../chatSessionContext/vscode-node/chatSessionContextProvider';
 import { ChatSessionsContrib } from '../../chatSessions/vscode-node/chatSessions';
@@ -117,6 +118,7 @@ export const vscodeNodeChatContributions: IExtensionContributionFactory[] = [
 	asContributionFactory(FixTestFailureContribution),
 	asContributionFactory(IgnoredFileProviderContribution),
 	asContributionFactory(BYOKContrib),
+	asContributionFactory(StandaloneEmbeddingsPickerContribution),
 	asContributionFactory(McpSetupCommands),
 	asContributionFactory(LanguageModelProxyContrib),
 	asContributionFactory(PromptFileContribution),
@@ -131,6 +133,7 @@ export const vscodeNodeStandaloneChatContributions: IExtensionContributionFactor
 	asContributionFactory(AiMappedEditsContrib),
 	asContributionFactory(LogWorkspaceStateContribution),
 	asContributionFactory(BYOKContrib),
+	asContributionFactory(StandaloneEmbeddingsPickerContribution),
 	asContributionFactory(McpSetupCommands),
 	asContributionFactory(LanguageModelProxyContrib),
 	asContributionFactory(PromptFileContribution),

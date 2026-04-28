@@ -22,6 +22,7 @@ import { ISessionTranscriptService } from '../../../platform/chat/common/session
 import { NodeHookExecutor } from '../../../platform/chat/node/hookExecutor';
 import { IChunkingEndpointClient } from '../../../platform/chunking/common/chunkingEndpointClient';
 import { ChunkingEndpointClientImpl } from '../../../platform/chunking/common/chunkingEndpointClientImpl';
+import { LocalChunkingEndpointClient } from '../../../platform/chunking/node/localChunkingEndpointClient';
 import { INaiveChunkingService, NaiveChunkingService } from '../../../platform/chunking/node/naiveChunkerService';
 import { IDevContainerConfigurationService } from '../../../platform/devcontainer/common/devContainerConfigurationService';
 import { IDiffService } from '../../../platform/diff/common/diffService';
@@ -86,7 +87,7 @@ import { IWorkspaceMutationManager } from '../../../platform/testing/common/work
 import { ISetupTestsDetector, SetupTestsDetector } from '../../../platform/testing/node/setupTestDetector';
 import { ITestDepsResolver, TestDepsResolver } from '../../../platform/testing/node/testDepsResolver';
 import { ITokenizerProvider, TokenizerProvider } from '../../../platform/tokenizer/node/tokenizer';
-import { GithubAvailableEmbeddingTypesService, IGithubAvailableEmbeddingTypesService } from '../../../platform/workspaceChunkSearch/common/githubAvailableEmbeddingTypes';
+import { GithubAvailableEmbeddingTypesService, IGithubAvailableEmbeddingTypesService, StandaloneAvailableEmbeddingTypesService } from '../../../platform/workspaceChunkSearch/common/githubAvailableEmbeddingTypes';
 import { IRerankerService, RerankerService } from '../../../platform/workspaceChunkSearch/common/rerankerService';
 import { IWorkspaceChunkSearchService, WorkspaceChunkSearchService } from '../../../platform/workspaceChunkSearch/node/workspaceChunkSearchService';
 import { IWorkspaceFileIndex, WorkspaceFileIndex } from '../../../platform/workspaceChunkSearch/node/workspaceFileIndex';
@@ -215,7 +216,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(IIntentService, new SyncDescriptor(IntentService));
 	builder.define(INaiveChunkingService, new SyncDescriptor(NaiveChunkingService));
 	builder.define(IWorkspaceFileIndex, new SyncDescriptor(WorkspaceFileIndex));
-	builder.define(IChunkingEndpointClient, new SyncDescriptor(ChunkingEndpointClientImpl));
+	builder.define(IChunkingEndpointClient, isStandaloneMode ? new SyncDescriptor(LocalChunkingEndpointClient) : new SyncDescriptor(ChunkingEndpointClientImpl));
 	builder.define(ICommandService, new SyncDescriptor(CommandServiceImpl));
 	builder.define(IDocsSearchClient, new SyncDescriptor(DocsSearchClient));
 	builder.define(ISearchService, new SyncDescriptor(SearchServiceImpl));
@@ -261,7 +262,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(IWorkspaceListenerService, new SyncDescriptor(WorkspacListenerService));
 	builder.define(ICodeSearchAuthenticationService, new SyncDescriptor(VsCodeCodeSearchAuthenticationService));
 	builder.define(ITodoListContextProvider, new SyncDescriptor(TodoListContextProvider));
-	builder.define(IGithubAvailableEmbeddingTypesService, new SyncDescriptor(GithubAvailableEmbeddingTypesService));
+	builder.define(IGithubAvailableEmbeddingTypesService, isStandaloneMode ? new SyncDescriptor(StandaloneAvailableEmbeddingTypesService) : new SyncDescriptor(GithubAvailableEmbeddingTypesService));
 	builder.define(IRerankerService, new SyncDescriptor(RerankerService));
 	builder.define(IProxyModelsService, new SyncDescriptor(ProxyModelsService));
 	builder.define(IPowerService, new SyncDescriptor(PowerService));

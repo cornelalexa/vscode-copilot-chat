@@ -2112,6 +2112,11 @@
 		],
 		"commands": [
 			{
+				"command": "github.copilot.chat.standalone.selectEmbeddingsModel",
+				"title": "Select Standalone Embeddings Model",
+				"category": "Reea Copilot Chat"
+			},
+			{
 				"command": "github.copilot.chat.triggerPermissiveSignIn",
 				"title": "%github.copilot.command.triggerPermissiveSignIn%"
 			},
@@ -2909,7 +2914,13 @@
 					"github.copilot.chat.standalone.model.embeddings": {
 						"type": "string",
 						"default": "",
-						"markdownDescription": "Optional standalone embeddings model reference. Embeddings are deferred until a provider-neutral embeddings implementation is available."
+						"markdownDescription": "Optional standalone embeddings model reference in `vendor/model-id` format. Supported OpenAI-compatible providers include `openai/text-embedding-3-small`, `openrouter/openai/text-embedding-3-small`, and `customoai/local-embed`."
+					},
+					"github.copilot.chat.standalone.model.embeddingsDimensions": {
+						"type": "number",
+						"default": 0,
+						"minimum": 0,
+						"markdownDescription": "Optional dimensions value sent to OpenAI-compatible standalone embeddings endpoints. Use `0` to omit the dimensions field."
 					},
 					"github.copilot.chat.backgroundAgent.enabled": {
 						"type": "boolean",

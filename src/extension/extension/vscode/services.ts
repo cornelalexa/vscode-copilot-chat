@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, ExtensionMode, l10n } from 'vscode';
+import { ExtensionContext, ExtensionMode, l10n, workspace } from 'vscode';
 import { IAuthenticationChatUpgradeService } from '../../../platform/authentication/common/authenticationUpgrade';
 import { AuthenticationChatUpgradeService } from '../../../platform/authentication/common/authenticationUpgradeService';
 import { CopilotTokenStore, ICopilotTokenStore } from '../../../platform/authentication/common/copilotTokenStore';
@@ -26,6 +26,7 @@ import { DialogServiceImpl } from '../../../platform/dialog/vscode/dialogService
 import { EditSurvivalTrackerService, IEditSurvivalTrackerService } from '../../../platform/editSurvivalTracking/common/editSurvivalTrackerService';
 import { IEmbeddingsComputer } from '../../../platform/embeddings/common/embeddingsComputer';
 import { RemoteEmbeddingsComputer } from '../../../platform/embeddings/common/remoteEmbeddingsComputer';
+import { StandaloneEmbeddingsComputer } from '../../../platform/embeddings/common/standaloneEmbeddingsComputer';
 import { ICombinedEmbeddingIndex, VSCodeCombinedIndexImpl } from '../../../platform/embeddings/common/vscodeIndex';
 import { IEnvService, isScenarioAutomation } from '../../../platform/env/common/envService';
 import { EnvServiceImpl } from '../../../platform/env/vscode/envServiceImpl';
@@ -110,6 +111,7 @@ import { IToolGroupingCache, IToolGroupingService } from '../../tools/common/vir
 
 export function registerServices(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext): void {
 	const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
+	const isStandaloneMode = workspace.getConfiguration('github.copilot.chat').get<string>('providerMode') === 'standalone';
 
 	builder.define(IInteractionService, new SyncDescriptor(InteractionService));
 	builder.define(ICopilotTokenStore, new CopilotTokenStore());
@@ -167,7 +169,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(ISnippyService, new SyncDescriptor(SnippyService));
 	builder.define(IInteractiveSessionService, new InteractiveSessionServiceImpl());
 	builder.define(IAuthenticationChatUpgradeService, new SyncDescriptor(AuthenticationChatUpgradeService));
-	builder.define(IEmbeddingsComputer, new SyncDescriptor(RemoteEmbeddingsComputer));
+	builder.define(IEmbeddingsComputer, isStandaloneMode ? new SyncDescriptor(StandaloneEmbeddingsComputer) : new SyncDescriptor(RemoteEmbeddingsComputer));
 	builder.define(IToolGroupingService, new SyncDescriptor(ToolGroupingService));
 	builder.define(IToolEmbeddingsComputer, new SyncDescriptor(ToolEmbeddingsComputer));
 	builder.define(IToolGroupingCache, new SyncDescriptor(ToolGroupingCache));

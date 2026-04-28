@@ -431,10 +431,16 @@ export class CodeSearchChunkSearch extends Disposable {
 	}
 
 	private isCodeSearchEnabled() {
+		if (this._configService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+			return false;
+		}
 		return this._configService.getExperimentBasedConfig<boolean>(ConfigKey.Advanced.WorkspaceEnableCodeSearch, this._experimentationService);
 	}
 
 	public isExternalIngestEnabled(): boolean | 'force' {
+		if (this._configService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+			return false;
+		}
 		return this._configService.getExperimentBasedConfig<boolean>(ConfigKey.TeamInternal.WorkspaceEnableCodeSearchExternalIngest, this._experimentationService);
 	}
 
@@ -497,6 +503,9 @@ export class CodeSearchChunkSearch extends Disposable {
 
 	private didRunPrepare = false;
 	public async prepareSearchWorkspace(telemetryInfo: TelemetryCorrelationId, token: CancellationToken): Promise<undefined> {
+		if (this._configService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+			return;
+		}
 		if (this.didRunPrepare) {
 			return;
 		}
@@ -506,6 +515,10 @@ export class CodeSearchChunkSearch extends Disposable {
 	}
 
 	public async searchWorkspace(sizing: StrategySearchSizing, query: WorkspaceChunkQueryWithEmbeddings, options: WorkspaceChunkSearchOptions, telemetryInfo: TelemetryCorrelationId, token: CancellationToken): Promise<StrategySearchResult | undefined> {
+		if (this._configService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+			return this._embeddingsChunkSearch.searchWorkspace(sizing, query, options, telemetryInfo.addCaller('CodeSearchChunkSearch::standaloneLocalEmbeddings'), token);
+		}
+
 		if (!(await raceCancellationError(this.isAvailable(telemetryInfo, true, token), token))) {
 			return;
 		}

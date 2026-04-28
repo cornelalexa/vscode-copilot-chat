@@ -19,9 +19,11 @@ describe('configuration service settings', () => {
 		expect(ConfigKey.Advanced.StandaloneFastModel.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.fast');
 		expect(ConfigKey.Advanced.StandaloneReasoningModel.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.reasoning');
 		expect(ConfigKey.Advanced.StandaloneEmbeddingsModel.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.embeddings');
+		expect(ConfigKey.Advanced.StandaloneEmbeddingsDimensions.fullyQualifiedId).toBe('github.copilot.chat.standalone.model.embeddingsDimensions');
 		expect(ConfigKey.Advanced.StandaloneDefaultModel.defaultValue).toBe('');
 		expect(ConfigKey.Advanced.StandaloneFastModel.defaultValue).toBe('');
 		expect(ConfigKey.Advanced.StandaloneReasoningModel.defaultValue).toBe('');
 		expect(ConfigKey.Advanced.StandaloneEmbeddingsModel.defaultValue).toBe('');
+		expect(ConfigKey.Advanced.StandaloneEmbeddingsDimensions.defaultValue).toBe(0);
 	});
 });

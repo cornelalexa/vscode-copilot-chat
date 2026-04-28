@@ -21,6 +21,7 @@ import { ChatResponseProgressPart2, ChatResponseWarningPart } from '../../../vsc
 import { IAuthenticationService } from '../../authentication/common/authentication';
 import { FileChunk, FileChunkAndScore } from '../../chunking/common/chunk';
 import { MAX_CHUNK_SIZE_TOKENS } from '../../chunking/node/naiveChunker';
+import { ConfigKey, IConfigurationService } from '../../configuration/common/configurationService';
 import { distance, Embedding, EmbeddingDistance, Embeddings, EmbeddingType, IEmbeddingsComputer } from '../../embeddings/common/embeddingsComputer';
 import { IVSCodeExtensionContext } from '../../extContext/common/extensionContext';
 import { IIgnoreService } from '../../ignore/common/ignoreService.js';
@@ -104,6 +105,7 @@ export class WorkspaceChunkSearchService extends Disposable implements IWorkspac
 		@IInstantiationService private readonly _instantiationService: IInstantiationService,
 		@IAuthenticationService private readonly _authenticationService: IAuthenticationService,
 		@IGithubAvailableEmbeddingTypesService private readonly _availableEmbeddingTypes: IGithubAvailableEmbeddingTypesService,
+		@IConfigurationService private readonly _configurationService: IConfigurationService,
 		@ILogService private readonly _logService: ILogService,
 	) {
 		super();
@@ -116,7 +118,8 @@ export class WorkspaceChunkSearchService extends Disposable implements IWorkspac
 	}
 
 	private async tryInit(silent: boolean): Promise<WorkspaceChunkSearchServiceImpl | undefined> {
-		if (!this._authenticationService.copilotToken || this._authenticationService.copilotToken.isNoAuthUser) {
+		const isStandaloneMode = this._configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone';
+		if (!isStandaloneMode && (!this._authenticationService.copilotToken || this._authenticationService.copilotToken.isNoAuthUser)) {
 			return undefined;
 		}
 
@@ -616,4 +619,3 @@ export class NullWorkspaceChunkSearchService implements IWorkspaceChunkSearchSer
 		// noop
 	}
 }
-

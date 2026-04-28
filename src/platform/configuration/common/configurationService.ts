@@ -594,6 +594,7 @@ export namespace ConfigKey {
 		export const StandaloneFastModel = defineSetting<string>('chat.standalone.model.fast', ConfigType.Simple, '');
 		export const StandaloneReasoningModel = defineSetting<string>('chat.standalone.model.reasoning', ConfigType.Simple, '');
 		export const StandaloneEmbeddingsModel = defineSetting<string>('chat.standalone.model.embeddings', ConfigType.Simple, '');
+		export const StandaloneEmbeddingsDimensions = defineSetting<number>('chat.standalone.model.embeddingsDimensions', ConfigType.Simple, 0, vNumber());
 
 		/** Allows forcing a particular model.
 		 * Note: this should not be used while self-hosting because it might lead to

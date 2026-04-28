@@ -233,3 +233,25 @@ export class MockGithubAvailableEmbeddingTypesService implements IGithubAvailabl
 		return EmbeddingType.metis_1024_I16_Binary;
 	}
 }
+
+export class StandaloneAvailableEmbeddingTypesService implements IGithubAvailableEmbeddingTypesService {
+	declare readonly _serviceBrand: undefined;
+
+	constructor(
+		@IConfigurationService private readonly _configurationService: IConfigurationService,
+	) { }
+
+	async getPreferredType(_silent: boolean): Promise<EmbeddingType | undefined> {
+		const configured = this._configurationService.getConfig(ConfigKey.Advanced.StandaloneEmbeddingsModel).trim();
+		if (!configured) {
+			return undefined;
+		}
+
+		const dimensions = this._configurationService.getConfig(ConfigKey.Advanced.StandaloneEmbeddingsDimensions);
+		const cacheKeyParts = [`providerModel=${configured}`, `chunker=naive-v1`];
+		if (dimensions > 0) {
+			cacheKeyParts.push(`dimensions=${dimensions}`);
+		}
+		return new EmbeddingType(cacheKeyParts.join('#'));
+	}
+}
