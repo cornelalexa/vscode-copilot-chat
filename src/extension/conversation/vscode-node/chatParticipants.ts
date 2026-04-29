@@ -56,6 +56,7 @@ export class ChatAgentService implements IChatAgentService {
 
 class ChatAgents implements IDisposable {
 	private readonly _disposables = new DisposableStore();
+	private readonly _reeaChatSessionItems = new Map<string, vscode.ChatSessionItem>();
 
 	private additionalWelcomeMessage: vscode.MarkdownString | undefined;
 
@@ -161,6 +162,25 @@ class ChatAgents implements IDisposable {
 			return Intent.Unknown;
 		};
 		const defaultAgent = this.createAgent(defaultAgentName, intentGetter);
+		const reeaSessionController = this._disposables.add(vscode.chat.createChatSessionItemController('reea-copilot', () => {
+			reeaSessionController.items.replace(Array.from(this._reeaChatSessionItems.values()));
+			return Promise.resolve();
+		}));
+		reeaSessionController.newChatSessionItemHandler = context => {
+			const id = generateUuid();
+			const item = reeaSessionController.createChatSessionItem(vscode.Uri.from({ scheme: 'reea-copilot', path: `/${id}` }), context.request.prompt || vscode.l10n.t('New Reea Chat'));
+			item.iconPath = new vscode.ThemeIcon('copilot');
+			item.timing = { created: Date.now() };
+			this._reeaChatSessionItems.set(item.resource.toString(), item);
+			return Promise.resolve(item);
+		};
+		this._disposables.add(vscode.chat.registerChatSessionContentProvider('reea-copilot', {
+			provideChatSessionContent: resource => ({
+				title: this._reeaChatSessionItems.get(resource.toString())?.label ?? vscode.l10n.t('Reea Copilot Chat'),
+				history: [],
+				requestHandler: this.getChatParticipantHandler('reea.copilot.default', defaultAgentName, intentGetter) as vscode.ChatRequestHandler,
+			}),
+		}, defaultAgent));
 		defaultAgent.iconPath = new vscode.ThemeIcon('copilot');
 
 		defaultAgent.helpTextPrefix = vscode.l10n.t('You can ask me general programming questions, or chat with the following participants which have specialized expertise and can perform actions:');
