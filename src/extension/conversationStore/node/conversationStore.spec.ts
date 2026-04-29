@@ -115,4 +115,16 @@ describe('ConversationStore', () => {
 		expect(store.getConversation('resp-1')).toBeUndefined();
 		expect(store.getConversation('resp-2')).toBe(conv2);
 	});
+
+	test('gets the latest conversation for a session', () => {
+		const conv1 = createConversation('session-1');
+		store.addConversation('resp-1', conv1);
+
+		vi.advanceTimersByTime(1);
+
+		const conv2 = createConversation('session-1');
+		store.addConversation('resp-2', conv2);
+
+		expect(store.getLatestConversationForSession('session-1')).toBe(conv2);
+	});
 });

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import assert from 'assert';
+import { mkdirSync, rmSync, writeFileSync } from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { SpyChatResponseStream } from '../../../util/common/test/mockChatResponseStream';
@@ -11,10 +12,12 @@ import { timeout } from '../../../util/vs/base/common/async';
 import { CancellationToken } from '../../../util/vs/base/common/cancellation';
 import { Event } from '../../../util/vs/base/common/event';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
+import { reeaChatSessionStore } from '../../chatSessions/vscode-node/reeaChatSessionStore';
 import { Intent } from '../../common/constants';
 import { ConversationFeature } from '../../conversation/vscode-node/conversationFeature';
 import { IConversationStore } from '../../conversationStore/node/conversationStore';
 import { activate } from '../../extension/vscode-node/extension';
+import { Conversation, Turn, TurnStatus } from '../../prompt/common/conversation';
 import { ChatParticipantRequestHandler } from '../../prompt/node/chatParticipantRequestHandler';
 import { ContributedToolName } from '../../tools/common/toolNames';
 import { IToolsService } from '../../tools/common/toolsService';
@@ -32,11 +35,21 @@ suite('Copilot Chat Sanity Test', function () {
 	let sandbox: sinon.SinonSandbox;
 	const fakeToken = CancellationToken.None;
 	const sessionItemProviders = new Map<string, vscode.ChatSessionItemProvider>();
+	const sessionContentProviders = new Map<string, vscode.ChatSessionContentProvider>();
+	const treeDataProviders = new Map<string, vscode.TreeDataProvider<vscode.TreeItem>>();
 	// Before everything, activate the extension
 	suiteSetup(async function () {
 		sandbox = sinon.createSandbox();
 		sandbox.stub(vscode.commands, 'registerCommand').returns({ dispose: () => { } });
 		sandbox.stub(vscode.workspace, 'registerFileSystemProvider').returns({ dispose: () => { } });
+		sandbox.stub(vscode.window, 'registerTreeDataProvider').callsFake((viewId, provider) => {
+			treeDataProviders.set(viewId, provider as vscode.TreeDataProvider<vscode.TreeItem>);
+			return { dispose: () => { } };
+		});
+		sandbox.stub(vscode.chat, 'registerChatSessionContentProvider').callsFake((scheme, provider) => {
+			sessionContentProviders.set(scheme, provider as vscode.ChatSessionContentProvider);
+			return { dispose: () => { } };
+		});
 		sandbox.stub(vscode.chat, 'registerChatSessionItemProvider').callsFake((scheme, sessionItemProvider) => {
 			sessionItemProviders.set(scheme, sessionItemProvider);
 			return { dispose: () => { } };
@@ -179,6 +192,136 @@ suite('Copilot Chat Sanity Test', function () {
 				conversationFeature.activated = false;
 			}
 		});
+	});
+
+	test('REDEX surface registers a dedicated sessions view', async function () {
+		const provider = treeDataProviders.get('reea-copilot-redex.sessions');
+		assert.ok(provider);
+
+		const items = await provider.getChildren();
+		assert.ok(items);
+		assert.ok(items.some(item => item.label === 'New REDEX Session'));
+	});
+
+	test('REDEX registers its dedicated chat session provider', async function () {
+		const provider = sessionContentProviders.get('reea-copilot');
+		assert.ok(provider);
+	});
+
+	test('REDEX restores in-memory session history for reopened sessions', async function () {
+		const provider = sessionContentProviders.get('reea-copilot');
+		assert.ok(provider);
+
+		const resource = vscode.Uri.from({ scheme: 'reea-copilot', path: '/restored-session' });
+		const previousItems = reeaChatSessionStore.values();
+		const chatSessionItem = {
+			resource,
+			label: 'Restored REDEX Session',
+			metadata: { internalSessionId: 'session-restore-1' },
+		} as vscode.ChatSessionItem;
+
+		reeaChatSessionStore.replace([...previousItems, chatSessionItem]);
+
+		try {
+			await realInstaAccessor.invokeFunction(async accessor => {
+				const conversationStore = accessor.get(IConversationStore);
+				const turn = new Turn('turn-restore-1', { message: 'Explain this', type: 'user' });
+				turn.setResponse(TurnStatus.Success, { message: 'Restored answer', type: 'model' }, 'resp-restore-1', {
+					metadata: {
+						responseId: 'resp-restore-1',
+						sessionId: 'session-restore-1',
+						agentId: 'reea-copilot',
+					},
+				});
+				conversationStore.addConversation('resp-restore-1', new Conversation('session-restore-1', [turn]));
+			});
+
+			const session = await provider.provideChatSessionContent(resource, CancellationToken.None, {
+				inputState: undefined as unknown as vscode.ChatSessionInputState,
+				sessionOptions: [],
+			});
+
+			assert.strictEqual(session.history.length, 2);
+			assert.ok(session.history[0] instanceof vscode.ChatRequestTurn2);
+			assert.ok(session.history[1] instanceof vscode.ChatResponseTurn2);
+			assert.strictEqual((session.history[0] as vscode.ChatRequestTurn2).prompt, 'Explain this');
+			assert.strictEqual(((session.history[1] as vscode.ChatResponseTurn2).result.metadata as { responseId: string }).responseId, 'resp-restore-1');
+		} finally {
+			reeaChatSessionStore.replace(previousItems);
+		}
+	});
+
+	test('REDEX restores transcript-backed history and surfaces the session in the REDEX list', async function () {
+		const provider = sessionContentProviders.get('reea-copilot');
+		const treeProvider = treeDataProviders.get('reea-copilot-redex.sessions');
+		assert.ok(provider);
+		assert.ok(treeProvider);
+		assert.ok(realContext.storageUri);
+
+		const previousItems = reeaChatSessionStore.values();
+		const sessionId = 'session-transcript-restore-1';
+		const resource = vscode.Uri.from({ scheme: 'reea-copilot', path: `/${sessionId}` });
+		const transcriptDirectory = vscode.Uri.joinPath(realContext.storageUri!, 'transcripts');
+		const transcriptFile = vscode.Uri.joinPath(transcriptDirectory, `${sessionId}.jsonl`);
+
+		mkdirSync(transcriptDirectory.fsPath, { recursive: true });
+		writeFileSync(transcriptFile.fsPath, [
+			JSON.stringify({
+				id: 'entry-1',
+				type: 'session.start',
+				timestamp: '2026-04-29T10:00:00.000Z',
+				parentId: null,
+				data: {
+					sessionId,
+					version: 1,
+					producer: 'copilot-agent',
+					copilotVersion: '1.0.0',
+					vscodeVersion: '1.100.0',
+					startTime: '2026-04-29T10:00:00.000Z',
+				},
+			}),
+			JSON.stringify({
+				id: 'entry-2',
+				type: 'user.message',
+				timestamp: '2026-04-29T10:00:01.000Z',
+				parentId: 'entry-1',
+				data: {
+					content: 'Transcript question',
+					attachments: [],
+				},
+			}),
+			JSON.stringify({
+				id: 'entry-3',
+				type: 'assistant.message',
+				timestamp: '2026-04-29T10:00:02.000Z',
+				parentId: 'entry-2',
+				data: {
+					messageId: 'message-1',
+					content: 'Transcript answer',
+					toolRequests: [],
+				},
+			}),
+		].join('\n'));
+
+		try {
+			const session = await provider.provideChatSessionContent(resource, CancellationToken.None, {
+				inputState: undefined as unknown as vscode.ChatSessionInputState,
+				sessionOptions: [],
+			});
+
+			assert.strictEqual(session.history.length, 2);
+			assert.ok(session.history[0] instanceof vscode.ChatRequestTurn2);
+			assert.ok(session.history[1] instanceof vscode.ChatResponseTurn2);
+			assert.strictEqual((session.history[0] as vscode.ChatRequestTurn2).prompt, 'Transcript question');
+			assert.strictEqual(((session.history[1] as vscode.ChatResponseTurn2).response[0] as vscode.ChatResponseMarkdownPart).value.value, 'Transcript answer');
+
+			const items = await treeProvider.getChildren();
+			assert.ok(items);
+			assert.ok(items.some(item => item.label === 'Transcript question'));
+		} finally {
+			rmSync(transcriptFile.fsPath, { force: true });
+			reeaChatSessionStore.replace(previousItems);
+		}
 	});
 
 	test.skip('E2E Production Inline Chat Test', async function () {

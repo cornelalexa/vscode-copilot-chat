@@ -6,6 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CancellationToken, ChatHookResult, ChatHookType, ChatRequest, LanguageModelToolInformation } from 'vscode';
 import { IChatHookService, SessionStartHookInput, StopHookInput, SubagentStartHookInput, SubagentStopHookInput } from '../../../../platform/chat/common/chatHookService';
+import { IHistoricalTurn, ISessionTranscriptService } from '../../../../platform/chat/common/sessionTranscriptService';
 import { NoopOTelService } from '../../../../platform/otel/common/noopOtelService';
 import { resolveOTelConfig } from '../../../../platform/otel/common/otelConfig';
 import { IOTelService } from '../../../../platform/otel/common/otelService';
@@ -92,6 +93,34 @@ export class MockChatHookService implements IChatHookService {
 	}
 }
 
+class MockSessionTranscriptService implements ISessionTranscriptService {
+	declare readonly _serviceBrand: undefined;
+
+	readonly startCalls: Array<{ sessionId: string; history: readonly IHistoricalTurn[] | undefined }> = [];
+	readonly flushCalls: string[] = [];
+
+	async startSession(sessionId: string, _context?: { cwd?: string }, history?: readonly IHistoricalTurn[]): Promise<void> {
+		this.startCalls.push({ sessionId, history });
+	}
+
+	logUserMessage(): void { }
+	logAssistantTurnStart(): void { }
+	logAssistantMessage(): void { }
+	logToolExecutionStart(): void { }
+	logToolExecutionComplete(): void { }
+	logAssistantTurnEnd(): void { }
+
+	async flush(sessionId: string): Promise<void> {
+		this.flushCalls.push(sessionId);
+	}
+
+	async endSession(): Promise<void> { }
+	getTranscriptPath(): undefined { return undefined; }
+	getLineCount(): undefined { return undefined; }
+	async cleanupOldTranscripts(): Promise<void> { }
+	isTranscriptUri(): boolean { return false; }
+}
+
 /**
  * Minimal concrete implementation of ToolCallingLoop for testing.
  * Exposes the abstract base class methods for testing while providing
@@ -171,15 +200,18 @@ describe('ToolCallingLoop SessionStart hook', () => {
 	let disposables: DisposableStore;
 	let instantiationService: IInstantiationService;
 	let mockChatHookService: MockChatHookService;
+	let mockSessionTranscriptService: MockSessionTranscriptService;
 	let tokenSource: CancellationTokenSource;
 
 	beforeEach(() => {
 		disposables = new DisposableStore();
 		mockChatHookService = new MockChatHookService();
+		mockSessionTranscriptService = new MockSessionTranscriptService();
 
 		const serviceCollection = disposables.add(createExtensionUnitTestingServices());
 		// Must define the mock service BEFORE creating the accessor
 		serviceCollection.define(IChatHookService, mockChatHookService);
+		serviceCollection.define(ISessionTranscriptService, mockSessionTranscriptService);
 		serviceCollection.define(IOTelService, new NoopOTelService(resolveOTelConfig({ env: {}, extensionVersion: '0.0.0', sessionId: 'test' })));
 
 		const accessor = serviceCollection.createTestingAccessor();
@@ -195,6 +227,26 @@ describe('ToolCallingLoop SessionStart hook', () => {
 	});
 
 	describe('SessionStart hook execution conditions', () => {
+		it('should start transcript persistence even when hooks are disabled', async () => {
+			const conversation = createTestConversation(1);
+			const request = createMockChatRequest({ hasHooksEnabled: false } as Partial<ChatRequest>);
+
+			const loop = instantiationService.createInstance(
+				TestToolCallingLoop,
+				{
+					conversation,
+					toolCallLimit: 10,
+					request,
+				}
+			);
+			disposables.add(loop);
+
+			await loop.testRunStartHooks(tokenSource.token);
+
+			expect(mockSessionTranscriptService.startCalls).toHaveLength(1);
+			expect(mockSessionTranscriptService.startCalls[0].sessionId).toBe(conversation.sessionId);
+		});
+
 		it('should execute SessionStart hook on the first turn of regular sessions', async () => {
 			const conversation = createTestConversation(1); // First turn
 			const request = createMockChatRequest();
