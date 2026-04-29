@@ -5,10 +5,13 @@
 
 import type { CancellationToken } from 'vscode';
 import { TelemetryCorrelationId } from '../../../util/common/telemetryCorrelationId';
+import { legacyModelApiKeySecretKey, legacyModelsConfigKey, legacyProviderApiKeySecretKey, migrationKey, modelApiKeySecretKey, modelsConfigKey, providerApiKeySecretKey } from '../../byok/common/byokStorageKeys';
 import { ConfigKey, IConfigurationService } from '../../configuration/common/configurationService';
 import { IVSCodeExtensionContext } from '../../extContext/common/extensionContext';
 import { FetchOptions, IFetcherService } from '../../networking/common/fetcherService';
 import { ComputeEmbeddingsOptions, Embedding, Embeddings, EmbeddingType, IEmbeddingsComputer } from './embeddingsComputer';
+
+const migrationVersion = 'v1';
 
 type StoredCustomOAIModelConfig = {
 	readonly deploymentUrl?: string;
@@ -103,14 +106,14 @@ export class StandaloneEmbeddingsComputer implements IEmbeddingsComputer {
 			return undefined;
 		}
 
-		const apiKey = await this._extensionContext.secrets.get(`copilot-byok-${providerInfo.storageName}-${modelId}-api-key`)
-			?? await this._extensionContext.secrets.get(`copilot-byok-${providerInfo.storageName}-api-key`);
+		const apiKey = await this.getApiKey(providerInfo.storageName, modelId);
 
 		return { url, apiKey, headers: providerInfo.headers };
 	}
 
 	private async getStoredModelConfig(providerName: string, modelId: string): Promise<(StoredCustomOAIModelConfig & DeprecatedCustomOAIModelConfig) | undefined> {
-		const storedModels = this._extensionContext.globalState.get<Record<string, StoredCustomOAIModelConfig>>(`copilot-byok-${providerName}-models-config`, {});
+		await this.migrateProviderStorage(providerName);
+		const storedModels = this._extensionContext.globalState.get<Record<string, StoredCustomOAIModelConfig>>(modelsConfigKey(providerName), {});
 		const storedModel = storedModels?.[modelId];
 		if (storedModel?.deploymentUrl) {
 			return storedModel;
@@ -122,6 +125,53 @@ export class StandaloneEmbeddingsComputer implements IEmbeddingsComputer {
 
 		const deprecatedModels = this._configurationService.getConfig(ConfigKey.Deprecated.CustomOAIModels) as Record<string, DeprecatedCustomOAIModelConfig>;
 		return deprecatedModels?.[modelId];
+	}
+
+	private async getApiKey(providerName: string, modelId: string): Promise<string | undefined> {
+		await this.migrateProviderStorage(providerName);
+
+		const modelKey = await this._extensionContext.secrets.get(modelApiKeySecretKey(providerName, modelId));
+		if (modelKey?.trim()) {
+			return modelKey.trim();
+		}
+
+		const providerKey = await this._extensionContext.secrets.get(providerApiKeySecretKey(providerName));
+		return providerKey?.trim() || undefined;
+	}
+
+	private async migrateProviderStorage(providerName: string): Promise<void> {
+		const providerMigrationKey = migrationKey(providerName, migrationVersion);
+		if (this._extensionContext.globalState.get<boolean>(providerMigrationKey, false)) {
+			return;
+		}
+
+		const currentModels = this._extensionContext.globalState.get<Record<string, StoredCustomOAIModelConfig>>(modelsConfigKey(providerName), {});
+		const legacyModels = this._extensionContext.globalState.get<Record<string, StoredCustomOAIModelConfig>>(legacyModelsConfigKey(providerName), {});
+		const mergedModels = { ...legacyModels, ...currentModels };
+		if (Object.keys(legacyModels).length && Object.keys(currentModels).length !== Object.keys(mergedModels).length) {
+			await this._extensionContext.globalState.update(modelsConfigKey(providerName), mergedModels);
+		} else if (Object.keys(legacyModels).length && !Object.keys(currentModels).length) {
+			await this._extensionContext.globalState.update(modelsConfigKey(providerName), legacyModels);
+		}
+
+		await this.migrateSecretIfMissing(legacyProviderApiKeySecretKey(providerName), providerApiKeySecretKey(providerName));
+		for (const storedModelId of Object.keys(mergedModels)) {
+			await this.migrateSecretIfMissing(legacyModelApiKeySecretKey(providerName, storedModelId), modelApiKeySecretKey(providerName, storedModelId));
+		}
+
+		await this._extensionContext.globalState.update(providerMigrationKey, true);
+	}
+
+	private async migrateSecretIfMissing(legacyKey: string, currentKey: string): Promise<void> {
+		const currentValue = await this._extensionContext.secrets.get(currentKey);
+		if (currentValue?.trim()) {
+			return;
+		}
+
+		const legacyValue = await this._extensionContext.secrets.get(legacyKey);
+		if (legacyValue?.trim()) {
+			await this._extensionContext.secrets.store(currentKey, legacyValue);
+		}
 	}
 
 	private async fetchEmbeddings(url: string, modelId: string, inputs: readonly string[], apiKey: string | undefined, providerHeaders: Record<string, string> | undefined, cancellationToken: CancellationToken | undefined): Promise<OpenAIEmbeddingResponse> {

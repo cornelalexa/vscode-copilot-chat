@@ -6,6 +6,7 @@
 import type { ConfigurationScope, ExtensionContext } from 'vscode';
 import { describe, expect, it } from 'vitest';
 import { Event } from '../../../../util/vs/base/common/event';
+import { modelApiKeySecretKey, modelsConfigKey, providerApiKeySecretKey } from '../../../byok/common/byokStorageKeys';
 import { Config, ConfigKey, IConfigurationService } from '../../../configuration/common/configurationService';
 import { IVSCodeExtensionContext } from '../../../extContext/common/extensionContext';
 import { FetchOptions, IAbortController, IAbortSignal, IFetcherService, Response, WebSocketConnection } from '../../../networking/common/fetcherService';
@@ -47,7 +48,7 @@ describe('StandaloneEmbeddingsComputer', () => {
 					'local-embed': { deploymentUrl: 'http://localhost:8080/v1/chat/completions' }
 				},
 				secrets: {
-					'copilot-byok-CustomOAI-local-embed-api-key': 'local-key'
+					[modelApiKeySecretKey('CustomOAI', 'local-embed')]: 'local-key'
 				}
 			})
 		);
@@ -87,7 +88,7 @@ describe('StandaloneEmbeddingsComputer', () => {
 				}), 'test-stub');
 			}),
 			createExtensionContext({
-				secrets: { 'copilot-byok-OpenAI-api-key': 'openai-key' }
+				secrets: { [providerApiKeySecretKey('OpenAI')]: 'openai-key' }
 			})
 		);
 
@@ -112,7 +113,7 @@ describe('StandaloneEmbeddingsComputer', () => {
 				}), 'test-stub');
 			}),
 			createExtensionContext({
-				secrets: { 'copilot-byok-OpenRouter-api-key': 'openrouter-key' }
+				secrets: { [providerApiKeySecretKey('OpenRouter')]: 'openrouter-key' }
 			})
 		);
 
@@ -232,13 +233,17 @@ function createExtensionContext(options?: {
 }): IVSCodeExtensionContext {
 	return {
 		globalState: {
-			get: (key: string) => {
-				if (key === 'copilot-byok-CustomOAI-models-config') {
+			get: (key: string, defaultValue?: unknown) => {
+				if (key === modelsConfigKey('CustomOAI')) {
 					return options?.storedModels ?? options?.providerStoredModels?.CustomOAI ?? {};
 				}
-				const match = /^copilot-byok-(.+)-models-config$/.exec(key);
-				return match ? options?.providerStoredModels?.[match[1]] ?? {} : undefined;
+				const match = /^reea-copilot-byok-(.+)-models-config$/.exec(key);
+				if (key.startsWith('reea-copilot-byok-migration-')) {
+					return false;
+				}
+				return match ? options?.providerStoredModels?.[match[1]] ?? {} : defaultValue;
 			},
+			update: async () => undefined,
 		} as unknown as ExtensionContext['globalState'],
 		secrets: {
 			get: async (key: string) => options?.secrets?.[key],

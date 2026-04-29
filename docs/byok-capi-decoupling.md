@@ -1926,6 +1926,7 @@ Status:
 - Standalone mode registers a `StandaloneEmbeddingsComputer` instead of `RemoteEmbeddingsComputer`.
 - OpenAI-compatible `/v1/embeddings` is supported through `github.copilot.chat.standalone.model.embeddings` for `openai/...`, `openrouter/...`, and `customoai/...` model refs.
 - The standalone embeddings path resolves provider URL/API-key data from BYOK provider storage or built-in provider defaults and never calls Copilot token APIs. Current OpenAI-compatible provider model configurations are persisted into BYOK storage when models are enumerated.
+- BYOK provider storage now uses `reea-copilot-byok-*` keys. Existing `copilot-byok-*` provider keys, per-model keys, and model configs are migrated lazily per provider without deleting legacy values.
 - Added `Select Standalone Embeddings Model` command (`github.copilot.chat.standalone.selectEmbeddingsModel`) to pick an embedding-looking model from configured OpenAI, OpenRouter, or OpenAI Compatible providers.
 - Standalone workspace chunk search now initializes from local embedding config instead of Copilot token/GitHub embedding type discovery.
 - Standalone workspace semantic index population uses local naive chunking plus configured embeddings instead of CAPI `RequestType.Chunks`.

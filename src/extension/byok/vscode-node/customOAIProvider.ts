@@ -85,7 +85,7 @@ export abstract class AbstractCustomOAIBYOKModelProvider extends AbstractOpenAIC
 
 	protected async migrateConfig(configKey: Config<IStringDictionary<_CustomOAIModelConfig>>, providerName: string, providerGroupName: string): Promise<void> {
 		// Check if migration has already been completed
-		const migrationKey = `copilot-byok-migration-${providerName}-${configKey}`;
+		const migrationKey = `reea-copilot-byok-migration-${providerName}-${configKey}`;
 		const migrationCompleted = this._extensionContext.globalState.get<boolean>(migrationKey, false);
 		if (migrationCompleted) {
 			return;

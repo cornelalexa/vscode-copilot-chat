@@ -3,7 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { IVSCodeExtensionContext } from '../../../platform/extContext/common/extensionContext';
+import { legacyModelApiKeySecretKey, legacyModelsConfigKey, legacyProviderApiKeySecretKey, migrationKey, modelApiKeySecretKey, modelsConfigKey, providerApiKeySecretKey } from '../../../platform/byok/common/byokStorageKeys';
 import { BYOKAuthType, BYOKModelCapabilities } from '../../byok/common/byokProvider';
+
+const migrationVersion = 'v1';
 
 export interface StoredModelConfig {
 	deploymentUrl?: string;
@@ -64,9 +67,11 @@ export class BYOKStorageService implements IBYOKStorageService {
 	}
 
 	public async getAPIKey(providerName: string, modelId?: string): Promise<string | undefined> {
+		await this.migrateProviderStorage(providerName);
+
 		// If model-specific key is requested, try to get it first
 		if (modelId) {
-			const modelKey = await this._extensionContext.secrets.get(`copilot-byok-${providerName}-${modelId}-api-key`);
+			const modelKey = await this._extensionContext.secrets.get(modelApiKeySecretKey(providerName, modelId));
 			// Only return the key if it's non-empty after trimming, and return the trimmed version
 			if (modelKey && modelKey.trim()) {
 				return modelKey.trim();
@@ -74,7 +79,7 @@ export class BYOKStorageService implements IBYOKStorageService {
 		}
 
 		// Fall back to provider key if no model-specific key or it was requested directly
-		const providerKey = await this._extensionContext.secrets.get(`copilot-byok-${providerName}-api-key`);
+		const providerKey = await this._extensionContext.secrets.get(providerApiKeySecretKey(providerName));
 		// Only return the key if it's non-empty after trimming, and return the trimmed version
 		return providerKey?.trim() || undefined;
 	}
@@ -94,10 +99,10 @@ export class BYOKStorageService implements IBYOKStorageService {
 
 		if (authType === BYOKAuthType.GlobalApiKey) {
 			// For GlobalApiKey providers, only store at provider level
-			await this._extensionContext.secrets.store(`copilot-byok-${providerName}-api-key`, apiKey);
+			await this._extensionContext.secrets.store(providerApiKeySecretKey(providerName), apiKey);
 		} else if (authType === BYOKAuthType.PerModelDeployment && modelId) {
 			// For PerModelDeployment providers, store per model
-			await this._extensionContext.secrets.store(`copilot-byok-${providerName}-${modelId}-api-key`, apiKey);
+			await this._extensionContext.secrets.store(modelApiKeySecretKey(providerName, modelId), apiKey);
 		}
 	}
 
@@ -108,16 +113,17 @@ export class BYOKStorageService implements IBYOKStorageService {
 			return;
 		} else if (authType === BYOKAuthType.GlobalApiKey) {
 			// For GlobalApiKey providers, delete at provider level
-			await this._extensionContext.secrets.delete(`copilot-byok-${providerName}-api-key`);
+			await this._extensionContext.secrets.delete(providerApiKeySecretKey(providerName));
 		} else if (authType === BYOKAuthType.PerModelDeployment && modelId) {
 			// For PerModelDeployment providers, delete per model
-			await this._extensionContext.secrets.delete(`copilot-byok-${providerName}-${modelId}-api-key`);
+			await this._extensionContext.secrets.delete(modelApiKeySecretKey(providerName, modelId));
 		}
 	}
 
 	public async getStoredModelConfigs(providerName: string): Promise<Record<string, StoredModelConfig>> {
+		await this.migrateProviderStorage(providerName);
 		return this._extensionContext.globalState.get<Record<string, StoredModelConfig>>(
-			`copilot-byok-${providerName}-models-config`,
+			modelsConfigKey(providerName),
 			{}
 		);
 	}
@@ -142,7 +148,7 @@ export class BYOKStorageService implements IBYOKStorageService {
 		};
 		const existingConfigs = await this.getStoredModelConfigs(providerName);
 		existingConfigs[modelId] = configToSave;
-		await this._extensionContext.globalState.update(`copilot-byok-${providerName}-models-config`, existingConfigs);
+		await this._extensionContext.globalState.update(modelsConfigKey(providerName), existingConfigs);
 
 		await this.storeAPIKey(providerName, config.apiKey, authType, modelId);
 	}
@@ -158,17 +164,52 @@ export class BYOKStorageService implements IBYOKStorageService {
 		if (isDeletingCustomModel || !isCustomModel) {
 			delete existingConfigs[modelId];
 			await this._extensionContext.globalState.update(
-				`copilot-byok-${providerName}-models-config`,
+				modelsConfigKey(providerName),
 				existingConfigs
 			);
 			// Remove API key from secrets
-			await this._extensionContext.secrets.delete(`copilot-byok-${providerName}-${modelId}-api-key`);
+			await this._extensionContext.secrets.delete(modelApiKeySecretKey(providerName, modelId));
 		} else {
 			existingConfig.isRegistered = false;
 			await this._extensionContext.globalState.update(
-				`copilot-byok-${providerName}-models-config`,
+				modelsConfigKey(providerName),
 				existingConfigs
 			);
+		}
+	}
+
+	private async migrateProviderStorage(providerName: string): Promise<void> {
+		const providerMigrationKey = migrationKey(providerName, migrationVersion);
+		if (this._extensionContext.globalState.get<boolean>(providerMigrationKey, false)) {
+			return;
+		}
+
+		const currentModels = this._extensionContext.globalState.get<Record<string, StoredModelConfig>>(modelsConfigKey(providerName), {});
+		const legacyModels = this._extensionContext.globalState.get<Record<string, StoredModelConfig>>(legacyModelsConfigKey(providerName), {});
+		const mergedModels = { ...legacyModels, ...currentModels };
+		if (Object.keys(legacyModels).length && Object.keys(currentModels).length !== Object.keys(mergedModels).length) {
+			await this._extensionContext.globalState.update(modelsConfigKey(providerName), mergedModels);
+		} else if (Object.keys(legacyModels).length && !Object.keys(currentModels).length) {
+			await this._extensionContext.globalState.update(modelsConfigKey(providerName), legacyModels);
+		}
+
+		await this.migrateSecretIfMissing(legacyProviderApiKeySecretKey(providerName), providerApiKeySecretKey(providerName));
+		for (const modelId of Object.keys(mergedModels)) {
+			await this.migrateSecretIfMissing(legacyModelApiKeySecretKey(providerName, modelId), modelApiKeySecretKey(providerName, modelId));
+		}
+
+		await this._extensionContext.globalState.update(providerMigrationKey, true);
+	}
+
+	private async migrateSecretIfMissing(legacyKey: string, currentKey: string): Promise<void> {
+		const currentValue = await this._extensionContext.secrets.get(currentKey);
+		if (currentValue?.trim()) {
+			return;
+		}
+
+		const legacyValue = await this._extensionContext.secrets.get(legacyKey);
+		if (legacyValue?.trim()) {
+			await this._extensionContext.secrets.store(currentKey, legacyValue);
 		}
 	}
 }
