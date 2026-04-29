@@ -130,7 +130,7 @@ suite('InlineEditTriggerer', () => {
 	}
 
 	function createOutputDocument(): { document: TextDocument; textEditor: TextEditor; selection: Selection } {
-		const uri = Uri.parse('output:extension-output-GitHub.copilot-chat-#1-GitHub Copilot Chat');
+		const uri = Uri.parse('output:extension-output-reea-srl.reea-copilot-#1-Reea Copilot Chat');
 		const doc = createTextDocumentData(uri, 'output logs', 'log');
 		const selection = new Selection(0, 0, 0, 0);
 		const textEditor = new ExtHostTextEditor(doc.document, [selection], {}, [], undefined);

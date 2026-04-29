@@ -115,8 +115,8 @@ describe('emitSessionStartEvent', () => {
 		const otel = createMockOTel();
 		emitSessionStartEvent(otel, 'sess-123', 'gpt-4o', 'copilot');
 
-		expect(otel.emitLogRecord).toHaveBeenCalledWith('copilot_chat.session.start', {
-			'event.name': 'copilot_chat.session.start',
+		expect(otel.emitLogRecord).toHaveBeenCalledWith('reea_copilot_chat.session.start', {
+			'event.name': 'reea_copilot_chat.session.start',
 			'session.id': 'sess-123',
 			[GenAiAttr.REQUEST_MODEL]: 'gpt-4o',
 			[GenAiAttr.AGENT_NAME]: 'copilot',
@@ -131,7 +131,7 @@ describe('emitToolCallEvent', () => {
 
 		const [body, attrs] = otel.emitLogRecord.mock.calls[0];
 		expect(body).toContain('readFile');
-		expect(attrs['event.name']).toBe('copilot_chat.tool.call');
+		expect(attrs['event.name']).toBe('reea_copilot_chat.tool.call');
 		expect(attrs[GenAiAttr.TOOL_NAME]).toBe('readFile');
 		expect(attrs['duration_ms']).toBe(150);
 		expect(attrs['success']).toBe(true);
@@ -155,7 +155,7 @@ describe('emitAgentTurnEvent', () => {
 
 		const [body, attrs] = otel.emitLogRecord.mock.calls[0];
 		expect(body).toContain('3');
-		expect(attrs['event.name']).toBe('copilot_chat.agent.turn');
+		expect(attrs['event.name']).toBe('reea_copilot_chat.agent.turn');
 		expect(attrs['turn.index']).toBe(3);
 		expect(attrs[GenAiAttr.USAGE_INPUT_TOKENS]).toBe(500);
 		expect(attrs[GenAiAttr.USAGE_OUTPUT_TOKENS]).toBe(200);
@@ -190,7 +190,7 @@ describe('emitEditSurvivalEvent', () => {
 		});
 
 		const attrs = otel.emitLogRecord.mock.calls[0][1];
-		expect(attrs['event.name']).toBe('copilot_chat.edit.survival');
+		expect(attrs['event.name']).toBe('reea_copilot_chat.edit.survival');
 		expect(attrs['survival_rate_four_gram']).toBe(0.95);
 		expect(attrs[CopilotChatAttr.REPO_HEAD_BRANCH_NAME]).toBe('feature/x');
 		expect(attrs[CopilotChatAttr.REPO_HEAD_COMMIT_HASH]).toBe('deadbeef');

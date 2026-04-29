@@ -58,16 +58,16 @@ export class ConfigurationServiceImpl extends AbstractConfigurationService {
 
 		let configuredValue: T | undefined;
 		if (key.advancedSubKey) {
-			// This is a `github.copilot.advanced.*` setting
+			// This is a `reea.copilot.advanced.*` setting
 
 			// First, let's try to read it using the flat style
-			// e.g. "github.copilot.advanced.debug.useElectronFetcher": false
+			// e.g. "reea.copilot.advanced.debug.useElectronFetcher": false
 			const advancedConfigFlatStyleValue = config.get<T>(key.id);
 			if (advancedConfigFlatStyleValue !== undefined) {
 				configuredValue = advancedConfigFlatStyleValue;
 			} else {
 				// If that doesn't work, fall back to the object style
-				// e.g. "github.copilot.advanced": { "debug.useElectronFetcher": false }
+				// e.g. "reea.copilot.advanced": { "debug.useElectronFetcher": false }
 				const advancedConfig = config.get<Record<string, any>>('advanced');
 				configuredValue = advancedConfig?.[key.advancedSubKey];
 			}
@@ -156,12 +156,12 @@ export class ConfigurationServiceImpl extends AbstractConfigurationService {
 
 	async setConfig<T>(key: BaseConfig<T>, value: T): Promise<void> {
 		if (key.advancedSubKey) {
-			// This is a `github.copilot.advanced.*` setting
+			// This is a `reea.copilot.advanced.*` setting
 
 			// We support two styles when reading these settings:
-			// 1. Flat style: "github.copilot.advanced.debug.useElectronFetcher": false
+			// 1. Flat style: "reea.copilot.advanced.debug.useElectronFetcher": false
 			//    This is the style our team likes to use, but this is not the correct way according to how the setting is registered in package.json.
-			// 2. Object style: "github.copilot.advanced": { "debug.useElectronFetcher": false }
+			// 2. Object style: "reea.copilot.advanced": { "debug.useElectronFetcher": false }
 			//    This is the style that the package.json schema expects, and is the correct way to write these settings.
 
 			// Unfortunately, the configuration API of vscode is unable to write the flat style setting, it refuses to write them.

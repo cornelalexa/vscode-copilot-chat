@@ -75,11 +75,11 @@ export class CopilotStatusBar extends StatusReporter implements IDisposable {
 		}
 		void commands.executeCommand(
 			'setContext',
-			'github.copilot.completions.quotaExceeded',
+			'reea.copilot.completions.quotaExceeded',
 			this.extensionStatusService.command?.command === CMDQuotaExceeded
 		);
 		const enabled = this.checkEnabledForLanguage();
-		void commands.executeCommand('setContext', 'github.copilot.completions.enabled', enabled);
+		void commands.executeCommand('setContext', 'reea.copilot.completions.enabled', enabled);
 		this.item.command = { command: CMDToggleStatusMenuChat, title: 'View Details' };
 		switch (this.extensionStatusService.kind) {
 			case 'Error':

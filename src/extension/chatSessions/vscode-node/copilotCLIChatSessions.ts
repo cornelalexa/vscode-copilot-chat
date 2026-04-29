@@ -91,9 +91,9 @@ export interface ICopilotCLIChatSessionItemProvider extends IDisposable {
 const REPOSITORY_OPTION_ID = 'repository';
 const BRANCH_OPTION_ID = 'branch';
 const ISOLATION_OPTION_ID = 'isolation';
-const LAST_USED_ISOLATION_OPTION_KEY = 'github.copilot.cli.lastUsedIsolationOption';
-const OPEN_REPOSITORY_COMMAND_ID = 'github.copilot.cli.sessions.openRepository';
-const OPEN_IN_COPILOT_CLI_COMMAND_ID = 'github.copilot.cli.openInCopilotCLI';
+const LAST_USED_ISOLATION_OPTION_KEY = 'reea.copilot.cli.lastUsedIsolationOption';
+const OPEN_REPOSITORY_COMMAND_ID = 'reea.copilot.cli.sessions.openRepository';
+const OPEN_IN_COPILOT_CLI_COMMAND_ID = 'reea.copilot.cli.openInCopilotCLI';
 const MAX_MRU_ENTRIES = 10;
 const CHECK_FOR_STEERING_DELAY = 100; // ms
 
@@ -263,7 +263,7 @@ export class CopilotCLIChatSessionContentProvider extends Disposable implements 
 					const items = await Promise.all(sessions.map(async session => this.toChatSessionItem(session)));
 
 					const count = items.length;
-					void this.commandExecutionService.executeCommand('setContext', 'github.copilot.chat.cliSessionsEmpty', count === 0);
+					void this.commandExecutionService.executeCommand('setContext', 'reea.copilot.chat.cliSessionsEmpty', count === 0);
 
 					controller.items.replace(items);
 				} finally {
@@ -362,7 +362,7 @@ export class CopilotCLIChatSessionContentProvider extends Disposable implements 
 		const diskSessions = await Promise.all(sessions.map(async session => this.toChatSessionItem(session)));
 
 		const count = diskSessions.length;
-		this.commandExecutionService.executeCommand('setContext', 'github.copilot.chat.cliSessionsEmpty', count === 0);
+		this.commandExecutionService.executeCommand('setContext', 'reea.copilot.chat.cliSessionsEmpty', count === 0);
 
 		return diskSessions;
 	}
@@ -1659,7 +1659,7 @@ export function registerCLIChatCommands(
 	logService: ILogService
 ): IDisposable {
 	const disposableStore = new DisposableStore();
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.delete', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.delete', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (sessionItem?.resource) {
 			const id = SessionIdForCLI.parse(sessionItem.resource);
 			const worktree = await copilotCLIWorktreeManagerService.getWorktreeProperties(id);
@@ -1696,7 +1696,7 @@ export function registerCLIChatCommands(
 			}
 		}
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.resumeInTerminal', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.resumeInTerminal', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (sessionItem?.resource) {
 			const id = SessionIdForCLI.parse(sessionItem.resource);
 			const existingTerminal = await sessionTracker.getTerminal(id);
@@ -1721,7 +1721,7 @@ export function registerCLIChatCommands(
 			}
 		}
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.rename', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.rename', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (!sessionItem?.resource) {
 			return;
 		}
@@ -1744,7 +1744,7 @@ export function registerCLIChatCommands(
 			}
 		}
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.setTitle', async (sessionItem?: vscode.ChatSessionItem, title?: string) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.setTitle', async (sessionItem?: vscode.ChatSessionItem, title?: string) => {
 		if (!sessionItem?.resource || !title) {
 			return;
 		}
@@ -1762,17 +1762,17 @@ export function registerCLIChatCommands(
 		await terminalIntegration.openTerminal(terminalName, [], cwd, location);
 	};
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.newSession', async () => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.newSession', async () => {
 		await createCopilotCLITerminal('editor', l10n.t('Copilot CLI'));
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.newSessionToSide', async () => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.newSessionToSide', async () => {
 		await createCopilotCLITerminal('editorBeside', l10n.t('Copilot CLI'));
 	}));
 	disposableStore.add(vscode.commands.registerCommand(OPEN_IN_COPILOT_CLI_COMMAND_ID, async (sourceControlContext?: unknown) => {
 		const rootUri = getSourceControlRootUri(sourceControlContext);
 		await createCopilotCLITerminal('editor', l10n.t('Copilot CLI'), rootUri?.fsPath);
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.openWorktreeInNewWindow', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.openWorktreeInNewWindow', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (!sessionItem?.resource) {
 			return;
 		}
@@ -1784,7 +1784,7 @@ export function registerCLIChatCommands(
 			await vscode.commands.executeCommand('vscode.openFolder', folder, { forceNewWindow: true });
 		}
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.openWorktreeInTerminal', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.openWorktreeInTerminal', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (!sessionItem?.resource) {
 			return;
 		}
@@ -1796,7 +1796,7 @@ export function registerCLIChatCommands(
 			vscode.window.createTerminal({ cwd: folder }).show();
 		}
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.copyWorktreeBranchName', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.copyWorktreeBranchName', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (!sessionItem?.resource) {
 			return;
 		}
@@ -1997,8 +1997,8 @@ export function registerCLIChatCommands(
 		}
 	};
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.applyCopilotCLIAgentSessionChanges', applyChanges));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.applyCopilotCLIAgentSessionChanges.apply', applyChanges));
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.applyCopilotCLIAgentSessionChanges', applyChanges));
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.applyCopilotCLIAgentSessionChanges.apply', applyChanges));
 
 	const mergeChanges = async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri, syncWithRemote: boolean = false) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
@@ -2054,15 +2054,15 @@ export function registerCLIChatCommands(
 		});
 	};
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.mergeCopilotCLIAgentSessionChanges.merge', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.mergeCopilotCLIAgentSessionChanges.merge', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		await mergeChanges(sessionItemOrResource);
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.mergeCopilotCLIAgentSessionChanges.mergeAndSync', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.mergeCopilotCLIAgentSessionChanges.mergeAndSync', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		await mergeChanges(sessionItemOrResource, true);
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.updateCopilotCLIAgentSessionChanges.update', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.updateCopilotCLIAgentSessionChanges.update', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2083,7 +2083,7 @@ export function registerCLIChatCommands(
 		}
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.sessions.refreshChanges', async (resource?: vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.sessions.refreshChanges', async (resource?: vscode.Uri) => {
 		if (!resource) {
 			return;
 		}
@@ -2110,7 +2110,7 @@ export function registerCLIChatCommands(
 		await contentProvider.refreshSession({ reason: 'update', sessionId });
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.sessions.initializeRepository', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.sessions.initializeRepository', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2136,7 +2136,7 @@ export function registerCLIChatCommands(
 		await contentProvider.refreshSession({ reason: 'update', sessionId });
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.sessions.commit', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.sessions.commit', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2151,7 +2151,7 @@ export function registerCLIChatCommands(
 		});
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.sessions.commitAndSync', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.sessions.commitAndSync', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2166,7 +2166,7 @@ export function registerCLIChatCommands(
 		});
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.sessions.sync', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.sessions.sync', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2181,7 +2181,7 @@ export function registerCLIChatCommands(
 		});
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.sessions.discardChanges', async (sessionResource: vscode.Uri, ref: string, ...resources: vscode.Uri[]) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.sessions.discardChanges', async (sessionResource: vscode.Uri, ref: string, ...resources: vscode.Uri[]) => {
 		if (!isUri(sessionResource) || !ref || resources.length === 0 || resources.some(r => !isUri(r))) {
 			return;
 		}
@@ -2209,7 +2209,7 @@ export function registerCLIChatCommands(
 		await gitService.restore(repository.rootUri, resources.map(r => r.fsPath), { ref });
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.createPullRequestCopilotCLIAgentSession.createPR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.createPullRequestCopilotCLIAgentSession.createPR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2236,7 +2236,7 @@ export function registerCLIChatCommands(
 		});
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.createDraftPullRequestCopilotCLIAgentSession.createDraftPR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.createDraftPullRequestCopilotCLIAgentSession.createDraftPR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2263,7 +2263,7 @@ export function registerCLIChatCommands(
 		});
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.createPullRequestCopilotCLIAgentSession.updatePR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.createPullRequestCopilotCLIAgentSession.updatePR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2306,7 +2306,7 @@ export function registerCLIChatCommands(
 		});
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.chat.openPullRequestCopilotCLIAgentSession.openPR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.chat.openPullRequestCopilotCLIAgentSession.openPR', async (sessionItemOrResource?: vscode.ChatSessionItem | vscode.Uri) => {
 		const resource = sessionItemOrResource instanceof vscode.Uri
 			? sessionItemOrResource
 			: sessionItemOrResource?.resource;
@@ -2334,7 +2334,7 @@ export function registerCLIChatCommands(
 		}
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.commitToWorktree', async (args?: { worktreeUri?: vscode.Uri; fileUri?: vscode.Uri }) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.commitToWorktree', async (args?: { worktreeUri?: vscode.Uri; fileUri?: vscode.Uri }) => {
 		logService.trace(`[commitToWorktree] Command invoked, args: ${JSON.stringify(args, null, 2)}`);
 		if (!args?.worktreeUri || !args?.fileUri) {
 			logService.debug('[commitToWorktree] Missing worktreeUri or fileUri, aborting');
@@ -2380,7 +2380,7 @@ export function registerCLIChatCommands(
 		}
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.commitToRepository', async (args?: { repositoryUri?: vscode.Uri; fileUri?: vscode.Uri }) => {
+	disposableStore.add(vscode.commands.registerCommand('reea.copilot.cli.sessions.commitToRepository', async (args?: { repositoryUri?: vscode.Uri; fileUri?: vscode.Uri }) => {
 		logService.trace(`[commitToRepository] Command invoked, args: ${JSON.stringify(args, null, 2)}`);
 		if (!args?.repositoryUri || !args?.fileUri) {
 			logService.debug('[commitToRepository] Missing repositoryUri or fileUri, aborting');

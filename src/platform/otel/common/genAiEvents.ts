@@ -76,8 +76,8 @@ export function emitSessionStartEvent(
 	model: string,
 	participant: string,
 ): void {
-	otel.emitLogRecord('copilot_chat.session.start', {
-		'event.name': 'copilot_chat.session.start',
+	otel.emitLogRecord('reea_copilot_chat.session.start', {
+		'event.name': 'reea_copilot_chat.session.start',
 		'session.id': sessionId,
 		[GenAiAttr.REQUEST_MODEL]: model,
 		[GenAiAttr.AGENT_NAME]: participant,
@@ -91,8 +91,8 @@ export function emitToolCallEvent(
 	success: boolean,
 	error?: string,
 ): void {
-	otel.emitLogRecord(`copilot_chat.tool.call: ${toolName}`, {
-		'event.name': 'copilot_chat.tool.call',
+	otel.emitLogRecord(`reea_copilot_chat.tool.call: ${toolName}`, {
+		'event.name': 'reea_copilot_chat.tool.call',
 		[GenAiAttr.TOOL_NAME]: toolName,
 		'duration_ms': durationMs,
 		'success': success,
@@ -107,8 +107,8 @@ export function emitAgentTurnEvent(
 	outputTokens: number,
 	toolCallCount: number,
 ): void {
-	otel.emitLogRecord(`copilot_chat.agent.turn: ${turnIndex}`, {
-		'event.name': 'copilot_chat.agent.turn',
+	otel.emitLogRecord(`reea_copilot_chat.agent.turn: ${turnIndex}`, {
+		'event.name': 'reea_copilot_chat.agent.turn',
 		'turn.index': turnIndex,
 		[GenAiAttr.USAGE_INPUT_TOKENS]: inputTokens,
 		[GenAiAttr.USAGE_OUTPUT_TOKENS]: outputTokens,
@@ -129,8 +129,8 @@ export function emitEditFeedbackEvent(
 	isNotebook: boolean,
 	workspace?: WorkspaceOTelMetadata,
 ): void {
-	otel.emitLogRecord(`copilot_chat.edit.feedback: ${outcome}`, {
-		'event.name': 'copilot_chat.edit.feedback',
+	otel.emitLogRecord(`reea_copilot_chat.edit.feedback: ${outcome}`, {
+		'event.name': 'reea_copilot_chat.edit.feedback',
 		'outcome': outcome,
 		'language_id': languageId,
 		'participant': participant,
@@ -152,8 +152,8 @@ export function emitEditHunkActionEvent(
 	linesRemoved: number,
 	workspace?: WorkspaceOTelMetadata,
 ): void {
-	otel.emitLogRecord(`copilot_chat.edit.hunk.action: ${outcome}`, {
-		'event.name': 'copilot_chat.edit.hunk.action',
+	otel.emitLogRecord(`reea_copilot_chat.edit.hunk.action: ${outcome}`, {
+		'event.name': 'reea_copilot_chat.edit.hunk.action',
 		'outcome': outcome,
 		'language_id': languageId,
 		'request_id': requestId,
@@ -174,8 +174,8 @@ export function emitInlineDoneEvent(
 	isNotebook: boolean,
 	workspace?: WorkspaceOTelMetadata,
 ): void {
-	otel.emitLogRecord(`copilot_chat.inline.done: ${accepted ? 'accepted' : 'rejected'}`, {
-		'event.name': 'copilot_chat.inline.done',
+	otel.emitLogRecord(`reea_copilot_chat.inline.done: ${accepted ? 'accepted' : 'rejected'}`, {
+		'event.name': 'reea_copilot_chat.inline.done',
 		'accepted': accepted,
 		'language_id': languageId,
 		'edit_count': editCount,
@@ -196,8 +196,8 @@ export function emitEditSurvivalEvent(
 	requestId: string,
 	workspace?: WorkspaceOTelMetadata,
 ): void {
-	otel.emitLogRecord(`copilot_chat.edit.survival: ${editSource}`, {
-		'event.name': 'copilot_chat.edit.survival',
+	otel.emitLogRecord(`reea_copilot_chat.edit.survival: ${editSource}`, {
+		'event.name': 'reea_copilot_chat.edit.survival',
 		'edit_source': editSource,
 		'survival_rate_four_gram': survivalRateFourGram,
 		'survival_rate_no_revert': survivalRateNoRevert,
@@ -215,8 +215,8 @@ export function emitUserFeedbackEvent(
 	conversationId: string,
 	requestId: string,
 ): void {
-	otel.emitLogRecord(`copilot_chat.user.feedback: ${rating}`, {
-		'event.name': 'copilot_chat.user.feedback',
+	otel.emitLogRecord(`reea_copilot_chat.user.feedback: ${rating}`, {
+		'event.name': 'reea_copilot_chat.user.feedback',
 		'rating': rating,
 		'participant': participant,
 		'conversation_id': conversationId,
@@ -230,8 +230,8 @@ export function emitCloudSessionInvokeEvent(
 	model: string,
 	requestId: string,
 ): void {
-	otel.emitLogRecord(`copilot_chat.cloud.session.invoke: ${partnerAgent}`, {
-		'event.name': 'copilot_chat.cloud.session.invoke',
+	otel.emitLogRecord(`reea_copilot_chat.cloud.session.invoke: ${partnerAgent}`, {
+		'event.name': 'reea_copilot_chat.cloud.session.invoke',
 		'partner_agent': partnerAgent,
 		'model': model,
 		'request_id': requestId,

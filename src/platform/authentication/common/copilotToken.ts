@@ -162,7 +162,7 @@ export class CopilotToken {
 		if (this.isFreeUser) {
 			return 'free';
 		}
-		const plan = this._info.copilot_plan;
+		const plan = this._info.reea_copilot_plan;
 		switch (plan) {
 			case 'individual':
 			case 'individual_pro':
@@ -294,7 +294,7 @@ export interface Endpoints {
 
 /**
  * A server response containing a Copilot token and metadata associated with it.
- * This is the success response (HTTP 200) from the /copilot_internal/v2/token endpoint.
+ * This is the success response (HTTP 200) from the /reea_copilot_internal/v2/token endpoint.
  */
 export interface TokenEnvelope {
 	// Required fields
@@ -489,20 +489,20 @@ export function isStandardErrorEnvelope(obj: unknown): obj is StandardErrorEnvel
 
 
 /**
- * Combined response type from the /copilot_internal/v2/token endpoint.
+ * Combined response type from the /reea_copilot_internal/v2/token endpoint.
  * Can be either a success (TokenEnvelope) or error (ErrorEnvelope) response.
  */
 export type CopilotTokenResponse = TokenEnvelope | ErrorEnvelope | StandardErrorEnvelope;
 
 /**
- * A server response containing the user info for the copilot user from the /copilot_internal/user endpoint
+ * A server response containing the user info for the copilot user from the /reea_copilot_internal/user endpoint
  */
 export interface CopilotUserInfo extends CopilotUserQuotaInfo {
 	access_type_sku: string;
 	analytics_tracking_id: string;
 	assigned_date: string;
 	can_signup_for_limited: boolean;
-	copilot_plan: string;
+	reea_copilot_plan: string;
 	organization_login_list: string[];
 	organization_list: Array<{
 		login: string;
@@ -519,7 +519,7 @@ export type ExtendedTokenInfo = TokenEnvelope & {
 	// Extended fields added by client
 	username: string;
 	isVscodeTeamMember: boolean;
-} & Pick<CopilotUserInfo, 'copilot_plan' | 'quota_snapshots' | 'quota_reset_date' | 'codex_agent_enabled' | 'organization_login_list'>;
+} & Pick<CopilotUserInfo, 'reea_copilot_plan' | 'quota_snapshots' | 'quota_reset_date' | 'codex_agent_enabled' | 'organization_login_list'>;
 
 /**
  * Creates a minimal ExtendedTokenInfo for testing purposes.
@@ -546,7 +546,7 @@ export function createTestExtendedTokenInfo(overrides?: Partial<ExtendedTokenInf
 		// Extended fields
 		username: 'testuser',
 		isVscodeTeamMember: false,
-		copilot_plan: 'free',
+		reea_copilot_plan: 'free',
 		organization_login_list: [],
 		// Apply overrides
 		...overrides,
@@ -571,7 +571,7 @@ export type TokenErrorReason =
 	'RateLimited';
 
 export const enum TokenErrorNotificationId {
-	NoCopilotAccess = 'no_copilot_access',
+	NoCopilotAccess = 'no_reea_copilot_access',
 	NotSignedUp = 'not_signed_up',
 	SubscriptionEnded = 'subscription_ended',
 	EnterPriseManagedUserAccount = 'enterprise_managed_user_account',
@@ -599,7 +599,7 @@ export type SuccessNotificationId =
 	| 'subscription_ending'
 	| 'free_over_limits'
 	| 'codespaces_demo_welcome'
-	| `copilot_seat_added_${number}`;
+	| `reea_copilot_seat_added_${number}`;
 
 export type TokenError = {
 	reason: TokenErrorReason;

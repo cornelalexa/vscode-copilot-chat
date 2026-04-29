@@ -84,7 +84,7 @@ describe('Configurations', () => {
 
 		// Validate Internal settings have the correct prefix
 		internalKeys.forEach(key => {
-			expect(key, 'Internal settings must start with github.copilot.chat.advanced.').toMatch(/^github\.copilot\.chat\.advanced\./);
+			expect(key, 'Internal settings must start with reea.copilot.chat.advanced.').toMatch(/^github\.copilot\.chat\.advanced\./);
 		});
 
 		// Validate public settings in code are in package.json
@@ -94,7 +94,7 @@ describe('Configurations', () => {
 
 		// Validate advanced settings in code are in the advanced section of package.json
 		advancedPublicKeys.forEach(key => {
-			expect(key, 'Advanced settings must not start wih github.copilot.chat.advanced.').not.toMatch(/^github\.copilot\.chat\.advanced\./);
+			expect(key, 'Advanced settings must not start wih reea.copilot.chat.advanced.').not.toMatch(/^github\.copilot\.chat\.advanced\./);
 			if (key === ConfigKey.Advanced.DebugGitHubAuthFailWith.fullyQualifiedId) {
 				// This setting should be internal, but can't be made TeamInternal because we lose the team and internal flags as part of its testing.
 				return;

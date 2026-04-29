@@ -122,7 +122,7 @@ export class McpSetupCommands extends Disposable {
 	) {
 		super();
 		this._register(toDisposable(() => this.pendingSetup?.cts.dispose(true)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.mcp.setup.flow', async (args: { name: string }) => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.mcp.setup.flow', async (args: { name: string }) => {
 			let finalState = FlowFinalState.Failed;
 			let result;
 			try {
@@ -161,7 +161,7 @@ export class McpSetupCommands extends Disposable {
 				});
 			}
 		}));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.mcp.setup.validatePackage', async (args: IValidatePackageArgs): Promise<ValidatePackageResult> => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.mcp.setup.validatePackage', async (args: IValidatePackageArgs): Promise<ValidatePackageResult> => {
 			const sw = new StopWatch();
 			const result = await McpSetupCommands.validatePackageRegistry(args, this.logService, this.fetcherService);
 			if (result.state === 'ok') {
@@ -203,7 +203,7 @@ export class McpSetupCommands extends Disposable {
 				{ state: 'ok', publisher: result.publisher, name: result.name, version: result.version } :
 				{ state: 'error', error: result.error, helpUri: result.helpUri, helpUriLabel: result.helpUriLabel, errorType: result.errorType };
 		}));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.mcp.setup.check', () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.mcp.setup.check', () => {
 			return 1;
 		}));
 	}

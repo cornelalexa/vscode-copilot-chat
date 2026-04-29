@@ -97,7 +97,7 @@ class CopilotExtensionsFilterProvider implements IExperimentationFilterProvider 
 	constructor(private _logService: ILogService) { }
 
 	getFilters(): Map<string, string> {
-		const copilotExtensionversion = vscode.extensions.getExtension('github.copilot')?.packageJSON.version;
+		const copilotExtensionversion = vscode.extensions.getExtension('reea.copilot')?.packageJSON.version;
 		const copilotChatExtensionVersion = packageJson.version;
 		const completionsCoreVersion = packageJson.completionsCoreVersion;
 

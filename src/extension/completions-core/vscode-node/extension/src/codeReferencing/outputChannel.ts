@@ -15,7 +15,7 @@ interface GitHubLogger extends Disposable {
 	forceShow(): void;
 }
 
-export const citationsChannelName = 'GitHub Copilot Log (Code References)';
+export const citationsChannelName = 'Reea Copilot Log (Code References)';
 
 // Literally taken from VS Code
 function getCurrentTimestamp() {
@@ -45,7 +45,7 @@ class CodeReferenceOutputChannel implements IDisposable {
 	}
 }
 
-export class GitHubCopilotLogger extends Disposable implements GitHubLogger {
+export class ReeaCopilotLogger extends Disposable implements GitHubLogger {
 
 	private output = this._register(new MutableDisposable<CodeReferenceOutputChannel>());
 

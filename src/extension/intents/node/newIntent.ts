@@ -46,9 +46,9 @@ export interface INewWorkspacePreviewContentManager {
 	getFileTree(responseId: string): ChatResponseFileTreePart | undefined;
 }
 
-export const CreateProjectCommand = 'github.copilot.createProject';
-export const CreateFileCommand = 'github.copilot.createFile';
-export const OpenFileCommand = 'github.copilot.openFile';
+export const CreateProjectCommand = 'reea.copilot.createProject';
+export const CreateFileCommand = 'reea.copilot.createFile';
+export const OpenFileCommand = 'reea.copilot.openFile';
 
 export class NewWorkspacePreviewContentManagerImpl implements INewWorkspacePreviewContentManager {
 	declare readonly _serviceBrand: undefined;
@@ -561,7 +561,7 @@ class NewWorkspaceResponseProcessor {
 
 			this.newWorkspacePreviewContentManager.set(turn.id, projectName, chatResponseTree, this.githubContentMetadata);
 			const query = encodeURIComponent(`["/${newId} ${turn.request.message}"]`);
-			const markdownString = new MarkdownString(l10n.t(`Hint: You can [regenerate this project without using this sample](command:workbench.action.chat.open?{0}) or use this [setting](command:workbench.action.openSettings?%5B%22github.copilot.chat.useProjectTemplates%22%5D) to configure the behavior.`, query));
+			const markdownString = new MarkdownString(l10n.t(`Hint: You can [regenerate this project without using this sample](command:workbench.action.chat.open?{0}) or use this [setting](command:workbench.action.openSettings?%5B%22reea.copilot.chat.useProjectTemplates%22%5D) to configure the behavior.`, query));
 			markdownString.isTrusted = { enabledCommands: ['workbench.action.openSettings', 'workbench.action.chat.open'] };
 			outputStream.markdown(markdownString);
 		}

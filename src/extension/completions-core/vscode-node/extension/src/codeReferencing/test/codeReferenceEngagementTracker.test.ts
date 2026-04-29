@@ -33,7 +33,7 @@ suite('CodeReferenceEngagementTracker', function () {
 		});
 
 		assert.ok(telemetry.reporter.events.length === 1);
-		assert.strictEqual(telemetry.reporter.events[0].name, 'code_referencing.github_copilot_log.focus.count');
+		assert.strictEqual(telemetry.reporter.events[0].name, 'code_referencing.github_reea_copilot_log.focus.count');
 	});
 
 	test('sends a telemetry event when the output channel is focused2', async function () {
@@ -44,7 +44,7 @@ suite('CodeReferenceEngagementTracker', function () {
 		});
 
 		assert.ok(telemetry.reporter.events.length === 1);
-		assert.strictEqual(telemetry.reporter.events[0].name, 'code_referencing.github_copilot_log.focus.count');
+		assert.strictEqual(telemetry.reporter.events[0].name, 'code_referencing.github_reea_copilot_log.focus.count');
 	});
 
 
@@ -58,7 +58,7 @@ suite('CodeReferenceEngagementTracker', function () {
 		});
 
 		assert.ok(telemetry.reporter.events.length === 1);
-		assert.strictEqual(telemetry.reporter.events[0].name, 'code_referencing.github_copilot_log.open.count');
+		assert.strictEqual(telemetry.reporter.events[0].name, 'code_referencing.github_reea_copilot_log.open.count');
 	});
 
 	test('does not send a telemetry event when the output channel is already opened', async function () {

@@ -12,7 +12,7 @@ import { ResourceMap } from '../../../../util/vs/base/common/map';
 import { URI } from '../../../../util/vs/base/common/uri';
 
 const SummaryFileScheme = 'copilot-delegated-chat-summary';
-const DelegationSummaryMementoKey = 'github.copilot.chat.delegationSummary';
+const DelegationSummaryMementoKey = 'reea.copilot.chat.delegationSummary';
 export const IChatDelegationSummaryService = createServiceIdentifier<IChatDelegationSummaryService>('IChatDelegationSummaryService');
 
 export interface IChatDelegationSummaryService {

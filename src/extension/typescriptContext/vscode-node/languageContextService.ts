@@ -1788,7 +1788,7 @@ async function* mapAsyncIterable<T, U>(
 	}
 }
 
-const showContextInspectorViewContextKey = `github.copilot.chat.showContextInspectorView`;
+const showContextInspectorViewContextKey = `reea.copilot.chat.showContextInspectorView`;
 export class InlineCompletionContribution implements vscode.Disposable, TokenBudgetProvider {
 
 	private disposables: DisposableStore;
@@ -1812,11 +1812,11 @@ export class InlineCompletionContribution implements vscode.Disposable, TokenBud
 
 		this.disposables = new DisposableStore();
 		if (languageContextService instanceof LanguageContextServiceImpl) {
-			this.disposables.add(vscode.commands.registerCommand('github.copilot.debug.showContextInspectorView', async () => {
+			this.disposables.add(vscode.commands.registerCommand('reea.copilot.debug.showContextInspectorView', async () => {
 				await vscode.commands.executeCommand('setContext', showContextInspectorViewContextKey, true);
-				await vscode.commands.executeCommand('context-inspector.focus');
+				await vscode.commands.executeCommand('reea-context-inspector.focus');
 			}));
-			this.disposables.add(vscode.window.registerTreeDataProvider('context-inspector', new InspectorDataProvider(languageContextService)));
+			this.disposables.add(vscode.window.registerTreeDataProvider('reea-context-inspector', new InspectorDataProvider(languageContextService)));
 		}
 
 		// Check if there are any TypeScript files open in the workspace.

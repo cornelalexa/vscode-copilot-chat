@@ -14,7 +14,7 @@ import { INotebookService, PipPackage, Variable, VariablesResult } from '../comm
 import { NotebookExecutionServiceImpl } from './notebookExectionServiceImpl';
 
 export const NOTEBOOK_ALTERNATIVE_CONTENT_SCHEME = 'alternative-notebook-content';
-const NOTEBOOK_AGENT_USAGE_KEY = 'github.copilot.notebookAgentModeUsage';
+const NOTEBOOK_AGENT_USAGE_KEY = 'reea.copilot.notebookAgentModeUsage';
 
 export interface ICellExecution {
 	cell: NotebookCell;

@@ -20,8 +20,8 @@ import { IWorkspaceInfo } from '../common/workspaceInfo';
 import { getCopilotCLISessionDir } from '../copilotcli/node/cliHelpers';
 import { ICopilotCLIAgents } from '../copilotcli/node/copilotCli';
 
-const WORKSPACE_FOLDER_MEMENTO_KEY = 'github.copilot.cli.sessionWorkspaceFolders';
-const WORKTREE_MEMENTO_KEY = 'github.copilot.cli.sessionWorktrees';
+const WORKSPACE_FOLDER_MEMENTO_KEY = 'reea.copilot.cli.sessionWorkspaceFolders';
+const WORKTREE_MEMENTO_KEY = 'reea.copilot.cli.sessionWorktrees';
 const BULK_METADATA_FILENAME = 'copilotcli.session.metadata.json';
 const REQUEST_MAPPING_FILENAME = 'vscode.requests.metadata.json';
 

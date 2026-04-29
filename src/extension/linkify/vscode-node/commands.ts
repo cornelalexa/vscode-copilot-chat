@@ -12,7 +12,7 @@ import { UriComponents } from '../../../util/vs/base/common/uri';
 import { openFileLinkCommand, OpenFileLinkCommandArgs, openSymbolInFileCommand, OpenSymbolInFileCommandArgs } from '../common/commands';
 import { findBestSymbolByPath } from './findSymbol';
 
-export const openSymbolFromReferencesCommand = '_github.copilot.openSymbolFromReferences';
+export const openSymbolFromReferencesCommand = '_reea.copilot.openSymbolFromReferences';
 
 export type OpenSymbolFromReferencesCommandArgs = [_word_unused: string, locations: ReadonlyArray<{ uri: UriComponents; pos: vscode.Position }>, requestId: string | undefined];
 

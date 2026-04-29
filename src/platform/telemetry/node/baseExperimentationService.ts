@@ -26,12 +26,12 @@ export class UserInfoStore extends Disposable {
 	private _onDidChangeUserInfo = this._register(new Emitter<void>());
 	readonly onDidChangeUserInfo = this._onDidChangeUserInfo.event;
 
-	static INTERNAL_ORG_STORAGE_KEY = 'exp.github.copilot.internalOrg';
-	static SKU_STORAGE_KEY = 'exp.github.copilot.sku';
-	static IS_FCV1_STORAGE_KEY = 'exp.github.copilot.isFcv1';
-	static IS_SN_STORAGE_KEY = 'exp.github.copilot.isSn';
-	static IS_VSCODE_TEAM_MEMBER_STORAGE_KEY = 'exp.github.copilot.isVscodeTeamMember';
-	static ORGANIZATION_LIST_STORAGE_KEY = 'exp.github.copilot.organizationList';
+	static INTERNAL_ORG_STORAGE_KEY = 'exp.reea.copilot.internalOrg';
+	static SKU_STORAGE_KEY = 'exp.reea.copilot.sku';
+	static IS_FCV1_STORAGE_KEY = 'exp.reea.copilot.isFcv1';
+	static IS_SN_STORAGE_KEY = 'exp.reea.copilot.isSn';
+	static IS_VSCODE_TEAM_MEMBER_STORAGE_KEY = 'exp.reea.copilot.isVscodeTeamMember';
+	static ORGANIZATION_LIST_STORAGE_KEY = 'exp.reea.copilot.organizationList';
 	constructor(private readonly context: IVSCodeExtensionContext, copilotTokenStore: ICopilotTokenStore) {
 		super();
 

@@ -277,7 +277,7 @@ describe('ChatWebSocketManager', () => {
 			await expect(handle.done).rejects.toThrow();
 		});
 
-		it('includes copilot_quota_snapshots when present', async () => {
+		it('includes reea_copilot_quota_snapshots when present', async () => {
 			const connection = await getConnection();
 			const cts = disposables.add(new CancellationTokenSource());
 			const handle = connection.sendRequest(
@@ -292,7 +292,7 @@ describe('ChatWebSocketManager', () => {
 			const capiError = JSON.stringify({
 				type: 'error',
 				error: { code: 'quota_exceeded', message: 'Quota exceeded' },
-				copilot_quota_snapshots: {
+				reea_copilot_quota_snapshots: {
 					'premium-chat-requests': {
 						entitlement: '300',
 						percent_remaining: 0,
@@ -304,8 +304,8 @@ describe('ChatWebSocketManager', () => {
 			handle.done.catch(() => { });
 			ws.simulateMessage(capiError);
 
-			expect(capiErrors[0].copilot_quota_snapshots).toBeDefined();
-			expect(capiErrors[0].copilot_quota_snapshots!['premium-chat-requests'].percent_remaining).toBe(0);
+			expect(capiErrors[0].reea_copilot_quota_snapshots).toBeDefined();
+			expect(capiErrors[0].reea_copilot_quota_snapshots!['premium-chat-requests'].percent_remaining).toBe(0);
 
 			await expect(handle.done).rejects.toThrow();
 		});

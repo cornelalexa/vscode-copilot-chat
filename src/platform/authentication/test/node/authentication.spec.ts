@@ -78,7 +78,7 @@ suite('AuthenticationService', function () {
 		authenticationService.setCopilotToken(new CopilotToken(createTestExtendedTokenInfo({
 			token: newToken,
 			username: 'fake',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		})));
 		await promise;
 		expect(authenticationService.copilotToken?.token).toBe(newToken);

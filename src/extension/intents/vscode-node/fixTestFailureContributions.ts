@@ -35,7 +35,7 @@ function registerTestMessageSparkles(store: DisposableStore, telemetryService: I
 		return failure || mapFindFirst(item.children, ([, item]) => getLastFailureForItemOrChildren(item));
 	}
 
-	store.add(vscode.commands.registerCommand('github.copilot.tests.fixTestFailure.fromInline', (item: vscode.TestItem) => {
+	store.add(vscode.commands.registerCommand('reea.copilot.tests.fixTestFailure.fromInline', (item: vscode.TestItem) => {
 		const failure = getLastFailureForItemOrChildren(item);
 		if (failure) {
 			openFixChat({
@@ -46,7 +46,7 @@ function registerTestMessageSparkles(store: DisposableStore, telemetryService: I
 		}
 	}));
 
-	store.add(vscode.commands.registerCommand('github.copilot.tests.fixTestFailure', openFixChat));
+	store.add(vscode.commands.registerCommand('reea.copilot.tests.fixTestFailure', openFixChat));
 
 	async function openFixChat(args: FixCommandArgs) {
 		if (!args.test.uri) {
@@ -95,7 +95,7 @@ function registerTestFailureCodeAction(testProvider: ITestProvider, configuratio
 			ca.isAI = true;
 			ca.command = {
 				title: l10n.t('Fix test failure'),
-				command: 'github.copilot.tests.fixTestFailure',
+				command: 'reea.copilot.tests.fixTestFailure',
 				arguments: [{
 					message: test.task.messages[0],
 					test: test.snapshot,

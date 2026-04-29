@@ -63,45 +63,45 @@ export class GenAiMetrics {
 	// ── Extension-Specific Metrics ──
 
 	static recordToolCallCount(otel: IOTelService, toolName: string, success: boolean): void {
-		otel.incrementCounter('copilot_chat.tool.call.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.tool.call.count', 1, {
 			[GenAiAttr.TOOL_NAME]: toolName,
 			success,
 		});
 	}
 
 	static recordToolCallDuration(otel: IOTelService, toolName: string, durationMs: number): void {
-		otel.recordMetric('copilot_chat.tool.call.duration', durationMs, {
+		otel.recordMetric('reea_copilot_chat.tool.call.duration', durationMs, {
 			[GenAiAttr.TOOL_NAME]: toolName,
 		});
 	}
 
 	static recordAgentDuration(otel: IOTelService, agentName: string, durationSec: number): void {
-		otel.recordMetric('copilot_chat.agent.invocation.duration', durationSec, {
+		otel.recordMetric('reea_copilot_chat.agent.invocation.duration', durationSec, {
 			[GenAiAttr.AGENT_NAME]: agentName,
 		});
 	}
 
 	static recordAgentTurnCount(otel: IOTelService, agentName: string, turnCount: number): void {
-		otel.recordMetric('copilot_chat.agent.turn.count', turnCount, {
+		otel.recordMetric('reea_copilot_chat.agent.turn.count', turnCount, {
 			[GenAiAttr.AGENT_NAME]: agentName,
 		});
 	}
 
 	static recordTimeToFirstToken(otel: IOTelService, model: string, ttftSec: number): void {
-		otel.recordMetric('copilot_chat.time_to_first_token', ttftSec, {
+		otel.recordMetric('reea_copilot_chat.time_to_first_token', ttftSec, {
 			[GenAiAttr.REQUEST_MODEL]: model,
 		});
 	}
 
 	static incrementSessionCount(otel: IOTelService): void {
-		otel.incrementCounter('copilot_chat.session.count');
+		otel.incrementCounter('reea_copilot_chat.session.count');
 	}
 
 	// ── Agent Activity & Outcome Metrics ──
 
 	/** Accept/reject counter for inline chat and chat editing edits */
 	static recordEditAcceptance(otel: IOTelService, source: EditSource, outcome: EditOutcome, languageId?: string): void {
-		otel.incrementCounter('copilot_chat.edit.acceptance.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.edit.acceptance.count', 1, {
 			[CopilotChatAttr.EDIT_SOURCE]: source,
 			[CopilotChatAttr.EDIT_OUTCOME]: outcome,
 			...(languageId ? { [CopilotChatAttr.LANGUAGE_ID]: languageId } : {}),
@@ -110,7 +110,7 @@ export class GenAiMetrics {
 
 	/** File-level chat editing session outcome (accepted/rejected/saved) */
 	static recordChatEditOutcome(otel: IOTelService, source: EditSource, outcome: EditOutcome, languageId?: string, hasRemainingEdits?: boolean): void {
-		otel.incrementCounter('copilot_chat.chat_edit.outcome.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.chat_edit.outcome.count', 1, {
 			[CopilotChatAttr.EDIT_SOURCE]: source,
 			[CopilotChatAttr.EDIT_OUTCOME]: outcome,
 			...(languageId ? { [CopilotChatAttr.LANGUAGE_ID]: languageId } : {}),
@@ -120,7 +120,7 @@ export class GenAiMetrics {
 
 	/** 4-gram text similarity survival score */
 	static recordEditSurvivalFourGram(otel: IOTelService, source: EditSource, score: number, timeDelayMs: number): void {
-		otel.recordMetric('copilot_chat.edit.survival.four_gram', score, {
+		otel.recordMetric('reea_copilot_chat.edit.survival.four_gram', score, {
 			[CopilotChatAttr.EDIT_SOURCE]: source,
 			[CopilotChatAttr.TIME_DELAY_MS]: timeDelayMs,
 		});
@@ -128,7 +128,7 @@ export class GenAiMetrics {
 
 	/** No-revert survival score */
 	static recordEditSurvivalNoRevert(otel: IOTelService, source: EditSource, score: number, timeDelayMs: number): void {
-		otel.recordMetric('copilot_chat.edit.survival.no_revert', score, {
+		otel.recordMetric('reea_copilot_chat.edit.survival.no_revert', score, {
 			[CopilotChatAttr.EDIT_SOURCE]: source,
 			[CopilotChatAttr.TIME_DELAY_MS]: timeDelayMs,
 		});
@@ -136,7 +136,7 @@ export class GenAiMetrics {
 
 	/** Lines of code added/removed by accepted agent edits */
 	static incrementLinesOfCode(otel: IOTelService, type: 'added' | 'removed', languageId: string | undefined, count: number): void {
-		otel.incrementCounter('copilot_chat.lines_of_code.count', count, {
+		otel.incrementCounter('reea_copilot_chat.lines_of_code.count', count, {
 			'type': type,
 			...(languageId ? { [CopilotChatAttr.LANGUAGE_ID]: languageId } : {}),
 		});
@@ -145,13 +145,13 @@ export class GenAiMetrics {
 	// ── User Engagement Metrics ──
 
 	static incrementUserActionCount(otel: IOTelService, action: string): void {
-		otel.incrementCounter('copilot_chat.user.action.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.user.action.count', 1, {
 			'action': action,
 		});
 	}
 
 	static incrementUserFeedbackCount(otel: IOTelService, rating: string): void {
-		otel.incrementCounter('copilot_chat.user.feedback.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.user.feedback.count', 1, {
 			'rating': rating,
 		});
 	}
@@ -159,13 +159,13 @@ export class GenAiMetrics {
 	// ── Agent Internals Metrics ──
 
 	static incrementAgentEditResponseCount(otel: IOTelService, outcome: string): void {
-		otel.incrementCounter('copilot_chat.agent.edit_response.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.agent.edit_response.count', 1, {
 			'outcome': outcome,
 		});
 	}
 
 	static incrementAgentSummarizationCount(otel: IOTelService, outcome: string): void {
-		otel.incrementCounter('copilot_chat.agent.summarization.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.agent.summarization.count', 1, {
 			'outcome': outcome,
 		});
 	}
@@ -173,16 +173,16 @@ export class GenAiMetrics {
 	// ── Background/Cloud Metrics ──
 
 	static incrementPullRequestCount(otel: IOTelService): void {
-		otel.incrementCounter('copilot_chat.pull_request.count');
+		otel.incrementCounter('reea_copilot_chat.pull_request.count');
 	}
 
 	static incrementCloudSessionCount(otel: IOTelService, partnerAgent: string): void {
-		otel.incrementCounter('copilot_chat.cloud.session.count', 1, {
+		otel.incrementCounter('reea_copilot_chat.cloud.session.count', 1, {
 			'partner_agent': partnerAgent,
 		});
 	}
 
 	static incrementCloudPrReadyCount(otel: IOTelService): void {
-		otel.incrementCounter('copilot_chat.cloud.pr_ready.count');
+		otel.incrementCounter('reea_copilot_chat.cloud.pr_ready.count');
 	}
 }

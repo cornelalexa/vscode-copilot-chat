@@ -653,7 +653,7 @@ export class ClaudeChatSessionItemController extends Disposable {
 	}
 
 	private _registerCommands(): void {
-		this._register(vscode.commands.registerCommand('github.copilot.claude.sessions.rename', async (sessionItem?: vscode.ChatSessionItem) => {
+		this._register(vscode.commands.registerCommand('reea.copilot.claude.sessions.rename', async (sessionItem?: vscode.ChatSessionItem) => {
 			if (!sessionItem?.resource) {
 				return;
 			}

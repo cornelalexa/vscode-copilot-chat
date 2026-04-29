@@ -152,7 +152,7 @@ suite('RepoInfoTelemetry', () => {
 			organization_list: [],
 			isVscodeTeamMember: false,
 			username: 'testUser',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 		copilotTokenStore.copilotToken = nonInternalToken;
 
@@ -1968,7 +1968,7 @@ suite('RepoInfoTelemetry', () => {
 			organization_list: ['4535c7beffc844b46bb1ed4aa04d759a'], // GitHub org for internal users
 			isVscodeTeamMember: true,
 			username: 'testUser',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 		copilotTokenStore.copilotToken = internalToken;
 	}

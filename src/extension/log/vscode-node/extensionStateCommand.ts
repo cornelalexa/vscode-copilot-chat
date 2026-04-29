@@ -24,7 +24,7 @@ export class ExtensionStateCommandContribution extends Disposable implements IEx
 	) {
 		super();
 
-		this._register(vscode.commands.registerCommand('github.copilot.debug.extensionState', async () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.debug.extensionState', async () => {
 			await this._logExtensionState();
 		}));
 	}

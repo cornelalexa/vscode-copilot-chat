@@ -85,23 +85,23 @@ export async function withHookOTelSpan<T>(
 		kind: SpanKind.INTERNAL,
 		attributes: {
 			[GenAiAttr.OPERATION_NAME]: GenAiOperationName.EXECUTE_HOOK,
-			'copilot_chat.hook_type': hookType,
-			'copilot_chat.hook_command': hookCommand,
+			'reea_copilot_chat.hook_type': hookType,
+			'reea_copilot_chat.hook_command': hookCommand,
 			[CopilotChatAttr.CHAT_SESSION_ID]: sessionId,
 		},
 	});
 	try {
-		span.setAttribute('copilot_chat.hook_input', truncateForOTel(JSON.stringify(input)));
+		span.setAttribute('reea_copilot_chat.hook_input', truncateForOTel(JSON.stringify(input)));
 	} catch { /* swallow serialization errors */ }
 
 	try {
 		const result = await callback(span);
-		span.setAttribute('copilot_chat.hook_result_kind', 'success');
+		span.setAttribute('reea_copilot_chat.hook_result_kind', 'success');
 		span.setStatus(SpanStatusCode.OK);
 		return result;
 	} catch (err) {
 		const errMsg = err instanceof Error ? err.message : 'unknown error';
-		span.setAttribute('copilot_chat.hook_result_kind', 'error');
+		span.setAttribute('reea_copilot_chat.hook_result_kind', 'error');
 		span.setStatus(SpanStatusCode.ERROR, errMsg);
 		throw err;
 	} finally {

@@ -45,7 +45,7 @@ export interface APIJsonData {
 	/* These are only generated in certain situations. */
 	logprobs?: APILogprobs;
 	/* Copilot-specific annotations returned by the proxy. */
-	copilot_annotations?: CopilotNamedAnnotationList;
+	reea_copilot_annotations?: CopilotNamedAnnotationList;
 	/* Reason the proxy returned for why the stream of chunks ended. */
 	finish_reason: string; // Reason the API used to describe why the stream of chunks finished.
 }
@@ -74,7 +74,7 @@ export function convertToAPIChoice(
 		tokens: jsonData.tokens,
 		numTokens: jsonData.tokens.length,
 		telemetryData: telemetryData,
-		copilotAnnotations: jsonData.copilot_annotations,
+		copilotAnnotations: jsonData.reea_copilot_annotations,
 		clientCompletionId: generateUuid(),
 		finishReason: jsonData.finish_reason,
 	};

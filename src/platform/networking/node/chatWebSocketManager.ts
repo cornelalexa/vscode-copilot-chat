@@ -128,7 +128,7 @@ export interface IChatWebSocketRequestHandle {
  * nested `error` object: `{ type: "error", error: { code, message } }`.
  *
  * Non-recoverable errors (rate limits, quota, upstream failures) also include
- * `copilot_quota_snapshots` with per-model quota state.
+ * `reea_copilot_quota_snapshots` with per-model quota state.
  */
 export interface CAPIWebSocketErrorEvent {
 	readonly type: 'error';
@@ -136,7 +136,7 @@ export interface CAPIWebSocketErrorEvent {
 		readonly code: string;
 		readonly message: string;
 	};
-	readonly copilot_quota_snapshots?: QuotaSnapshots;
+	readonly reea_copilot_quota_snapshots?: QuotaSnapshots;
 }
 
 export function isCAPIWebSocketError(event: OpenAI.Responses.ResponseStreamEvent | CAPIWebSocketErrorEvent): event is CAPIWebSocketErrorEvent {
@@ -691,8 +691,8 @@ class ChatWebSocketActiveRequest implements IChatWebSocketRequestHandle {
 			return;
 		}
 
-		// E.g.: "github.copilot.chat.advanced.debug.simulateWebSocketResponse": "{\"type\":\"error\",\"error\":{\"code\":\"user_global_rate_limited:enterprise\",\"message\":\"Rate limit exceeded\"}}"
-		// E.g.: "github.copilot.chat.advanced.debug.simulateWebSocketResponse": "{\"type\":\"error\",\"error\":{\"code\":\"service_unavailable\",\"message\":\"service temporarily unavailable, please retry\"}}"
+		// E.g.: "reea.copilot.chat.advanced.debug.simulateWebSocketResponse": "{\"type\":\"error\",\"error\":{\"code\":\"user_global_rate_limited:enterprise\",\"message\":\"Rate limit exceeded\"}}"
+		// E.g.: "reea.copilot.chat.advanced.debug.simulateWebSocketResponse": "{\"type\":\"error\",\"error\":{\"code\":\"service_unavailable\",\"message\":\"service temporarily unavailable, please retry\"}}"
 		const simulateResponse = this._configurationService.getConfig(ConfigKey.TeamInternal.DebugSimulateWebSocketResponse);
 		if (simulateResponse) {
 			try {

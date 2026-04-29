@@ -150,8 +150,8 @@ const DEFAULT_REPOSITORY_ID = '___vscode_repository_default___';
 
 const ACTIVE_SESSION_POLL_INTERVAL_MS = 5 * 1000; // 5 seconds
 const SEEN_DELEGATION_PROMPT_KEY = 'seenDelegationPromptBefore';
-const OPEN_REPOSITORY_COMMAND_ID = 'github.copilot.chat.cloudSessions.openRepository';
-const CLEAR_CACHES_COMMAND_ID = 'github.copilot.chat.cloudSessions.clearCaches';
+const OPEN_REPOSITORY_COMMAND_ID = 'reea.copilot.chat.cloudSessions.openRepository';
+const CLEAR_CACHES_COMMAND_ID = 'reea.copilot.chat.cloudSessions.clearCaches';
 const USER_SELECTED_REPOS_KEY = 'userSelectedRepositories';
 const USER_SELECTED_REPOS_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
 
@@ -449,7 +449,7 @@ export class CopilotCloudSessionsProvider extends Disposable implements vscode.C
 					await vscode.commands.executeCommand('pr.checkoutFromDescription', { owner: repoId.org, repo: repoId.repo, number: pullRequestNumber });
 				},
 			});
-		this._register(vscode.commands.registerCommand('github.copilot.chat.checkoutPullRequestReroute', checkoutPullRequestReroute));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.checkoutPullRequestReroute', checkoutPullRequestReroute));
 
 		const openPullRequestReroute = (sessionItemOrResource?: vscode.ChatSessionItem | number | vscode.Uri) =>
 			executePullRequestActionWithExtensionInstall(sessionItemOrResource, {
@@ -470,7 +470,7 @@ export class CopilotCloudSessionsProvider extends Disposable implements vscode.C
 					});
 				},
 			});
-		this._register(vscode.commands.registerCommand('github.copilot.chat.openPullRequestReroute', openPullRequestReroute));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.openPullRequestReroute', openPullRequestReroute));
 
 		// Command for browsing repositories in the repository picker
 		const openRepositoryCommand = async (sessionItemResource?: vscode.Uri): Promise<string | undefined> => {
@@ -1193,7 +1193,7 @@ export class CopilotCloudSessionsProvider extends Disposable implements vscode.C
 					return state !== 'CLOSED' && state !== 'MERGED';
 				});
 
-			vscode.commands.executeCommand('setContext', 'github.copilot.chat.cloudSessionsEmpty', filteredSessions.length === 0);
+			vscode.commands.executeCommand('setContext', 'reea.copilot.chat.cloudSessionsEmpty', filteredSessions.length === 0);
 			this.logService.debug(`copilotCloudSessionsProvider#provideChatSessionItems: returning ${filteredSessions.length} sessions (${sessionItems.length - filteredSessions.length} filtered out)`);
 
 			// Cache the results
@@ -1636,7 +1636,7 @@ export class CopilotCloudSessionsProvider extends Disposable implements vscode.C
 			uri, // PR uri,
 			command: {
 				title: vscode.l10n.t('View Pull Request #{0}', pullRequest.number),
-				command: 'github.copilot.chat.openPullRequestReroute',
+				command: 'reea.copilot.chat.openPullRequestReroute',
 				arguments: [pullRequest.number]
 			},
 			title: pullRequest.title,

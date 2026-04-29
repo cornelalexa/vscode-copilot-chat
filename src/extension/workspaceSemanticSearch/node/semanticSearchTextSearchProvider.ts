@@ -63,7 +63,7 @@ export interface IRankResult {
 export class SemanticSearchTextSearchProvider implements vscode.AITextSearchProvider {
 	private _endpoint: IChatEndpoint | undefined = undefined;
 	public readonly name: string = 'Copilot';
-	public static feedBackSentKey = 'github.copilot.search.feedback.sent';
+	public static feedBackSentKey = 'reea.copilot.search.feedback.sent';
 	public static latestQuery: string | undefined = undefined;
 	public static feedBackTelemetry: Partial<ISearchFeedbackTelemetry> = {};
 

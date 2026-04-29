@@ -98,7 +98,7 @@ export function createContext(serviceAccessor: ServicesAccessor, store: Disposab
 	serviceCollection.set(ICompletionsExtensionStatus, new CopilotExtensionStatus());
 	serviceCollection.set(ICompletionsFeaturesService, new SyncDescriptor(Features));
 	serviceCollection.set(ICompletionsObservableWorkspace, new SyncDescriptor(CompletionsObservableWorkspace));
-	serviceCollection.set(ICompletionsStatusReporter, new SyncDescriptor(CopilotStatusBar, ['github.copilot.languageStatus']));
+	serviceCollection.set(ICompletionsStatusReporter, new SyncDescriptor(CopilotStatusBar, ['reea.copilot.languageStatus']));
 	serviceCollection.set(ICompletionsCopilotTokenManager, new SyncDescriptor(CopilotTokenManagerImpl, [false]));
 	serviceCollection.set(ICompletionsTextDocumentManagerService, new SyncDescriptor(ExtensionTextDocumentManager));
 	serviceCollection.set(ICompletionsFileReaderService, new SyncDescriptor(FileReader));

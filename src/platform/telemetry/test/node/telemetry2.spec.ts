@@ -49,7 +49,7 @@ suite('Telemetry unit tests', function () {
 			token: 'tid=0123456789abcdef0123456789abcdef;rt=1;ssc=0;dom=org1.com;ol=org1,org2',
 			organization_list: ['org1', 'org2'],
 			username: 'fake',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		accessor.get(ICopilotTokenStore).copilotToken = copilotToken;
@@ -66,7 +66,7 @@ suite('Telemetry unit tests', function () {
 		const copilotToken = new CopilotToken(createTestExtendedTokenInfo({
 			token: 'tid=0123456789abcdef0123456789abcdef;rt=0;ssc=0;dom=org1.com;ol=org1,org2',
 			username: 'fake',
-			copilot_plan: 'unknown'
+			reea_copilot_plan: 'unknown'
 		}));
 
 		accessor.get(ICopilotTokenStore).copilotToken = copilotToken;
@@ -83,7 +83,7 @@ suite('Telemetry unit tests', function () {
 			organization_list: ['org1', 'org2'],
 			enterprise_list: [12345, 67890],
 			username: 'fake',
-			copilot_plan: 'enterprise',
+			reea_copilot_plan: 'enterprise',
 		}));
 
 		accessor.get(ICopilotTokenStore).copilotToken = copilotToken;
@@ -153,7 +153,7 @@ suite('Telemetry unit tests', function () {
 		tokenStore.copilotToken = new CopilotToken(createTestExtendedTokenInfo({
 			token: 'tid=abc123;rt=1',
 			username: 'fake',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		const getTrackingId = createTrackingIdGetter(tokenStore);
@@ -171,7 +171,7 @@ suite('Telemetry unit tests', function () {
 		tokenStore.copilotToken = new CopilotToken(createTestExtendedTokenInfo({
 			token: 'tid=abc123;rt=1',
 			username: 'fake',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		assert.strictEqual(getTrackingId(), 'abc123');
@@ -184,7 +184,7 @@ suite('Telemetry unit tests', function () {
 		tokenStore.copilotToken = new CopilotToken(createTestExtendedTokenInfo({
 			token: 'tid=abc123;rt=1',
 			username: 'fake',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		const getTrackingId = createTrackingIdGetter(tokenStore);
@@ -203,7 +203,7 @@ suite('Telemetry unit tests', function () {
 		tokenStore.copilotToken = new CopilotToken(createTestExtendedTokenInfo({
 			token: 'tid=abc123;rt=1',
 			username: 'fake',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		const getTrackingId = createTrackingIdGetter(tokenStore);
@@ -213,7 +213,7 @@ suite('Telemetry unit tests', function () {
 		tokenStore.copilotToken = new CopilotToken(createTestExtendedTokenInfo({
 			token: 'tid=def456;rt=1',
 			username: 'fake',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		assert.strictEqual(getTrackingId(), 'def456');

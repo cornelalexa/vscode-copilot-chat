@@ -439,7 +439,7 @@ export function postProcessChoices(choices: AsyncIterable<APIChoice>) {
 	return asyncIterableFilter(choices, choice => choice.completionText.trim().length > 0);
 }
 
-export const CMDQuotaExceeded = 'github.copilot.completions.quotaExceeded';
+export const CMDQuotaExceeded = 'reea.copilot.completions.quotaExceeded';
 
 export class LiveOpenAIFetcher extends OpenAIFetcher {
 	#disabledReason: string | undefined;
@@ -906,7 +906,7 @@ export class LiveOpenAIFetcher extends OpenAIFetcher {
 								text: completion.accumulator.responseSoFar,
 								tokens: completion.accumulator.chunks,
 								finish_reason: completion.accumulator.finishReason ?? 'stop', // @ulugbekna: logic to determine if last completion was accepted uses finish reason, so changing this `?? 'stop'` will change behavior of multiline completions
-								copilot_annotations: completion.accumulator.annotations.current,
+								reea_copilot_annotations: completion.accumulator.annotations.current,
 							} satisfies APIJsonData),
 						} satisfies RequestDelta);
 
@@ -989,7 +989,7 @@ export class LiveOpenAIFetcher extends OpenAIFetcher {
 							text: completion.accumulator.responseSoFar,
 							tokens: completion.accumulator.chunks,
 							finish_reason: completion.accumulator.finishReason ?? 'stop',
-							copilot_annotations: completion.accumulator.annotations.current,
+							reea_copilot_annotations: completion.accumulator.annotations.current,
 						} satisfies APIJsonData),
 					} satisfies RequestDelta);
 
@@ -1132,8 +1132,8 @@ class CompletionAccumulator {
 			this._responseSoFar = this._responseSoFar + chunk;
 		}
 
-		if (choice.copilot_annotations) {
-			this.annotations.update(choice.copilot_annotations);
+		if (choice.reea_copilot_annotations) {
+			this.annotations.update(choice.reea_copilot_annotations);
 		}
 	}
 }

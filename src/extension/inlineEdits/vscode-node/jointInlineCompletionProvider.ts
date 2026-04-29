@@ -219,7 +219,7 @@ export class JointCompletionsProviderContribution extends Disposable implements 
 						completionsProvider = this._copilotInlineCompletionItemProviderService.getOrCreateProvider() as CopilotInlineCompletionItemProvider;
 					}
 
-					void vscode.commands.executeCommand('setContext', 'github.copilot.extensionUnification.activated', extensionUnification);
+					void vscode.commands.executeCommand('setContext', 'reea.copilot.extensionUnification.activated', extensionUnification);
 
 					if (extensionUnification && completionsProvider) {
 						const completionsInstaService = this._copilotInlineCompletionItemProviderService.getOrCreateInstantiationService();
@@ -230,8 +230,8 @@ export class JointCompletionsProviderContribution extends Disposable implements 
 				const singularProvider = reader.store.add(this._instantiationService.createInstance(JointCompletionsProvider, completionsProvider, inlineEditProvider));
 
 				if (unificationStateValue?.modelUnification) {
-					if (!excludes.includes('github.copilot')) {
-						excludes.push('github.copilot');
+					if (!excludes.includes('reea.copilot')) {
+						excludes.push('reea.copilot');
 					}
 				}
 

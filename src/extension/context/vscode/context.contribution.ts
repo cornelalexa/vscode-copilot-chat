@@ -21,10 +21,10 @@ export function create(accessor: ServicesAccessor): IDisposable {
 
 function registerContextCommands(accessor: ServicesAccessor) {
 	return Disposable.from(
-		commands.registerCommand('github.copilot.chat.attachFile', () => {
+		commands.registerCommand('reea.copilot.chat.attachFile', () => {
 			return commands.executeCommand('workbench.action.chat.attachFile');
 		}),
-		commands.registerCommand('github.copilot.chat.attachSelection', () => {
+		commands.registerCommand('reea.copilot.chat.attachSelection', () => {
 			return commands.executeCommand('workbench.action.chat.attachSelection');
 		}),
 	);

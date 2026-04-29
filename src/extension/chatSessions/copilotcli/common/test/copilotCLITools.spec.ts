@@ -101,7 +101,7 @@ describe('CopilotCLITools', () => {
 			if (prPart) {
 				expect((prPart as any).title).toBe('Fix&Improve'); // &amp; unescaped
 				// command is set with openPullRequestReroute
-				expect((prPart as any).command.command).toBe('github.copilot.chat.openPullRequestReroute');
+				expect((prPart as any).command.command).toBe('reea.copilot.chat.openPullRequestReroute');
 			}
 			if (markdownPart) {
 				expect((markdownPart as any).value?.value || (markdownPart as any).value).toContain('This is the PR body.');
@@ -466,8 +466,8 @@ describe('CopilotCLITools', () => {
 			expect(part).toBeInstanceOf(ChatToolInvocationPart);
 			expect(getInvocationMessageText(part as ChatToolInvocationPart)).toContain('naming');
 		});
-		it('creates invocation for fetch_copilot_cli_documentation', () => {
-			const part = createCopilotCLIToolInvocation({ toolName: 'fetch_copilot_cli_documentation', toolCallId: 'fd1', arguments: {} });
+		it('creates invocation for fetch_reea_copilot_cli_documentation', () => {
+			const part = createCopilotCLIToolInvocation({ toolName: 'fetch_reea_copilot_cli_documentation', toolCallId: 'fd1', arguments: {} });
 			expect(part).toBeInstanceOf(ChatToolInvocationPart);
 		});
 		it('creates invocation for list_agents', () => {

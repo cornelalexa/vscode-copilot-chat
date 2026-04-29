@@ -1126,7 +1126,7 @@ export class ChatMLFetcherImpl extends AbstractChatMLFetcher {
 						}
 
 						if (event.type === 'response.completed') {
-							const snapshots = (event as any).copilot_quota_snapshots;
+							const snapshots = (event as any).reea_copilot_quota_snapshots;
 							if (snapshots && typeof snapshots === 'object') {
 								this._chatQuotaService.processQuotaSnapshots(snapshots);
 							}

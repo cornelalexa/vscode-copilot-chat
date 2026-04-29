@@ -198,8 +198,8 @@ export class OpenAICompatibleTestEndpoint extends ChatEndpoint {
 
 		if (body?.messages) {
 			body.messages.forEach((message: any) => {
-				if (message.copilot_cache_control) {
-					delete message.copilot_cache_control;
+				if (message.reea_copilot_cache_control) {
+					delete message.reea_copilot_cache_control;
 				}
 			});
 		}

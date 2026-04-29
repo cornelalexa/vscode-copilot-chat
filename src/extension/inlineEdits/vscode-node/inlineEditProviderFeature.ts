@@ -32,7 +32,7 @@ import { InlineEditLogger } from './parts/inlineEditLogger';
 import { VSCodeWorkspace } from './parts/vscodeWorkspace';
 import { makeSettable } from './utils/observablesUtils';
 
-const useEnhancedNotebookNESContextKey = 'github.copilot.chat.enableEnhancedNotebookNES';
+const useEnhancedNotebookNESContextKey = 'reea.copilot.chat.enableEnhancedNotebookNES';
 
 export class InlineEditProviderFeatureContribution extends Disposable implements IExtensionContribution {
 
@@ -102,7 +102,7 @@ export class InlineEditProviderFeature {
 		// Set context key for inline edits enabled state (used for keybindings)
 		return autorun((reader) => {
 			const enabled = this.inlineEditsEnabled.read(reader);
-			void commands.executeCommand('setContext', 'github.copilot.inlineEditsEnabled', enabled);
+			void commands.executeCommand('setContext', 'reea.copilot.inlineEditsEnabled', enabled);
 		});
 	}
 
@@ -157,14 +157,14 @@ export class InlineEditProviderFeature {
 				if (!excludes.includes('completions')) {
 					excludes.push('completions');
 				}
-				if (!excludes.includes('github.copilot')) {
-					excludes.push('github.copilot');
+				if (!excludes.includes('reea.copilot')) {
+					excludes.push('reea.copilot');
 				}
 			}
 
 			reader.store.add(languages.registerInlineCompletionItemProvider('*', provider, {
 				displayName: provider.displayName,
-				yieldTo: this._yieldToCopilot.read(reader) ? ['github.copilot'] : undefined,
+				yieldTo: this._yieldToCopilot.read(reader) ? ['reea.copilot'] : undefined,
 				debounceDelayMs: 0, // set 0 debounce to ensure consistent delays/timings
 				groupId: 'nes',
 				excludes,
@@ -215,13 +215,13 @@ export class InlineEditProviderFeature {
 	}
 }
 
-export const learnMoreCommandId = 'github.copilot.debug.inlineEdit.learnMore';
+export const learnMoreCommandId = 'reea.copilot.debug.inlineEdit.learnMore';
 
 export const learnMoreLink = 'https://aka.ms/vscode-nes';
 
-export const clearCacheCommandId = 'github.copilot.debug.inlineEdit.clearCache';
-export const reportNotebookNESIssueCommandId = 'github.copilot.debug.inlineEdit.reportNotebookNESIssue';
-export const captureExpectedStartCommandId = 'github.copilot.nes.captureExpected.start';
-export const captureExpectedConfirmCommandId = 'github.copilot.nes.captureExpected.confirm';
-export const captureExpectedAbortCommandId = 'github.copilot.nes.captureExpected.abort';
-export const captureExpectedSubmitCommandId = 'github.copilot.nes.captureExpected.submit';
+export const clearCacheCommandId = 'reea.copilot.debug.inlineEdit.clearCache';
+export const reportNotebookNESIssueCommandId = 'reea.copilot.debug.inlineEdit.reportNotebookNESIssue';
+export const captureExpectedStartCommandId = 'reea.copilot.nes.captureExpected.start';
+export const captureExpectedConfirmCommandId = 'reea.copilot.nes.captureExpected.confirm';
+export const captureExpectedAbortCommandId = 'reea.copilot.nes.captureExpected.abort';
+export const captureExpectedSubmitCommandId = 'reea.copilot.nes.captureExpected.submit';

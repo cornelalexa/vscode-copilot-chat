@@ -181,13 +181,13 @@ describe('ChatSessionWorkspaceFolderService', () => {
 					timestamp: Date.now() - 10000 + i  // Incrementing timestamps
 				};
 			}
-			await extensionContext.globalState.update('github.copilot.cli.sessionWorkspaceFolders', oldData);
+			await extensionContext.globalState.update('reea.copilot.cli.sessionWorkspaceFolders', oldData);
 
 			// Add one more entry to trigger cleanup
 			await service.trackSessionWorkspaceFolder('session-new', vscode.Uri.file('/new/path').fsPath);
 
 			// Verify that cleanup occurred (some old entries should be gone)
-			const data = extensionContext.globalState.get<Record<string, unknown>>('github.copilot.cli.sessionWorkspaceFolders', {});
+			const data = extensionContext.globalState.get<Record<string, unknown>>('reea.copilot.cli.sessionWorkspaceFolders', {});
 			const entryCount = Object.keys(data).length;
 			expect(entryCount).toBeLessThan(MAX_ENTRIES + 1);
 		});
@@ -223,7 +223,7 @@ describe('ChatSessionWorkspaceFolderService', () => {
 
 		it('should handle malformed data gracefully', async () => {
 			// Manually inject malformed data
-			await extensionContext.globalState.update('github.copilot.cli.sessionWorkspaceFolders', {
+			await extensionContext.globalState.update('reea.copilot.cli.sessionWorkspaceFolders', {
 				'session-bad': {} // Missing folderPath
 			});
 
@@ -233,7 +233,7 @@ describe('ChatSessionWorkspaceFolderService', () => {
 
 		it('should return undefined if folderPath is empty string', async () => {
 			// Manually inject entry with empty folderPath
-			await extensionContext.globalState.update('github.copilot.cli.sessionWorkspaceFolders', {
+			await extensionContext.globalState.update('reea.copilot.cli.sessionWorkspaceFolders', {
 				'session-empty': { folderPath: '', timestamp: Date.now() }
 			});
 
@@ -318,21 +318,21 @@ describe('ChatSessionWorkspaceFolderService', () => {
 					timestamp: 1000 + i  // Older timestamps
 				};
 			}
-			await extensionContext.globalState.update('github.copilot.cli.sessionWorkspaceFolders', oldData);
+			await extensionContext.globalState.update('reea.copilot.cli.sessionWorkspaceFolders', oldData);
 
 			// Add a new entry with current timestamp
 			const now = Date.now();
-			const data = extensionContext.globalState.get<Record<string, unknown>>('github.copilot.cli.sessionWorkspaceFolders', {});
+			const data = extensionContext.globalState.get<Record<string, unknown>>('reea.copilot.cli.sessionWorkspaceFolders', {});
 			(data as any)['session-new'] = {
 				folderPath: vscode.Uri.file('/new/path').fsPath,
 				timestamp: now
 			};
-			await extensionContext.globalState.update('github.copilot.cli.sessionWorkspaceFolders', data);
+			await extensionContext.globalState.update('reea.copilot.cli.sessionWorkspaceFolders', data);
 
 			// Trigger cleanup by adding another entry
 			await service.trackSessionWorkspaceFolder('session-trigger', vscode.Uri.file('/trigger/path').fsPath);
 
-			const finalData = extensionContext.globalState.get<Record<string, unknown>>('github.copilot.cli.sessionWorkspaceFolders', {});
+			const finalData = extensionContext.globalState.get<Record<string, unknown>>('reea.copilot.cli.sessionWorkspaceFolders', {});
 
 			// The newest entries should be preserved
 			expect(finalData['session-new']).toBeDefined();

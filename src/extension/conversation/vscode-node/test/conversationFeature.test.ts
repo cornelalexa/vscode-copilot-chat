@@ -93,7 +93,7 @@ suite('Conversation feature test suite', function () {
 	test('The feature is enabled and activated in test mode', function () {
 		const conversationFeature = instaService.createInstance(ConversationFeature);
 		try {
-			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', copilot_plan: 'unknown' }));
+			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', reea_copilot_plan: 'unknown' }));
 			setCopilotToken(accessor.get(IAuthenticationService), copilotToken);
 
 			assert.deepStrictEqual(conversationFeature.enabled, true);
@@ -106,7 +106,7 @@ suite('Conversation feature test suite', function () {
 	test('If the token envelope setting is set to true, the feature should be enabled', function () {
 		const conversationFeature = instaService.createInstance(ConversationFeature);
 		try {
-			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', copilot_plan: 'unknown' }));
+			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', reea_copilot_plan: 'unknown' }));
 			setCopilotToken(accessor.get(IAuthenticationService), copilotToken);
 
 			assert.deepStrictEqual(conversationFeature.enabled, true);
@@ -118,7 +118,7 @@ suite('Conversation feature test suite', function () {
 	test('The feature should be activated when it becomes enabled', function () {
 		const conversationFeature = instaService.createInstance(ConversationFeature);
 		try {
-			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', copilot_plan: 'unknown' }));
+			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', reea_copilot_plan: 'unknown' }));
 			setCopilotToken(accessor.get(IAuthenticationService), copilotToken);
 			assert.deepStrictEqual(conversationFeature.enabled, true);
 			assert.deepStrictEqual(conversationFeature.activated, true);
@@ -135,7 +135,7 @@ suite('Conversation feature test suite', function () {
 		const conversationFeature = instaService.createInstance(ConversationFeature);
 		try {
 
-			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', copilot_plan: 'unknown' }));
+			const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token: 'token', username: 'fake', reea_copilot_plan: 'unknown' }));
 			setCopilotToken(accessor.get(IAuthenticationService), copilotToken);
 
 			assert.deepStrictEqual(conversationFeature.activated, true);

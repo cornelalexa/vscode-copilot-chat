@@ -46,8 +46,8 @@ suite('CodeReference', function () {
 
 		test('should be updated correctly when token change events received', function () {
 			const codeQuote = instantiationService.createInstance(CodeReference);
-			const enabledToken = new CopilotToken(createTestExtendedTokenInfo({ token: `test token ${generateUuid()}`, username: 'fixedTokenManager', copilot_plan: 'unknown', code_quote_enabled: true }));
-			const disabledToken = new CopilotToken(createTestExtendedTokenInfo({ token: `test token ${generateUuid()}`, username: 'fixedTokenManager', copilot_plan: 'unknown', code_quote_enabled: false }));
+			const enabledToken = new CopilotToken(createTestExtendedTokenInfo({ token: `test token ${generateUuid()}`, username: 'fixedTokenManager', reea_copilot_plan: 'unknown', code_quote_enabled: true }));
+			const disabledToken = new CopilotToken(createTestExtendedTokenInfo({ token: `test token ${generateUuid()}`, username: 'fixedTokenManager', reea_copilot_plan: 'unknown', code_quote_enabled: false }));
 
 			codeQuote.onCopilotToken(enabledToken);
 

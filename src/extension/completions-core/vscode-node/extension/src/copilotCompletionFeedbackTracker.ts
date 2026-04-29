@@ -47,7 +47,7 @@ async function openGitHubIssue(
 ) {
 	const body = generateGitHubIssueBody(accessor, item, telemetry);
 	await commands.executeCommand('workbench.action.openIssueReporter', {
-		extensionId: 'github.copilot',
+		extensionId: 'reea.copilot',
 		uri: Uri.parse('https://github.com/microsoft/vscode'),
 		data: body,
 	});

@@ -59,10 +59,10 @@ export class VSCodeConfigProvider extends ConfigProvider implements IDisposable 
 	override onDidChangeCopilotSettings: ConfigProvider['onDidChangeCopilotSettings'] = transformEvent(
 		vscode.workspace.onDidChangeConfiguration,
 		event => {
-			if (event.affectsConfiguration('github.copilot')) {
+			if (event.affectsConfiguration('reea.copilot')) {
 				return this;
 			}
-			if (event.affectsConfiguration('github.copilot-chat')) {
+			if (event.affectsConfiguration('reea.copilot-chat')) {
 				return this;
 			}
 		}
@@ -100,7 +100,7 @@ export class VSCodeEditorInfo implements ICompletionsEditorAndPluginInfo {
 		};
 	}
 	getEditorPluginInfo() {
-		return { name: 'copilot-chat', readableName: 'GitHub Copilot for Visual Studio Code', version: packageJson.version };
+		return { name: 'reea-copilot-chat', readableName: 'Reea Copilot for Visual Studio Code', version: packageJson.version };
 	}
 	getRelatedPluginInfo() {
 		// Any additions to this list should also be added as a known filter in
@@ -117,7 +117,7 @@ export class VSCodeEditorInfo implements ICompletionsEditorAndPluginInfo {
 			'vscode.typescript-language-features',
 			'ms-vscode.vscode-typescript-next',
 			'ms-dotnettools.csharp',
-			'github.copilot-chat',
+			'reea.copilot-chat',
 		]
 			.map(name => {
 				const extpj = vscode.extensions.getExtension(name)?.packageJSON as unknown;
@@ -206,7 +206,7 @@ export async function enableCompletions(accessor: ServicesAccessor) {
 		}
 	}
 
-	// The rest of this function is the inverse of disableCompletions(), updating the github.copilot.enable setting.
+	// The rest of this function is the inverse of disableCompletions(), updating the reea.copilot.enable setting.
 	const languageId = vscode.window.activeTextEditor?.document.languageId;
 	if (!languageId) { return; }
 	const config = vscode.workspace.getConfiguration(CopilotConfigPrefix);
@@ -225,7 +225,7 @@ export async function enableCompletions(accessor: ServicesAccessor) {
 }
 
 /**
- * Disable completions using the github.copilot.enable setting.
+ * Disable completions using the reea.copilot.enable setting.
  */
 export async function disableCompletions(accessor: ServicesAccessor) {
 	const instantiationService = accessor.get(IInstantiationService);

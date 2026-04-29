@@ -6,10 +6,10 @@
 import { UriComponents } from '../../../util/vs/base/common/uri';
 
 // TODO: keep these commands around for backwards compatibility, but remove them in the future
-export const openFileLinkCommand = '_github.copilot.openRelativePath';
+export const openFileLinkCommand = '_reea.copilot.openRelativePath';
 export type OpenFileLinkCommandArgs = [path: string | UriComponents, requestId?: string];
 
-export const openSymbolInFileCommand = '_github.copilot.openSymbolInFile';
+export const openSymbolInFileCommand = '_reea.copilot.openSymbolInFile';
 export type OpenSymbolInFileCommandArgs = [inFileUri: UriComponents, symbolText: string, requestId?: string];
 
 export function commandUri(command: string, args: readonly any[]): string {

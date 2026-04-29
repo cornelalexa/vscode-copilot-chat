@@ -9,7 +9,7 @@ import { ICopilotCLISessionTracker } from '../copilotCLISessionTracker';
 import { InProcHttpServer } from '../inProcHttpServer';
 import { sendEditorContextToSession } from './sendContext';
 
-export const ADD_SELECTION_COMMAND = 'github.copilot.chat.copilotCLI.addSelection';
+export const ADD_SELECTION_COMMAND = 'reea.copilot.chat.copilotCLI.addSelection';
 
 export function registerAddSelectionCommand(logger: ILogger, httpServer: InProcHttpServer, sessionTracker: ICopilotCLISessionTracker): vscode.Disposable {
 	return vscode.commands.registerCommand(ADD_SELECTION_COMMAND, async () => {

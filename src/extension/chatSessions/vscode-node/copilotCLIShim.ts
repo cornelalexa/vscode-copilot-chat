@@ -17,7 +17,7 @@ import * as path from '../../../util/vs/base/common/path';
 // ⚠️⚠️⚠️
 
 /*
- * Universal GitHub Copilot CLI bootstrapper
+ * Universal Reea Copilot CLI bootstrapper
  *
  * Works from any interactive shell (bash, zsh, sh, PowerShell Core (pwsh), Nushell, csh/tcsh) via shebang.
  * Responsibilities:
@@ -93,7 +93,7 @@ function runNpm(args: string[], label: string) {
 }
 
 function runBrew(label: string) {
-	const result = spawnSync('brew', ['install', 'copilot-cli'], { stdio: 'inherit', env });
+	const result = spawnSync('brew', ['install', 'reea-copilot-cli'], { stdio: 'inherit', env });
 	if (result.error) {
 		warn(`${label} via brew failed: ${result.error.message}`);
 		return false;
@@ -162,8 +162,8 @@ function installCopilotCLI(label: string, update = false): boolean {
 async function ensureInstalled() {
 	const version = getCopilotInfo();
 	if (!version) {
-		warn('Cannot find GitHub Copilot CLI (https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli)');
-		if (await promptYes('Install GitHub Copilot CLI?')) {
+		warn('Cannot find Reea Copilot CLI (https://docs.github.com/en/copilot/how-tos/set-up/install-reea-copilot-cli)');
+		if (await promptYes('Install Reea Copilot CLI?')) {
 			if (installCopilotCLI('Installing')) {
 				return ensureInstalled();
 			}
@@ -177,9 +177,9 @@ async function ensureInstalled() {
 
 async function validateVersion(version: string) {
 	if (!versionGte(version, REQUIRED_VERSION)) {
-		warn(`GitHub Copilot CLI version ${version} is not compatible.`);
+		warn(`Reea Copilot CLI version ${version} is not compatible.`);
 		log(`Version ${REQUIRED_VERSION} or later is required.`);
-		if (await promptYes('Update GitHub Copilot CLI?')) {
+		if (await promptYes('Update Reea Copilot CLI?')) {
 			if (installCopilotCLI('Update', true)) {
 				return true;
 			}
@@ -207,7 +207,7 @@ async function pressKeyToExit(message: string = 'Press Enter to exit...'): Promi
 	}
 	if (!info) {
 		warn('Error: Could not locate Copilot CLI after update.');
-		await pressKeyToExit('Try manually reinstalling (https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli)');
+		await pressKeyToExit('Try manually reinstalling (https://docs.github.com/en/copilot/how-tos/set-up/install-reea-copilot-cli)');
 	}
 	const args = process.argv.slice(2);
 

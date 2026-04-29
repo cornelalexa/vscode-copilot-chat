@@ -26,7 +26,7 @@ export class TestProvider extends Disposable implements ITestProvider {
 	private setHasFailureContextKey() {
 		vscode.commands.executeCommand(
 			'setContext',
-			'github.copilot.chat.fixTestFailures.hasFailure',
+			'reea.copilot.chat.fixTestFailures.hasFailure',
 			!!Iterable.first(this.getAllFailures()),
 		);
 	}

@@ -53,7 +53,7 @@ import { ICopilotCLISkills } from './copilotCLISkills';
 import { ICopilotCLIMCPHandler, McpServerMappings, remapCustomAgentTools } from './mcpHandler';
 
 
-const COPILOT_CLI_WORKSPACE_JSON_FILE_KEY = 'github.copilot.cli.workspaceSessionFile';
+const COPILOT_CLI_WORKSPACE_JSON_FILE_KEY = 'reea.copilot.cli.workspaceSessionFile';
 
 export interface ICopilotCLISessionItem {
 	readonly id: string;

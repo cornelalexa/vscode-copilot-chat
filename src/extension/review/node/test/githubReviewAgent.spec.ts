@@ -93,19 +93,19 @@ suite('githubReviewAgent', () => {
 			assert.deepStrictEqual(result, []);
 		});
 
-		test('returns empty array when no copilot_references', () => {
+		test('returns empty array when no reea_copilot_references', () => {
 			const result = parseLine('data: {"choices":[]}');
 			assert.deepStrictEqual(result, []);
 		});
 
-		test('returns empty array when copilot_references is empty', () => {
-			const result = parseLine('data: {"copilot_references":[]}');
+		test('returns empty array when reea_copilot_references is empty', () => {
+			const result = parseLine('data: {"reea_copilot_references":[]}');
 			assert.deepStrictEqual(result, []);
 		});
 
 		test('parses generated pull request comment', () => {
 			const data = {
-				copilot_references: [{
+				reea_copilot_references: [{
 					type: 'github.generated-pull-request-comment',
 					data: {
 						path: 'src/file.ts',
@@ -127,7 +127,7 @@ suite('githubReviewAgent', () => {
 
 		test('parses excluded pull request comment', () => {
 			const data = {
-				copilot_references: [{
+				reea_copilot_references: [{
 					type: 'github.excluded-pull-request-comment',
 					data: {
 						path: 'src/file.ts',
@@ -145,7 +145,7 @@ suite('githubReviewAgent', () => {
 
 		test('parses excluded file reference', () => {
 			const data = {
-				copilot_references: [{
+				reea_copilot_references: [{
 					type: 'github.excluded-file',
 					data: {
 						file_path: 'src/file.txt',
@@ -162,7 +162,7 @@ suite('githubReviewAgent', () => {
 
 		test('parses multiple references in single line', () => {
 			const data = {
-				copilot_references: [
+				reea_copilot_references: [
 					{
 						type: 'github.generated-pull-request-comment',
 						data: { path: 'a.ts', line: 1, body: 'Comment 1' }
@@ -180,7 +180,7 @@ suite('githubReviewAgent', () => {
 
 		test('filters out references without type', () => {
 			const data = {
-				copilot_references: [
+				reea_copilot_references: [
 					{ type: 'github.generated-pull-request-comment', data: { path: 'a.ts', line: 1, body: 'Valid' } },
 					{ data: { path: 'b.ts', line: 2, body: 'No type field' } }
 				]
@@ -964,7 +964,7 @@ suite('githubReviewAgent', () => {
 			// Set up CAPI client to return a streaming response with a comment
 			const sseResponse = [
 				`data: ${JSON.stringify({
-					copilot_references: [{
+					reea_copilot_references: [{
 						type: 'github.generated-pull-request-comment',
 						data: {
 							path: 'file.ts',
@@ -1400,7 +1400,7 @@ suite('githubReviewAgent', () => {
 			// Response contains a comment for a different file - use proper SSE format
 			const sseResponse = [
 				`data: ${JSON.stringify({
-					copilot_references: [{
+					reea_copilot_references: [{
 						type: 'github.generated-pull-request-comment',
 						data: {
 							path: 'other-file.ts', // Different from file.ts
@@ -1473,7 +1473,7 @@ suite('githubReviewAgent', () => {
 			// Response with excluded comment
 			const sseResponse = [
 				`data: ${JSON.stringify({
-					copilot_references: [{
+					reea_copilot_references: [{
 						type: 'github.excluded-pull-request-comment',
 						data: {
 							path: 'file.ts',
@@ -1549,7 +1549,7 @@ suite('githubReviewAgent', () => {
 			// Response with excluded file due to unsupported language
 			const sseResponse = [
 				`data: ${JSON.stringify({
-					copilot_references: [{
+					reea_copilot_references: [{
 						type: 'github.excluded-file',
 						data: {
 							file_path: 'file.ts',
@@ -1623,7 +1623,7 @@ suite('githubReviewAgent', () => {
 			// Response with both a comment and an excluded file
 			const sseResponse = [
 				`data: ${JSON.stringify({
-					copilot_references: [
+					reea_copilot_references: [
 						{
 							type: 'github.generated-pull-request-comment',
 							data: {

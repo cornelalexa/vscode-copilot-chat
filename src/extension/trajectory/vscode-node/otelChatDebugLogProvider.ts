@@ -614,7 +614,7 @@ export class OTelChatDebugLogProviderContribution extends Disposable implements 
 		const spans = allEntries.map(entry => entryToExportSpan(entry));
 
 		const otlpExport = wrapInResourceSpans(spans, {
-			'service.name': 'copilot-chat',
+			'service.name': 'reea-copilot-chat',
 			'session.id': sessionId,
 		});
 
@@ -706,8 +706,8 @@ function entryToExportSpan(entry: IDebugLogEntry): ICompletedSpanData {
 		case 'discovery':
 		case 'generic':
 			attributes['gen_ai.operation.name'] = 'core_event';
-			if (entry.attrs.details !== undefined) { attributes['copilot_chat.event_details'] = String(entry.attrs.details); }
-			if (entry.attrs.category !== undefined) { attributes['copilot_chat.event_category'] = String(entry.attrs.category); }
+			if (entry.attrs.details !== undefined) { attributes['reea_copilot_chat.event_details'] = String(entry.attrs.details); }
+			if (entry.attrs.category !== undefined) { attributes['reea_copilot_chat.event_category'] = String(entry.attrs.category); }
 			break;
 		default:
 			attributes['gen_ai.operation.name'] = 'core_event';
@@ -786,9 +786,9 @@ function spanToImportEntry(span: ICompletedSpanData, sessionId: string): IDebugL
 			type = 'hook';
 			break;
 		case 'core_event':
-			type = (span.attributes['copilot_chat.event_category'] === 'discovery') ? 'discovery' : 'generic';
-			if (span.attributes['copilot_chat.event_details'] !== undefined) { attrs.details = String(span.attributes['copilot_chat.event_details']); }
-			if (span.attributes['copilot_chat.event_category'] !== undefined) { attrs.category = String(span.attributes['copilot_chat.event_category']); }
+			type = (span.attributes['reea_copilot_chat.event_category'] === 'discovery') ? 'discovery' : 'generic';
+			if (span.attributes['reea_copilot_chat.event_details'] !== undefined) { attrs.details = String(span.attributes['reea_copilot_chat.event_details']); }
+			if (span.attributes['reea_copilot_chat.event_category'] !== undefined) { attrs.category = String(span.attributes['reea_copilot_chat.event_category']); }
 			break;
 	}
 

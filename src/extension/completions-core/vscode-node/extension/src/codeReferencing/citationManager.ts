@@ -13,7 +13,7 @@ import { ICompletionsCitationManager, IPDocumentCitation } from '../../../lib/sr
 import { OutputPaneShowCommand } from '../../../lib/src/snippy/constants';
 import { copilotOutputLogTelemetry } from '../../../lib/src/snippy/telemetryHandlers';
 import { notify } from './matchNotifier';
-import { GitHubCopilotLogger } from './outputChannel';
+import { ReeaCopilotLogger } from './outputChannel';
 
 /**
  * Citation manager that logs citations to the VS Code log. On the first citation encountered,
@@ -22,7 +22,7 @@ import { GitHubCopilotLogger } from './outputChannel';
 export class LoggingCitationManager extends Disposable implements ICompletionsCitationManager {
 	declare _serviceBrand: undefined;
 
-	private logger?: GitHubCopilotLogger;
+	private logger?: ReeaCopilotLogger;
 	private readonly codeReference: CodeReference;
 
 	constructor(
@@ -35,7 +35,7 @@ export class LoggingCitationManager extends Disposable implements ICompletionsCi
 			if (this.logger) {
 				return;
 			}
-			this.logger = instantiationService.createInstance(GitHubCopilotLogger);
+			this.logger = instantiationService.createInstance(ReeaCopilotLogger);
 			const initialNotificationCommand = commands.registerCommand(OutputPaneShowCommand, () =>
 				this.logger?.forceShow()
 			);

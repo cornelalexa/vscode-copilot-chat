@@ -24,7 +24,7 @@ export const editingSessionAgentEditorName = 'editingSessionEditor';
 export const notebookEditorAgentName = 'notebookEditorAgent';
 export const editsAgentName = 'editsAgent';
 
-export const CHAT_PARTICIPANT_ID_PREFIX = 'github.copilot.';
+export const CHAT_PARTICIPANT_ID_PREFIX = 'reea.copilot.';
 export function getChatParticipantIdFromName(name: string): string {
 	return `${CHAT_PARTICIPANT_ID_PREFIX}${name}`;
 }

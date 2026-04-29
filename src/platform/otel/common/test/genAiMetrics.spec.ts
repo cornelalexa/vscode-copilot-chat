@@ -77,7 +77,7 @@ describe('GenAiMetrics', () => {
 
 		GenAiMetrics.recordToolCallCount(otel, 'readFile', true);
 
-		expect(otel.incrementCounter).toHaveBeenCalledWith('copilot_chat.tool.call.count', 1, {
+		expect(otel.incrementCounter).toHaveBeenCalledWith('reea_copilot_chat.tool.call.count', 1, {
 			[GenAiAttr.TOOL_NAME]: 'readFile',
 			success: true,
 		});
@@ -88,7 +88,7 @@ describe('GenAiMetrics', () => {
 
 		GenAiMetrics.recordToolCallDuration(otel, 'runCommand', 500);
 
-		expect(otel.recordMetric).toHaveBeenCalledWith('copilot_chat.tool.call.duration', 500, {
+		expect(otel.recordMetric).toHaveBeenCalledWith('reea_copilot_chat.tool.call.duration', 500, {
 			[GenAiAttr.TOOL_NAME]: 'runCommand',
 		});
 	});
@@ -98,7 +98,7 @@ describe('GenAiMetrics', () => {
 
 		GenAiMetrics.recordAgentDuration(otel, 'copilot', 15.2);
 
-		expect(otel.recordMetric).toHaveBeenCalledWith('copilot_chat.agent.invocation.duration', 15.2, {
+		expect(otel.recordMetric).toHaveBeenCalledWith('reea_copilot_chat.agent.invocation.duration', 15.2, {
 			[GenAiAttr.AGENT_NAME]: 'copilot',
 		});
 	});
@@ -108,7 +108,7 @@ describe('GenAiMetrics', () => {
 
 		GenAiMetrics.incrementSessionCount(otel);
 
-		expect(otel.incrementCounter).toHaveBeenCalledWith('copilot_chat.session.count');
+		expect(otel.incrementCounter).toHaveBeenCalledWith('reea_copilot_chat.session.count');
 	});
 
 	it('omits optional attributes when not provided', () => {

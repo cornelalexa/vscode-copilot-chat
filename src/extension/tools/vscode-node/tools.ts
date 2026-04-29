@@ -55,12 +55,12 @@ export class ToolsContribution extends Disposable {
 			v => v.definition,
 		));
 
-		this._register(vscode.commands.registerCommand('github.copilot.debug.resetVirtualToolGroups', async () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.debug.resetVirtualToolGroups', async () => {
 			await toolGrouping.clear();
 			vscode.window.showInformationMessage(l10n.t('Tool groups have been reset. They will be regenerated on the next agent request.'));
 		}));
 
-		this._register(vscode.commands.registerCommand('github.copilot.chat.tools.memory.showMemories', async () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.tools.memory.showMemories', async () => {
 			const globalStorageUri = this.extensionContext.globalStorageUri;
 			const storageUri = this.extensionContext.storageUri;
 
@@ -150,7 +150,7 @@ export class ToolsContribution extends Disposable {
 			}
 		}));
 
-		this._register(vscode.commands.registerCommand('github.copilot.chat.tools.memory.clearMemories', async () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.tools.memory.clearMemories', async () => {
 			const confirm = await vscode.window.showWarningMessage(
 				l10n.t('Are you sure you want to clear all memories? This cannot be undone.'),
 				{ modal: true },

@@ -8,8 +8,8 @@ import { Disposable } from '../../../util/vs/base/common/lifecycle';
 import { IDebuggableCommandIdentifier } from '../node/debuggableCommandIdentifier';
 import { COPILOT_DEBUG_COMMAND } from './copilotDebugCommandContribution';
 
-const PROVIDER_ID = 'copilot-chat.terminalToDebugging';
-const PROVIDER_ID2 = 'copilot-chat.terminalToDebuggingSuccess';
+const PROVIDER_ID = 'reea-copilot-chat.terminalToDebugging';
+const PROVIDER_ID2 = 'reea-copilot-chat.terminalToDebuggingSuccess';
 
 export class OnboardTerminalTestsContribution extends Disposable implements vscode.TerminalQuickFixProvider {
 	/**
@@ -30,7 +30,7 @@ export class OnboardTerminalTestsContribution extends Disposable implements vsco
 		this._register(vscode.window.onDidStartTerminalShellExecution(e => {
 			this.lastExecutionFor.set(e.terminal, e);
 		}));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.rerunWithCopilotDebug', () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.rerunWithCopilotDebug', () => {
 			const terminal = vscode.window.activeTerminal;
 			const execution = terminal && this.lastExecutionFor.get(terminal);
 			if (!execution) {

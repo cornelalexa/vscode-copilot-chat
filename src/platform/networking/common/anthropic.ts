@@ -72,7 +72,7 @@ export interface ToolSearchUsage {
 export const TOOL_SEARCH_TOOL_NAME = 'tool_search_tool_regex';
 export const TOOL_SEARCH_TOOL_TYPE = 'tool_search_tool_regex_20251119';
 
-/** Name for the custom client-side embeddings-based tool search tool. Must not use copilot_/vscode_ prefix — those are reserved for static package.json declarations and will be rejected by vscode.lm.registerToolDefinition. */
+/** Name for the custom client-side embeddings-based tool search tool. Must not use reea_copilot_/vscode_ prefix — those are reserved for static package.json declarations and will be rejected by vscode.lm.registerToolDefinition. */
 export const CUSTOM_TOOL_SEARCH_NAME = 'tool_search';
 
 /** Model ID prefixes that support tool search tools. Used by isAnthropicToolSearchEnabled() and the tool registration's model selector. */

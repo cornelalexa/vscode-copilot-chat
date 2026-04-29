@@ -216,7 +216,7 @@ type ShowFileTool = {
 };
 
 type FetchCopilotCliDocumentationTool = {
-	toolName: 'fetch_copilot_cli_documentation';
+	toolName: 'fetch_reea_copilot_cli_documentation';
 	arguments: Record<string, never>;
 };
 
@@ -500,7 +500,7 @@ function extractPRMetadata(content: string): { cleanedContent: string; prPart?: 
 			.replace(/&amp;/g, '&');
 
 		const prPart = new ChatResponsePullRequestPart(
-			{ command: 'github.copilot.chat.openPullRequestReroute', title: l10n.t('View Pull Request {0}', linkTag), arguments: [Number(linkTag.substring(1))] },
+			{ command: 'reea.copilot.chat.openPullRequestReroute', title: l10n.t('View Pull Request {0}', linkTag), arguments: [Number(linkTag.substring(1))] },
 			unescapeXml(title),
 			unescapeXml(description),
 			unescapeXml(author),
@@ -1053,7 +1053,7 @@ const ToolFriendlyNameAndHandlers: { [K in ToolCall['toolName']]: [title: string
 	'web_search': [l10n.t('Web Search'), emptyInvocation, genericToolInvocationCompleted],
 	'update_todo': [l10n.t('Update Todo'), formatUpdateTodoInvocation, formatUpdateTodoInvocationCompleted],
 	'show_file': [l10n.t('Show File'), formatShowFileInvocation, genericToolInvocationCompleted],
-	'fetch_copilot_cli_documentation': [l10n.t('Fetch Documentation'), emptyInvocation, genericToolInvocationCompleted],
+	'fetch_reea_copilot_cli_documentation': [l10n.t('Fetch Documentation'), emptyInvocation, genericToolInvocationCompleted],
 	'propose_work': [l10n.t('Propose Work'), formatProposeWorkInvocation, genericToolInvocationCompleted],
 	'task_complete': [l10n.t('Task Complete'), formatTaskCompleteInvocation, genericToolInvocationCompleted],
 	'ask_user': [l10n.t('Ask User'), formatAskUserInvocation, genericToolInvocationCompleted],

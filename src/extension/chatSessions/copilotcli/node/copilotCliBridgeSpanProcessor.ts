@@ -72,7 +72,7 @@ function flattenAttributes(attrs: Readonly<Record<string, unknown>>): Record<str
  * permission, hook, etc.) to appear in the Agent Debug Log panel without
  * creating duplicate synthetic spans in the extension.
  *
- * The processor injects `copilot_chat.chat_session_id` on each forwarded span
+ * The processor injects `reea_copilot_chat.chat_session_id` on each forwarded span
  * using a traceId → sessionId mapping maintained by the extension.
  */
 export class CopilotCliBridgeSpanProcessor implements SpanProcessor {
@@ -160,8 +160,8 @@ export class CopilotCliBridgeSpanProcessor implements SpanProcessor {
 
 		// SDK native hook spans: enrich with data from session events and
 		// remap to execute_hook so the debug panel shows full details.
-		const invocationId = span.attributes['github.copilot.hook.invocation_id'];
-		if (span.name.startsWith('hook ') && span.attributes['github.copilot.hook.type'] && typeof invocationId === 'string') {
+		const invocationId = span.attributes['reea.copilot.hook.invocation_id'];
+		if (span.name.startsWith('hook ') && span.attributes['reea.copilot.hook.type'] && typeof invocationId === 'string') {
 			const hookEndData = this._hookData.get(invocationId);
 			if (hookEndData?.resultKind) {
 				// hook.end data already arrived — enrich and inject immediately
@@ -186,15 +186,15 @@ export class CopilotCliBridgeSpanProcessor implements SpanProcessor {
 
 		const attrs = { ...span.attributes };
 		attrs[GenAiAttr.OPERATION_NAME] = GenAiOperationName.EXECUTE_HOOK;
-		attrs['copilot_chat.hook_type'] = data.hookType;
+		attrs['reea_copilot_chat.hook_type'] = data.hookType;
 		if (data.input) {
-			attrs['copilot_chat.hook_input'] = data.input;
+			attrs['reea_copilot_chat.hook_input'] = data.input;
 		}
 		if (data.output) {
-			attrs['copilot_chat.hook_output'] = data.output;
+			attrs['reea_copilot_chat.hook_output'] = data.output;
 		}
 		if (data.resultKind) {
-			attrs['copilot_chat.hook_result_kind'] = data.resultKind;
+			attrs['reea_copilot_chat.hook_result_kind'] = data.resultKind;
 		}
 
 		const enrichedSpan: ICompletedSpanData = {

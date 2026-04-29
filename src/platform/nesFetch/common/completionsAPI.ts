@@ -34,7 +34,7 @@ export namespace Completion {
 		/** The generated text. */
 		text: string | undefined;
 		/** Copilot-specific annotations */
-		copilot_annotations?: { [key: string]: CopilotAnnotation[] };
+		reea_copilot_annotations?: { [key: string]: CopilotAnnotation[] };
 	}
 
 	/**

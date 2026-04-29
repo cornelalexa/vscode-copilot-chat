@@ -756,7 +756,7 @@ export class CopilotCLISession extends DisposableStore implements ICopilotCLISes
 		} finally {
 			// End the invoke_agent wrapper span
 			const durationSec = (Date.now() - logStartTime) / 1000;
-			invokeAgentSpan.setAttribute('copilot_chat.duration_sec', durationSec);
+			invokeAgentSpan.setAttribute('reea_copilot_chat.duration_sec', durationSec);
 			invokeAgentSpan.end();
 
 			this._pendingPrompt = undefined;

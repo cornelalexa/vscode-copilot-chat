@@ -187,7 +187,7 @@ interface ExtendedChoiceJSON extends ChoiceJSON {
 	message?: RawThinkingDelta;
 	delta?: {
 		content: string | null;
-		copilot_annotations?: {
+		reea_copilot_annotations?: {
 			CodeVulnerability: ICodeVulnerabilityAnnotation[];
 			IPCodeCitations: IIPCodeCitation[];
 			TextCopyright: boolean | undefined;
@@ -347,9 +347,9 @@ export class SSEProcessor {
 					choices: ExtendedChoiceJSON[] | undefined | null;
 					model: string;
 					error?: APIErrorResponse;
-					copilot_references?: any;
-					copilot_confirmation?: any;
-					copilot_errors: any;
+					reea_copilot_references?: any;
+					reea_copilot_confirmation?: any;
+					reea_copilot_errors: any;
 					usage: APIUsage | undefined;
 				};
 				try {
@@ -366,13 +366,13 @@ export class SSEProcessor {
 				}
 
 				// A message with a confirmation may or may not have 'choices'
-				if (json.copilot_confirmation && isCopilotConfirmation(json.copilot_confirmation)) {
-					await finishedCb('', 0, { text: '', copilotConfirmation: json.copilot_confirmation });
+				if (json.reea_copilot_confirmation && isCopilotConfirmation(json.reea_copilot_confirmation)) {
+					await finishedCb('', 0, { text: '', copilotConfirmation: json.reea_copilot_confirmation });
 				}
 
 				if (!json.choices) {
-					// Currently there are messages with a null 'choices' that include copilot_references- ignore these
-					if (!json.copilot_references && !json.copilot_confirmation) {
+					// Currently there are messages with a null 'choices' that include reea_copilot_references- ignore these
+					if (!json.reea_copilot_references && !json.reea_copilot_confirmation) {
 						if (json.error !== undefined) {
 							this.logService.error(`Error in response for request id ${this.requestId.headerRequestId}:${json.error.message}`);
 							sendCommunicationErrorTelemetry(this.telemetryService, `Error in response for request id ${this.requestId.headerRequestId}:`, json.error.message);
@@ -391,13 +391,13 @@ export class SSEProcessor {
 						}
 					}
 
-					// There are also messages with a null 'choices' that include copilot_errors- report these
-					if (json.copilot_errors) {
-						await finishedCb('', 0, { text: '', copilotErrors: json.copilot_errors });
+					// There are also messages with a null 'choices' that include reea_copilot_errors- report these
+					if (json.reea_copilot_errors) {
+						await finishedCb('', 0, { text: '', copilotErrors: json.reea_copilot_errors });
 					}
 
-					if (json.copilot_references) {
-						await finishedCb('', 0, { text: '', copilotReferences: json.copilot_references });
+					if (json.reea_copilot_references) {
+						await finishedCb('', 0, { text: '', copilotReferences: json.reea_copilot_references });
 					}
 
 					continue;
@@ -487,14 +487,14 @@ export class SSEProcessor {
 								continue;
 							}
 						}
-					} else if (choice.delta?.copilot_annotations?.CodeVulnerability || choice.delta?.copilot_annotations?.IPCodeCitations) {
+					} else if (choice.delta?.reea_copilot_annotations?.CodeVulnerability || choice.delta?.reea_copilot_annotations?.IPCodeCitations) {
 						if (await emitSolution()) {
 							continue;
 						}
 
 						if (!hadEarlyFinishedSolution) {
 							solution.append(choice);
-							if (await emitSolution({ vulnAnnotations: choice.delta?.copilot_annotations?.CodeVulnerability, ipCodeCitations: choice.delta?.copilot_annotations?.IPCodeCitations })) {
+							if (await emitSolution({ vulnAnnotations: choice.delta?.reea_copilot_annotations?.CodeVulnerability, ipCodeCitations: choice.delta?.reea_copilot_annotations?.IPCodeCitations })) {
 								continue;
 							}
 						}
@@ -691,7 +691,7 @@ export class SSEProcessor {
 	}
 }
 
-// data: {"choices":null,"copilot_confirmation":{"type":"action","title":"Are you sure you want to proceed?","message":"This action is irreversible.","confirmation":{"id":"123"}},"id":null}
+// data: {"choices":null,"reea_copilot_confirmation":{"type":"action","title":"Are you sure you want to proceed?","message":"This action is irreversible.","confirmation":{"id":"123"}},"id":null}
 function isCopilotConfirmation(obj: unknown): obj is ICopilotConfirmation {
 	return typeof (obj as ICopilotConfirmation).title === 'string' &&
 		typeof (obj as ICopilotConfirmation).message === 'string' &&
@@ -718,26 +718,26 @@ function choiceToFilterReason(choice: ExtendedChoiceJSON): FilterReason | undefi
 		return undefined;
 	}
 
-	if (choice.delta?.copilot_annotations?.TextCopyright) {
+	if (choice.delta?.reea_copilot_annotations?.TextCopyright) {
 		return FilterReason.Copyright;
 	}
 
-	if (choice.delta?.copilot_annotations?.Sexual || choice.delta?.copilot_annotations?.SexualPattern) {
+	if (choice.delta?.reea_copilot_annotations?.Sexual || choice.delta?.reea_copilot_annotations?.SexualPattern) {
 		return FilterReason.Sexual;
 	}
-	if (choice.delta?.copilot_annotations?.Violence) {
+	if (choice.delta?.reea_copilot_annotations?.Violence) {
 		return FilterReason.Violence;
 	}
 
-	if (choice.delta?.copilot_annotations?.HateSpeech || choice.delta?.copilot_annotations?.HateSpeechPattern) {
+	if (choice.delta?.reea_copilot_annotations?.HateSpeech || choice.delta?.reea_copilot_annotations?.HateSpeechPattern) {
 		return FilterReason.Hate;
 	}
 
-	if (choice.delta?.copilot_annotations?.SelfHarm) {
+	if (choice.delta?.reea_copilot_annotations?.SelfHarm) {
 		return FilterReason.SelfHarm;
 	}
 
-	if (choice.delta?.copilot_annotations?.PromptPromBlockList) {
+	if (choice.delta?.reea_copilot_annotations?.PromptPromBlockList) {
 		return FilterReason.Prompt;
 	}
 

@@ -74,7 +74,7 @@ describe('CopilotCliBridgeSpanProcessor', () => {
 
 		expect(otelService.injectedSpans).toHaveLength(1);
 		expect(otelService.injectedSpans[0].name).toBe('chat model');
-		expect(otelService.injectedSpans[0].attributes['copilot_chat.chat_session_id']).toBe('session-1');
+		expect(otelService.injectedSpans[0].attributes['reea_copilot_chat.chat_session_id']).toBe('session-1');
 	});
 
 	it('drops spans with unregistered traceId', () => {
@@ -115,10 +115,10 @@ describe('CopilotCliBridgeSpanProcessor', () => {
 
 		bridge.onEnd(makeReadableSpan({
 			traceId: 'trace-abc',
-			attributes: { 'copilot_chat.chat_session_id': 'existing-session' },
+			attributes: { 'reea_copilot_chat.chat_session_id': 'existing-session' },
 		}));
 
-		expect(otelService.injectedSpans[0].attributes['copilot_chat.chat_session_id']).toBe('existing-session');
+		expect(otelService.injectedSpans[0].attributes['reea_copilot_chat.chat_session_id']).toBe('existing-session');
 	});
 
 	it('converts HrTime to milliseconds', () => {
@@ -217,8 +217,8 @@ describe('CopilotCliBridgeSpanProcessor', () => {
 			name: 'hook sessionEnd',
 			traceId: 'trace-abc',
 			attributes: {
-				'github.copilot.hook.type': 'sessionEnd',
-				'github.copilot.hook.invocation_id': 'inv-123',
+				'reea.copilot.hook.type': 'sessionEnd',
+				'reea.copilot.hook.invocation_id': 'inv-123',
 			},
 		}));
 
@@ -226,9 +226,9 @@ describe('CopilotCliBridgeSpanProcessor', () => {
 		const span = otelService.injectedSpans[0];
 		expect(span.name).toBe('execute_hook sessionEnd');
 		expect(span.attributes['gen_ai.operation.name']).toBe('execute_hook');
-		expect(span.attributes['copilot_chat.hook_type']).toBe('sessionEnd');
-		expect(span.attributes['copilot_chat.hook_input']).toBe('{"reason":"complete"}');
-		expect(span.attributes['copilot_chat.hook_result_kind']).toBe('success');
+		expect(span.attributes['reea_copilot_chat.hook_type']).toBe('sessionEnd');
+		expect(span.attributes['reea_copilot_chat.hook_input']).toBe('{"reason":"complete"}');
+		expect(span.attributes['reea_copilot_chat.hook_result_kind']).toBe('success');
 	});
 
 	it('holds SDK hook span until hook.end data arrives', () => {
@@ -242,8 +242,8 @@ describe('CopilotCliBridgeSpanProcessor', () => {
 			name: 'hook preToolUse',
 			traceId: 'trace-abc',
 			attributes: {
-				'github.copilot.hook.type': 'preToolUse',
-				'github.copilot.hook.invocation_id': 'inv-456',
+				'reea.copilot.hook.type': 'preToolUse',
+				'reea.copilot.hook.invocation_id': 'inv-456',
 			},
 		}));
 
@@ -255,9 +255,9 @@ describe('CopilotCliBridgeSpanProcessor', () => {
 
 		expect(otelService.injectedSpans).toHaveLength(1);
 		const span = otelService.injectedSpans[0];
-		expect(span.attributes['copilot_chat.hook_input']).toBe('{"tool":"bash"}');
-		expect(span.attributes['copilot_chat.hook_output']).toBe('{"decision":"allow"}');
-		expect(span.attributes['copilot_chat.hook_result_kind']).toBe('success');
+		expect(span.attributes['reea_copilot_chat.hook_input']).toBe('{"tool":"bash"}');
+		expect(span.attributes['reea_copilot_chat.hook_output']).toBe('{"decision":"allow"}');
+		expect(span.attributes['reea_copilot_chat.hook_result_kind']).toBe('success');
 	});
 
 	it('does not hold non-hook spans', () => {

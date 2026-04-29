@@ -28,7 +28,7 @@ export interface IClaudeSlashCommandHandler {
 	 * If provided, the command will be registered as a VS Code command
 	 * and can be invoked via the Command Palette.
 	 *
-	 * @example "copilot.claude.hooks"
+	 * @example "reea.copilot.claude.hooks"
 	 */
 	readonly commandId?: string;
 
@@ -69,7 +69,7 @@ const handlerRegistry: IClaudeSlashCommandHandlerCtor[] = [];
  * 2. Call `registerClaudeSlashCommand(YourHandler)` at module load time
  * 3. Import it in `slashCommands/index.ts`
  * 4. Add entries to `package.json`:
- *    - Under `contributes.commands`: Add the VS Code command (e.g., `copilot.claude.mycommand`)
+ *    - Under `contributes.commands`: Add the VS Code command (e.g., `reea.copilot.claude.mycommand`)
  *    - Under `contributes.chatSessions[type="claude-code"].commands`: Add the slash command name and description
  *
  * @param ctor - The handler constructor class
@@ -79,7 +79,7 @@ const handlerRegistry: IClaudeSlashCommandHandlerCtor[] = [];
  * export class MyCommand implements IClaudeSlashCommandHandler {
  *     readonly commandName = 'mycommand';
  *     readonly description = 'Does something useful';
- *     readonly commandId = 'copilot.claude.mycommand'; // For Command Palette
+ *     readonly commandId = 'reea.copilot.claude.mycommand'; // For Command Palette
  *
  *     async handle(args: string, stream: vscode.ChatResponseStream, token: CancellationToken) {
  *         stream.markdown('Hello!');

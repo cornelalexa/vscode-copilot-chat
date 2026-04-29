@@ -705,7 +705,7 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions =
 	public async run(outputStream: ChatResponseStream | undefined, token: CancellationToken): Promise<IToolCallLoopResult> {
 		const agentName = (this.options.request as { subAgentName?: string }).subAgentName
 			?? (this.options.request as { participant?: string }).participant
-			?? 'GitHub Copilot Chat';
+			?? 'Reea Copilot Chat';
 
 		// Extract custom mode name for debug logging (kept separate from agentName to avoid metric cardinality)
 		const modeInstructions = (this.options.request as { modeInstructions2?: { name?: string; isBuiltin?: boolean } }).modeInstructions2;
@@ -744,7 +744,7 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions =
 					...(chatSessionId ? { [CopilotChatAttr.CHAT_SESSION_ID]: chatSessionId } : {}),
 					...(parentChatSessionId ? { [CopilotChatAttr.PARENT_CHAT_SESSION_ID]: parentChatSessionId } : {}),
 					...(debugLogLabel ? { [CopilotChatAttr.DEBUG_LOG_LABEL]: debugLogLabel } : {}),
-					...(customModeName ? { 'copilot_chat.mode_name': customModeName } : {}),
+					...(customModeName ? { 'reea_copilot_chat.mode_name': customModeName } : {}),
 					...workspaceMetadataToOTelAttributes(resolveWorkspaceOTelMetadata(this._gitService)),
 				},
 				parentTraceContext,
@@ -1149,7 +1149,7 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions =
 				for (const part of result.content) {
 					if (part instanceof LanguageModelDataPart2 && part.mimeType === 'application/pull-request+json' && part.audience?.includes(LanguageModelPartAudience.User)) {
 						const data: { uri: string; title: string; description: string; author: string; linkTag: string } = JSON.parse(part.data.toString());
-						outputStream?.push(new ChatResponsePullRequestPart({ command: 'github.copilot.chat.openPullRequestReroute', title: l10n.t('View Pull Request {0}', data.linkTag), arguments: [Number(data.linkTag.substring(1))] }, data.title, data.description, data.author, data.linkTag));
+						outputStream?.push(new ChatResponsePullRequestPart({ command: 'reea.copilot.chat.openPullRequestReroute', title: l10n.t('View Pull Request {0}', data.linkTag), arguments: [Number(data.linkTag.substring(1))] }, data.title, data.description, data.author, data.linkTag));
 					}
 				}
 			}

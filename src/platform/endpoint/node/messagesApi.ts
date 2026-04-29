@@ -37,7 +37,7 @@ export function buildToolInputSchema(schema: Record<string, unknown> | undefined
 	return { type: 'object', properties: {}, ...rest };
 }
 
-/** IP Code Citation annotation from Messages API copilot_annotations */
+/** IP Code Citation annotation from Messages API reea_copilot_annotations */
 interface AnthropicIPCodeCitation {
 	id: number;
 	start_offset: number;
@@ -82,7 +82,7 @@ interface AnthropicStreamEvent {
 		stop_reason?: string;
 		stop_sequence?: string;
 	};
-	copilot_annotations?: {
+	reea_copilot_annotations?: {
 		IPCodeCitations?: AnthropicIPCodeCitation[];
 	};
 	usage?: {
@@ -630,7 +630,7 @@ export class AnthropicMessagesProcessor {
 	) { }
 
 	/**
-	 * Extract IP code citations from copilot_annotations and convert to IIPCodeCitation format
+	 * Extract IP code citations from reea_copilot_annotations and convert to IIPCodeCitation format
 	 */
 	private extractIPCodeCitations(annotations?: { IPCodeCitations?: AnthropicIPCodeCitation[] }): IIPCodeCitation[] {
 		if (!annotations?.IPCodeCitations?.length) {
@@ -853,7 +853,7 @@ export class AnthropicMessagesProcessor {
 			case 'content_block_delta':
 				if (chunk.delta) {
 					if (chunk.delta.type === 'text_delta' && chunk.delta.text) {
-						const ipCitations = this.extractIPCodeCitations(chunk.copilot_annotations);
+						const ipCitations = this.extractIPCodeCitations(chunk.reea_copilot_annotations);
 						if (ipCitations.length > 0) {
 							return onProgress({ text: chunk.delta.text, ipCitations });
 						}

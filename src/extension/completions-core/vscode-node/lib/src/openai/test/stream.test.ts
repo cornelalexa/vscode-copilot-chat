@@ -381,7 +381,7 @@ data: [DONE]
 	});
 
 	test('text choice with annotations are preserved', async function () {
-		const response = `data: {"choices":[{"text":"foo","index":0,"finish_reason":null,"copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } }]}
+		const response = `data: {"choices":[{"text":"foo","index":0,"finish_reason":null,"reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } }]}
 data: {"choices":[{"text":"bar","index":0,"finish_reason":"stop","logprobs":{"token_logprobs":[-2.0]}}]}
 data: [DONE]
 `;
@@ -393,12 +393,12 @@ data: [DONE]
 		);
 		const match = { match_id: 2, cursor: '123,', start_offset: 120, stop_offset: 130 };
 		const results = await asyncIterableToArray(processor.processSSE());
-		assert.deepStrictEqual(results[0].solution.copilot_annotations.for('code_references')[0], match);
+		assert.deepStrictEqual(results[0].solution.reea_copilot_annotations.for('code_references')[0], match);
 	});
 
 	test('delta choice with annotations are preserved', async function () {
 		const response = `data: {"choices":[{"delta":{"content":"foo"},"index":0,"finish_reason":null, "annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } }]}
-data: {"choices":[{"delta":{"content":"bar"},"index":0,"finish_reason":"stop", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } }]}
+data: {"choices":[{"delta":{"content":"bar"},"index":0,"finish_reason":"stop", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } }]}
 data: [DONE]
 `;
 		const processor = await SSEProcessor.create(
@@ -409,12 +409,12 @@ data: [DONE]
 		);
 		const results = await asyncIterableToArray(processor.processSSE());
 		const match = { match_id: 2, cursor: '123,', start_offset: 120, stop_offset: 130 };
-		assert.deepStrictEqual(results[0].solution.copilot_annotations.for('code_references')[0], match);
+		assert.deepStrictEqual(results[0].solution.reea_copilot_annotations.for('code_references')[0], match);
 	});
 
 	test('text choice with annotations are updated', async function () {
-		const response = `data: {"choices":[{"text":"foo","index":0,"finish_reason":null,"copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } }]}
-data: {"choices":[{"text":"bar","index":0,"copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,456", "start_offset": 120, "stop_offset": 140}] },"finish_reason":"stop","logprobs":{"token_logprobs":[-2.0]}}]}
+		const response = `data: {"choices":[{"text":"foo","index":0,"finish_reason":null,"reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } }]}
+data: {"choices":[{"text":"bar","index":0,"reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,456", "start_offset": 120, "stop_offset": 140}] },"finish_reason":"stop","logprobs":{"token_logprobs":[-2.0]}}]}
 data: [DONE]
 `;
 		const processor = await SSEProcessor.create(
@@ -425,12 +425,12 @@ data: [DONE]
 		);
 		const match = { match_id: 2, cursor: '123,456', start_offset: 120, stop_offset: 140 };
 		const results = await asyncIterableToArray(processor.processSSE());
-		assert.deepStrictEqual(results[0].solution.copilot_annotations.for('code_references')[0], match);
+		assert.deepStrictEqual(results[0].solution.reea_copilot_annotations.for('code_references')[0], match);
 	});
 
 	test('delta choice with annotations are updated', async function () {
-		const response = `data: {"choices":[{"delta":{"content":"foo", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
-data: {"choices":[{"delta":{"content":"bar", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
+		const response = `data: {"choices":[{"delta":{"content":"foo", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
+data: {"choices":[{"delta":{"content":"bar", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
 data: [DONE]
 `;
 		const processor = await SSEProcessor.create(
@@ -441,7 +441,7 @@ data: [DONE]
 		);
 		const match = { match_id: 2, cursor: '123', start_offset: 120, stop_offset: 130 };
 		const results = await asyncIterableToArray(processor.processSSE());
-		assert.deepStrictEqual(results[0].solution.copilot_annotations.for('code_references')[0], match);
+		assert.deepStrictEqual(results[0].solution.reea_copilot_annotations.for('code_references')[0], match);
 	});
 
 	test('2 text token response with 2 indexes yields 2 results', async function () {
@@ -568,8 +568,8 @@ data: [DONE]
 
 	test('annotations are passed to finishedCb', async function () {
 		const references: CopilotAnnotation[] = [];
-		const response = `data: {"choices":[{"delta":{"content":"foo", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
-data: {"choices":[{"delta":{"content":"bar", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
+		const response = `data: {"choices":[{"delta":{"content":"foo", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
+data: {"choices":[{"delta":{"content":"bar", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
 data: [DONE]
 `;
 		const processor = await SSEProcessor.create(
@@ -590,11 +590,11 @@ data: [DONE]
 		assert.deepStrictEqual(references[0], match);
 	});
 
-	test('copilot_errors are passed to finishedCb', async function () {
+	test('reea_copilot_errors are passed to finishedCb', async function () {
 		const errors: CopilotError[] = [];
-		const response = `data: {"choices":[{"delta":{"content":"foo", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
-data: {"choices":[{"delta":{"content":"bar", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
-data: {"copilot_errors": [{ "type": "reference", "code": "unknown", "message": "Unknown branch", "identifier": "id1" }, { "type": "reference", "code": "invalid", "message": "Invalid SHA", "identifier": "id2" }]}
+		const response = `data: {"choices":[{"delta":{"content":"foo", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
+data: {"choices":[{"delta":{"content":"bar", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
+data: {"reea_copilot_errors": [{ "type": "reference", "code": "unknown", "message": "Unknown branch", "identifier": "id1" }, { "type": "reference", "code": "invalid", "message": "Invalid SHA", "identifier": "id2" }]}
 data: [DONE]
 `;
 
@@ -627,11 +627,11 @@ data: [DONE]
 		});
 	});
 
-	test('copilot_confirmations are passed to finishedCb', async function () {
+	test('reea_copilot_confirmations are passed to finishedCb', async function () {
 		const confirmations: CopilotConfirmation[] = [];
-		const response = `data: {"choices":[{"delta":{"content":"foo", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
-data: {"choices":[{"delta":{"content":"bar", "copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
-data: {"choices":null,"copilot_confirmation":{"type":"action","title":"Are you sure you want to proceed?","message":"This action is irreversible.","confirmation":{"id":"123"}},"id":null}
+		const response = `data: {"choices":[{"delta":{"content":"foo", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123,", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":null }]}
+data: {"choices":[{"delta":{"content":"bar", "reea_copilot_annotations": {"code_references": [{"match_id": 2, "cursor": "123", "start_offset": 120, "stop_offset": 130}] } },"index":0,"finish_reason":"stop" }]}
+data: {"choices":null,"reea_copilot_confirmation":{"type":"action","title":"Are you sure you want to proceed?","message":"This action is irreversible.","confirmation":{"id":"123"}},"id":null}
 data: [DONE]
 `;
 
@@ -754,7 +754,7 @@ data: [DONE]
 
 	test('copilot references', async function () {
 		const references: CopilotReference[] = [];
-		const response = `data: {"choices":[{"delta":{"content":"[{\\"type\\":\\"github.web-search\\",\\"data\\":{\\"query\\":\\"most recent version of React\\",\\"results\\":[{\\"title\\":\\"React v18.0 Ã¢Â€Â“ React\\",\\"excerpt\\":\\"React v18.0. March 29, 2022 by The React Team. React 18 is now available on npm! In our last post, we shared step-by-step instructions for upgrading your app to React 18. In this post, weÃ¢Â€Â™ll give an overview of whatÃ¢Â€Â™s new in React 18, and what it means for the future. Our latest major version includes out-of-the-box improvements like ...\\",\\"url\\":\\"https://react.dev/blog/2022/03/29/react-v18\\"},{\\"title\\":\\"React Versions Ã¢Â€Â“ React\\",\\"excerpt\\":\\"React Versions. The React docs at react.dev provide documentation for the latest version of React. We aim to keep the docs updated within major versions, and do not publish versions for each minor or patch version. When a new major is released, we archive the docs for the previous version as x.react.dev. See our versioning policy for more info.\\",\\"url\\":\\"https://react.dev/versions\\"},{\\"title\\":\\"React 19 RC Ã¢Â€Â“ React\\",\\"excerpt\\":\\"April 25, 2024 by The React Team. React 19 RC is now available on npm! In our React 19 RC Upgrade Guide, we shared step-by-step instructions for upgrading your app to React 19. In this post, weÃ¢Â€Â™ll give an overview of the new features in React 19, and how you can adopt them. WhatÃ¢Â€Â™s new in React 19. Improvements in React 19.\\",\\"url\\":\\"https://react.dev/blog/2024/04/25/react-19\\"},{\\"title\\":\\"React 18: A Comprehensive Guide to the Latest Features and ... - Medium\\",\\"excerpt\\":\\"Lets explore the most recent version of React, diving into key features, improvements, and best practices to leverage in your projects. Hey fellow developer! Welcome to this comprehensive guide onÃ¢Â€Â¦\\",\\"url\\":\\"https://medium.com/@vyakymenko/react-18-a-comprehensive-guide-to-the-latest-features-and-improvements-82825f209ae7\\"},{\\"title\\":\\"React\\",\\"excerpt\\":\\"React is designed to let you seamlessly combine components written by independent people, teams, and organizations. ... Latest React News. React Conf 2024 Recap. May 22, 2024. React 19 RC. April 25, 2024. React 19 RC Upgrade Guide. April 25, 2024. React Labs: February 2024. February 15, 2024.\\",\\"url\\":\\"https://19.react.dev/\\"}],\\"type\\":\\"web-search\\"},\\"id\\":\\"web-search: most recent version of React\\",\\"metadata\\":{\\"display_name\\":\\"web-search: most recent version of React\\",\\"display_icon\\":\\"\\"}}]","name":"bing-search","role":"function"},"index":0}],"copilot_references":[{"type":"github.web-search","data":{"query":"most recent version of React","results":[{"title":"React v18.0 Ã¢Â€Â“ React","excerpt":"React v18.0. March 29, 2022 by The React Team. React 18 is now available on npm! In our last post, we shared step-by-step instructions for upgrading your app to React 18. In this post, weÃ¢Â€Â™ll give an overview of whatÃ¢Â€Â™s new in React 18, and what it means for the future. Our latest major version includes out-of-the-box improvements like ...","url":"https://react.dev/blog/2022/03/29/react-v18"},{"title":"React Versions Ã¢Â€Â“ React","excerpt":"React Versions. The React docs at react.dev provide documentation for the latest version of React. We aim to keep the docs updated within major versions, and do not publish versions for each minor or patch version. When a new major is released, we archive the docs for the previous version as x.react.dev. See our versioning policy for more info.","url":"https://react.dev/versions"},{"title":"React 19 RC Ã¢Â€Â“ React","excerpt":"April 25, 2024 by The React Team. React 19 RC is now available on npm! In our React 19 RC Upgrade Guide, we shared step-by-step instructions for upgrading your app to React 19. In this post, weÃ¢Â€Â™ll give an overview of the new features in React 19, and how you can adopt them. WhatÃ¢Â€Â™s new in React 19. Improvements in React 19.","url":"https://react.dev/blog/2024/04/25/react-19"},{"title":"React 18: A Comprehensive Guide to the Latest Features and ... - Medium","excerpt":"Lets explore the most recent version of React, diving into key features, improvements, and best practices to leverage in your projects. Hey fellow developer! Welcome to this comprehensive guide onÃ¢Â€Â¦","url":"https://medium.com/@vyakymenko/react-18-a-comprehensive-guide-to-the-latest-features-and-improvements-82825f209ae7"},{"title":"React","excerpt":"React is designed to let you seamlessly combine components written by independent people, teams, and organizations. ... Latest React News. React Conf 2024 Recap. May 22, 2024. React 19 RC. April 25, 2024. React 19 RC Upgrade Guide. April 25, 2024. React Labs: February 2024. February 15, 2024.","url":"https://19.react.dev/"}],"type":"web-search"},"id":"web-search: most recent version of React","metadata":{"display_name":"web-search: most recent version of React","display_icon":""}}],"id":null}
+		const response = `data: {"choices":[{"delta":{"content":"[{\\"type\\":\\"github.web-search\\",\\"data\\":{\\"query\\":\\"most recent version of React\\",\\"results\\":[{\\"title\\":\\"React v18.0 Ã¢Â€Â“ React\\",\\"excerpt\\":\\"React v18.0. March 29, 2022 by The React Team. React 18 is now available on npm! In our last post, we shared step-by-step instructions for upgrading your app to React 18. In this post, weÃ¢Â€Â™ll give an overview of whatÃ¢Â€Â™s new in React 18, and what it means for the future. Our latest major version includes out-of-the-box improvements like ...\\",\\"url\\":\\"https://react.dev/blog/2022/03/29/react-v18\\"},{\\"title\\":\\"React Versions Ã¢Â€Â“ React\\",\\"excerpt\\":\\"React Versions. The React docs at react.dev provide documentation for the latest version of React. We aim to keep the docs updated within major versions, and do not publish versions for each minor or patch version. When a new major is released, we archive the docs for the previous version as x.react.dev. See our versioning policy for more info.\\",\\"url\\":\\"https://react.dev/versions\\"},{\\"title\\":\\"React 19 RC Ã¢Â€Â“ React\\",\\"excerpt\\":\\"April 25, 2024 by The React Team. React 19 RC is now available on npm! In our React 19 RC Upgrade Guide, we shared step-by-step instructions for upgrading your app to React 19. In this post, weÃ¢Â€Â™ll give an overview of the new features in React 19, and how you can adopt them. WhatÃ¢Â€Â™s new in React 19. Improvements in React 19.\\",\\"url\\":\\"https://react.dev/blog/2024/04/25/react-19\\"},{\\"title\\":\\"React 18: A Comprehensive Guide to the Latest Features and ... - Medium\\",\\"excerpt\\":\\"Lets explore the most recent version of React, diving into key features, improvements, and best practices to leverage in your projects. Hey fellow developer! Welcome to this comprehensive guide onÃ¢Â€Â¦\\",\\"url\\":\\"https://medium.com/@vyakymenko/react-18-a-comprehensive-guide-to-the-latest-features-and-improvements-82825f209ae7\\"},{\\"title\\":\\"React\\",\\"excerpt\\":\\"React is designed to let you seamlessly combine components written by independent people, teams, and organizations. ... Latest React News. React Conf 2024 Recap. May 22, 2024. React 19 RC. April 25, 2024. React 19 RC Upgrade Guide. April 25, 2024. React Labs: February 2024. February 15, 2024.\\",\\"url\\":\\"https://19.react.dev/\\"}],\\"type\\":\\"web-search\\"},\\"id\\":\\"web-search: most recent version of React\\",\\"metadata\\":{\\"display_name\\":\\"web-search: most recent version of React\\",\\"display_icon\\":\\"\\"}}]","name":"bing-search","role":"function"},"index":0}],"reea_copilot_references":[{"type":"github.web-search","data":{"query":"most recent version of React","results":[{"title":"React v18.0 Ã¢Â€Â“ React","excerpt":"React v18.0. March 29, 2022 by The React Team. React 18 is now available on npm! In our last post, we shared step-by-step instructions for upgrading your app to React 18. In this post, weÃ¢Â€Â™ll give an overview of whatÃ¢Â€Â™s new in React 18, and what it means for the future. Our latest major version includes out-of-the-box improvements like ...","url":"https://react.dev/blog/2022/03/29/react-v18"},{"title":"React Versions Ã¢Â€Â“ React","excerpt":"React Versions. The React docs at react.dev provide documentation for the latest version of React. We aim to keep the docs updated within major versions, and do not publish versions for each minor or patch version. When a new major is released, we archive the docs for the previous version as x.react.dev. See our versioning policy for more info.","url":"https://react.dev/versions"},{"title":"React 19 RC Ã¢Â€Â“ React","excerpt":"April 25, 2024 by The React Team. React 19 RC is now available on npm! In our React 19 RC Upgrade Guide, we shared step-by-step instructions for upgrading your app to React 19. In this post, weÃ¢Â€Â™ll give an overview of the new features in React 19, and how you can adopt them. WhatÃ¢Â€Â™s new in React 19. Improvements in React 19.","url":"https://react.dev/blog/2024/04/25/react-19"},{"title":"React 18: A Comprehensive Guide to the Latest Features and ... - Medium","excerpt":"Lets explore the most recent version of React, diving into key features, improvements, and best practices to leverage in your projects. Hey fellow developer! Welcome to this comprehensive guide onÃ¢Â€Â¦","url":"https://medium.com/@vyakymenko/react-18-a-comprehensive-guide-to-the-latest-features-and-improvements-82825f209ae7"},{"title":"React","excerpt":"React is designed to let you seamlessly combine components written by independent people, teams, and organizations. ... Latest React News. React Conf 2024 Recap. May 22, 2024. React 19 RC. April 25, 2024. React 19 RC Upgrade Guide. April 25, 2024. React Labs: February 2024. February 15, 2024.","url":"https://19.react.dev/"}],"type":"web-search"},"id":"web-search: most recent version of React","metadata":{"display_name":"web-search: most recent version of React","display_icon":""}}],"id":null}
 data: [DONE]
 `;
 

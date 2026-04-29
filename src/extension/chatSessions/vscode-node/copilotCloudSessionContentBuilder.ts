@@ -136,7 +136,7 @@ export class ChatSessionContentBuilder {
 				if (sessionIndex === 0 && pullRequest.author && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
 					const plaintextBody = pullRequest.body;
 
-					const card = new vscode.ChatResponsePullRequestPart({ command: 'github.copilot.chat.openPullRequestReroute', title: vscode.l10n.t('View Pull Request {0}', `#${pullRequest.number}`), arguments: [pullRequest.number] }, pullRequest.title, plaintextBody, getAuthorDisplayName(pullRequest.author), `#${pullRequest.number}`);
+					const card = new vscode.ChatResponsePullRequestPart({ command: 'reea.copilot.chat.openPullRequestReroute', title: vscode.l10n.t('View Pull Request {0}', `#${pullRequest.number}`), arguments: [pullRequest.number] }, pullRequest.title, plaintextBody, getAuthorDisplayName(pullRequest.author), `#${pullRequest.number}`);
 					const cardTurn = new vscode.ChatResponseTurn2([card], {}, this.type);
 					turns.push(cardTurn);
 				}

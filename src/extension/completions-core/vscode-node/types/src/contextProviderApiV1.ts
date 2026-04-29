@@ -25,7 +25,7 @@ import {
  *
  * Example:
  * ```
- * const copilot = vscode.extensions.getExtension("github.copilot");
+ * const copilot = vscode.extensions.getExtension("reea.copilot");
  * const contextProviderAPI = copilot.exports.getContextProviderAPI("v1") as ContextProviderApiV1;
  * ```
  */

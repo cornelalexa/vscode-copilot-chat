@@ -290,7 +290,7 @@ describe('CopilotCLISessionService', () => {
 
 	describe('CopilotCLISessionService.tryGetPartialSesionHistory', () => {
 		it('reconstructs history from persisted files', async () => {
-			tempStateHome = await mkdtemp(join(tmpdir(), 'copilot-cli-session-service-'));
+			tempStateHome = await mkdtemp(join(tmpdir(), 'reea-copilot-cli-session-service-'));
 			process.env.XDG_STATE_HOME = tempStateHome;
 			const sessionId = 'partial-session';
 			const sessionDir = URI.file(getCopilotCLISessionDir(sessionId));
@@ -329,7 +329,7 @@ describe('CopilotCLISessionService', () => {
 		});
 
 		it('returns cached result on second call without re-reading the file', async () => {
-			tempStateHome = await mkdtemp(join(tmpdir(), 'copilot-cli-session-service-'));
+			tempStateHome = await mkdtemp(join(tmpdir(), 'reea-copilot-cli-session-service-'));
 			process.env.XDG_STATE_HOME = tempStateHome;
 			const sessionId = 'cache-test-session';
 			const sessionDir = URI.file(getCopilotCLISessionDir(sessionId));
@@ -368,7 +368,7 @@ describe('CopilotCLISessionService', () => {
 		});
 
 		it('returns undefined when the events file does not exist', async () => {
-			tempStateHome = await mkdtemp(join(tmpdir(), 'copilot-cli-session-service-'));
+			tempStateHome = await mkdtemp(join(tmpdir(), 'reea-copilot-cli-session-service-'));
 			process.env.XDG_STATE_HOME = tempStateHome;
 
 			const result = await service.tryGetPartialSesionHistory('nonexistent-session-id');
@@ -394,7 +394,7 @@ describe('CopilotCLISessionService', () => {
 		});
 
 		it('falls back to partial session data when getSession fails with an unknown event type', async () => {
-			tempStateHome = await mkdtemp(join(tmpdir(), 'copilot-cli-session-service-'));
+			tempStateHome = await mkdtemp(join(tmpdir(), 'reea-copilot-cli-session-service-'));
 			process.env.XDG_STATE_HOME = tempStateHome;
 			const sessionId = 'invalid-session';
 			const sessionDir = URI.file(getCopilotCLISessionDir(sessionId));
@@ -440,7 +440,7 @@ describe('CopilotCLISessionService', () => {
 		});
 
 		it('does not emit session when summary is truncated and no user turns exist', async () => {
-			tempStateHome = await mkdtemp(join(tmpdir(), 'copilot-cli-session-service-'));
+			tempStateHome = await mkdtemp(join(tmpdir(), 'reea-copilot-cli-session-service-'));
 			process.env.XDG_STATE_HOME = tempStateHome;
 			const sessionId = 'no-user-turns-session';
 			const sessionDir = URI.file(getCopilotCLISessionDir(sessionId));

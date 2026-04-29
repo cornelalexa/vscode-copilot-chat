@@ -113,11 +113,11 @@ describe('TerminalSlashCommand', () => {
 		});
 
 		it('has correct description', () => {
-			expect(terminalCommand.description).toBe('Launch Claude Code CLI using your GitHub Copilot subscription');
+			expect(terminalCommand.description).toBe('Launch Claude Code CLI using your Reea Copilot subscription');
 		});
 
 		it('has correct command ID', () => {
-			expect(terminalCommand.commandId).toBe('copilot.claude.terminal');
+			expect(terminalCommand.commandId).toBe('reea.copilot.claude.terminal');
 		});
 	});
 
@@ -146,7 +146,7 @@ describe('TerminalSlashCommand', () => {
 
 			const createTerminalCall = testTerminalService.createTerminalSpy.mock.calls[0][0] as TerminalOptions;
 			expect(createTerminalCall.message).toContain('\x1b[0;104m');
-			expect(createTerminalCall.message).toContain('GitHub Copilot subscription');
+			expect(createTerminalCall.message).toContain('Reea Copilot subscription');
 		});
 
 		it('shows the terminal after creation', async () => {

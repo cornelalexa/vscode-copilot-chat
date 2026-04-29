@@ -12,7 +12,7 @@ import { Disposable } from '../../../util/vs/base/common/lifecycle';
 import { IExtensionContribution } from '../../common/contributions';
 import { BYOKStorageService, StoredModelConfig } from './byokStorageService';
 
-export const selectStandaloneEmbeddingsModelCommandId = 'github.copilot.chat.standalone.selectEmbeddingsModel';
+export const selectStandaloneEmbeddingsModelCommandId = 'reea.copilot.chat.standalone.selectEmbeddingsModel';
 
 type ProviderInfo = {
 	readonly displayName: string;
@@ -82,7 +82,7 @@ export class StandaloneEmbeddingsPickerContribution extends Disposable implement
 			return;
 		}
 
-		await vscode.workspace.getConfiguration('github.copilot.chat').update('standalone.model.embeddings', picked.modelRef, vscode.ConfigurationTarget.Global);
+		await vscode.workspace.getConfiguration('reea.copilot.chat').update('standalone.model.embeddings', picked.modelRef, vscode.ConfigurationTarget.Global);
 		void vscode.window.showInformationMessage(`Standalone embeddings model set to ${picked.modelRef}${current === picked.modelRef ? ' (unchanged)' : ''}.`);
 	}
 

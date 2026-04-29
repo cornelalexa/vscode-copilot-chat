@@ -52,7 +52,7 @@ function createDiffTab(tabName: string, modifiedUri: vscode.Uri) {
 	return {
 		label: tabName,
 		input: new vscode.TabInputTextDiff(
-			{ scheme: 'copilot-cli-readonly' } as unknown as vscode.Uri,
+			{ scheme: 'reea-reea-copilot-cli-readonly' } as unknown as vscode.Uri,
 			modifiedUri,
 		),
 	};

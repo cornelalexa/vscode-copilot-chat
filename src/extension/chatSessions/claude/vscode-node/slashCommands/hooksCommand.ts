@@ -216,7 +216,7 @@ interface IHooksWizardResult {
 export class HooksSlashCommand implements IClaudeSlashCommandHandler {
 	readonly commandName = 'hooks';
 	readonly description = 'Configure Claude Code hooks for tool execution and events';
-	readonly commandId = 'copilot.claude.hooks';
+	readonly commandId = 'reea.copilot.claude.hooks';
 
 	constructor(
 		@IWorkspaceService private readonly workspaceService: IWorkspaceService,

@@ -5,6 +5,7 @@
 import { commands, window } from 'vscode';
 import { IAuthenticationService } from '../../../platform/authentication/common/authentication';
 import { IAuthenticationChatUpgradeService } from '../../../platform/authentication/common/authenticationUpgrade';
+import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { IVSCodeExtensionContext } from '../../../platform/extContext/common/extensionContext';
 import { ILogService } from '../../../platform/log/common/logService';
 import { Event } from '../../../util/vs/base/common/event';
@@ -15,8 +16,14 @@ import { IInstantiationService } from '../../../util/vs/platform/instantiation/c
  * The main entry point for the authentication contribution.
  */
 export class AuthenticationContrib extends Disposable {
-	constructor(@IInstantiationService private readonly instantiationService: IInstantiationService) {
+	constructor(
+		@IInstantiationService private readonly instantiationService: IInstantiationService,
+		@IConfigurationService private readonly configurationService: IConfigurationService,
+	) {
 		super();
+		if (this.configurationService.getConfig(ConfigKey.Advanced.ProviderMode) === 'standalone') {
+			return;
+		}
 		this.askToUpgradeAuthPermissions();
 	}
 	private async askToUpgradeAuthPermissions() {
@@ -38,7 +45,7 @@ class AuthUpgradeAsk extends Disposable {
 		@IAuthenticationChatUpgradeService private readonly _authenticationChatUpgradeService: IAuthenticationChatUpgradeService,
 	) {
 		super();
-		this._register(commands.registerCommand('github.copilot.chat.triggerPermissiveSignIn', async () => {
+		this._register(commands.registerCommand('reea.copilot.chat.triggerPermissiveSignIn', async () => {
 			await this._authenticationChatUpgradeService.showPermissiveSessionModal(true);
 		}));
 	}

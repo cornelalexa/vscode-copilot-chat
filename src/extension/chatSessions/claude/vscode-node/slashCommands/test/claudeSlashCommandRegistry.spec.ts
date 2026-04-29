@@ -42,7 +42,7 @@ describe('claudeSlashCommandRegistry', () => {
 			class TestHandlerWithId implements IClaudeSlashCommandHandler {
 				readonly commandName = 'testWithId';
 				readonly description = 'A test command with ID';
-				readonly commandId = 'copilot.claude.testWithId';
+				readonly commandId = 'reea.copilot.claude.testWithId';
 				async handle(): Promise<vscode.ChatResult> {
 					return {};
 				}
@@ -153,14 +153,14 @@ describe('claudeSlashCommandRegistry', () => {
 			class HandlerWithId implements IClaudeSlashCommandHandler {
 				readonly commandName = 'withCommandId';
 				readonly description = 'Handler with command ID';
-				readonly commandId = 'copilot.claude.withCommandId';
+				readonly commandId = 'reea.copilot.claude.withCommandId';
 				async handle(): Promise<vscode.ChatResult> {
 					return {};
 				}
 			}
 
 			const handler = new HandlerWithId();
-			expect(handler.commandId).toBe('copilot.claude.withCommandId');
+			expect(handler.commandId).toBe('reea.copilot.claude.withCommandId');
 		});
 
 		it('handle method receives all parameters', async () => {

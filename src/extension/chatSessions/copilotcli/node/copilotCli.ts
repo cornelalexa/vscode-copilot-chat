@@ -26,10 +26,10 @@ import { getCopilotLogger } from './logger';
 import { ensureNodePtyShim } from './nodePtyShim';
 import { ensureRipgrepShim } from './ripgrepShim';
 
-const COPILOT_CLI_MODEL_MEMENTO_KEY = 'github.copilot.cli.sessionModel';
-const COPILOT_CLI_REQUEST_MAP_KEY = 'github.copilot.cli.requestMap';
+const COPILOT_CLI_MODEL_MEMENTO_KEY = 'reea.copilot.cli.sessionModel';
+const COPILOT_CLI_REQUEST_MAP_KEY = 'reea.copilot.cli.requestMap';
 // Store last used Agent for a Session.
-const COPILOT_CLI_SESSION_AGENTS_MEMENTO_KEY = 'github.copilot.cli.sessionAgents';
+const COPILOT_CLI_SESSION_AGENTS_MEMENTO_KEY = 'reea.copilot.cli.sessionAgents';
 /**
  * @deprecated Use empty strings to represent default model/agent instead.
  * Left here for backward compatibility (for state stored by older versions of Chat extension).

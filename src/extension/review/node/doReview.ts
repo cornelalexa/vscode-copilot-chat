@@ -380,7 +380,7 @@ async function review(
 
 /**
  * Runs a code review on file URI pairs and returns structured results.
- * This is the handler for the `github.copilot.chat.codeReview.run` command.
+ * This is the handler for the `reea.copilot.chat.codeReview.run` command.
  * It bypasses the comment controller — results are returned directly to the caller.
  */
 export async function reviewFileChanges(

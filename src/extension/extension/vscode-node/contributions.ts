@@ -94,7 +94,6 @@ export const vscodeNodeContributions: IExtensionContributionFactory[] = [
 	asContributionFactory(ChatSessionContextContribution),
 	asContributionFactory(CompletionsUnificationContribution),
 	workspaceIndexingContribution,
-	asContributionFactory(ChatSessionsContrib),
 	asContributionFactory(GitHubMcpContrib),
 	asContributionFactory(OTelContrib),
 ];
@@ -117,6 +116,7 @@ export const vscodeNodeChatContributions: IExtensionContributionFactory[] = [
 	asContributionFactory(SetupTestsContribution),
 	asContributionFactory(FixTestFailureContribution),
 	asContributionFactory(IgnoredFileProviderContribution),
+	asContributionFactory(ChatSessionsContrib),
 	asContributionFactory(BYOKContrib),
 	asContributionFactory(StandaloneEmbeddingsPickerContribution),
 	asContributionFactory(McpSetupCommands),

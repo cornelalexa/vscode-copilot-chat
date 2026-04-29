@@ -151,11 +151,11 @@ describe('resolveOTelConfig', () => {
 		expect(config.sessionId).toBe('abc-123');
 	});
 
-	it('defaults service name to copilot-chat', () => {
+	it('defaults service name to reea-copilot-chat', () => {
 		const config = resolveOTelConfig(makeInput({
 			settingEnabled: true,
 		}));
-		expect(config.serviceName).toBe('copilot-chat');
+		expect(config.serviceName).toBe('reea-copilot-chat');
 	});
 
 	it('overrides service name from OTEL_SERVICE_NAME', () => {

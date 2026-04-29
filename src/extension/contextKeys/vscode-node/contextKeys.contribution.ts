@@ -17,31 +17,31 @@ import { GHPR_EXTENSION_ID } from '../../chatSessions/vscode/chatSessionsUriHand
 import { EXTENSION_ID } from '../../common/constants';
 
 const welcomeViewContextKeys = {
-	Activated: 'github.copilot-chat.activated',
-	Offline: 'github.copilot.offline',
-	IndividualDisabled: 'github.copilot.interactiveSession.individual.disabled',
-	IndividualExpired: 'github.copilot.interactiveSession.individual.expired',
-	ContactSupport: 'github.copilot.interactiveSession.contactSupport',
-	EnterpriseDisabled: 'github.copilot.interactiveSession.enterprise.disabled',
-	InvalidToken: 'github.copilot.interactiveSession.invalidToken',
-	RateLimited: 'github.copilot.interactiveSession.rateLimited',
-	GitHubLoginFailed: 'github.copilot.interactiveSession.gitHubLoginFailed',
+	Activated: 'reea.copilot-chat.activated',
+	Offline: 'reea.copilot.offline',
+	IndividualDisabled: 'reea.copilot.interactiveSession.individual.disabled',
+	IndividualExpired: 'reea.copilot.interactiveSession.individual.expired',
+	ContactSupport: 'reea.copilot.interactiveSession.contactSupport',
+	EnterpriseDisabled: 'reea.copilot.interactiveSession.enterprise.disabled',
+	InvalidToken: 'reea.copilot.interactiveSession.invalidToken',
+	RateLimited: 'reea.copilot.interactiveSession.rateLimited',
+	GitHubLoginFailed: 'reea.copilot.interactiveSession.gitHubLoginFailed',
 };
 
-const chatQuotaExceededContextKey = 'github.copilot.chat.quotaExceeded';
+const chatQuotaExceededContextKey = 'reea.copilot.chat.quotaExceeded';
 
-const showLogViewContextKey = `github.copilot.chat.showLogView`;
-const debugReportFeedbackContextKey = 'github.copilot.debugReportFeedback';
+const showLogViewContextKey = `reea.copilot.chat.showLogView`;
+const debugReportFeedbackContextKey = 'reea.copilot.debugReportFeedback';
 
-const previewFeaturesDisabledContextKey = 'github.copilot.previewFeaturesDisabled';
+const previewFeaturesDisabledContextKey = 'reea.copilot.previewFeaturesDisabled';
 
-const debugContextKey = 'github.copilot.chat.debug';
+const debugContextKey = 'reea.copilot.chat.debug';
 
-const missingPermissiveSessionContextKey = 'github.copilot.auth.missingPermissiveSession';
+const missingPermissiveSessionContextKey = 'reea.copilot.auth.missingPermissiveSession';
 
-export const standaloneContextKey = 'github.copilot.chat.standalone';
+export const standaloneContextKey = 'reea.copilot.chat.standalone';
 
-export const prExtensionInstalledContextKey = 'github.copilot.prExtensionInstalled';
+export const prExtensionInstalledContextKey = 'reea.copilot.prExtensionInstalled';
 
 export class ContextKeysContribution extends Disposable {
 
@@ -62,11 +62,11 @@ export class ContextKeysContribution extends Disposable {
 		void this._inspectContext().catch(console.error);
 		void this._updatePermissiveSessionContext().catch(console.error);
 		this._register(_authenticationService.onDidAuthenticationChange(async () => await this._onAuthenticationChange()));
-		this._register(commands.registerCommand('github.copilot.refreshToken', async () => await this._inspectContext()));
-		this._register(commands.registerCommand('github.copilot.debug.showChatLogView', async () => {
+		this._register(commands.registerCommand('reea.copilot.refreshToken', async () => await this._inspectContext()));
+		this._register(commands.registerCommand('reea.copilot.debug.showChatLogView', async () => {
 			this._showLogView = true;
 			await commands.executeCommand('setContext', showLogViewContextKey, true);
-			await commands.executeCommand('copilot-chat.focus');
+			await commands.executeCommand('reea-copilot-chat.focus');
 		}));
 		this._register({ dispose: () => this._cancelPendingOfflineCheck() });
 		this._register(window.onDidChangeWindowState(() => this._runOfflineCheck('Window state change')));
@@ -148,7 +148,7 @@ export class ContextKeysContribution extends Disposable {
 			const message =
 				reason === 'GitHubLoginFailed'
 					? SESSION_LOGIN_MESSAGE
-					: `GitHub Copilot could not connect to server. Extension activation failed: "${reason}"`;
+					: `Reea Copilot could not connect to server. Extension activation failed: "${reason}"`;
 			this._logService.error(message);
 		}
 

@@ -160,7 +160,7 @@ import { registerServices as registerCommonServices } from '../vscode/services';
 
 export function registerServices(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext): void {
 	const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
-	const isStandaloneMode = workspace.getConfiguration('github.copilot.chat').get<string>('providerMode') === 'standalone';
+	const isStandaloneMode = workspace.getConfiguration('reea.copilot.chat').get<string>('providerMode') === 'standalone';
 
 	registerCommonServices(builder, extensionContext);
 
@@ -281,7 +281,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(IOTelSqliteStore, otelSqliteStore);
 
 	// OTel service — resolve config from env + settings, create appropriate impl
-	const otelSettings = workspace.getConfiguration('github.copilot.chat.otel');
+	const otelSettings = workspace.getConfiguration('reea.copilot.chat.otel');
 	const otelConfig = resolveOTelConfig({
 		env: isStandaloneMode ? {} : process.env,
 		settingEnabled: isStandaloneMode ? false : otelSettings.get<boolean>('enabled'),

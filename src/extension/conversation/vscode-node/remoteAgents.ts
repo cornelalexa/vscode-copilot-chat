@@ -199,7 +199,7 @@ export class RemoteAgentContribution implements IDisposable {
 
 	private registerAgent(agentData: IAgent | null): Disposable {
 		const store = new DisposableStore();
-		const participantId = `github.copilot-dynamic.${agentData?.slug ?? GITHUB_PLATFORM_AGENT_ID}`;
+		const participantId = `reea.copilot-dynamic.${agentData?.slug ?? GITHUB_PLATFORM_AGENT_ID}`;
 		const slug = agentData?.slug ?? GITHUB_PLATFORM_AGENT_NAME;
 		const description = agentData?.description ?? l10n.t("Get answers grounded in web search and code search");
 		const dynamicProps: DynamicChatParticipantProps = {
@@ -254,11 +254,11 @@ export class RemoteAgentContribution implements IDisposable {
 				accessToken = this.authenticationService.permissiveGitHubSession?.accessToken;
 				if (!accessToken) {
 					if (this.authenticationService.isMinimalMode) {
-						responseStream.markdown(l10n.t('Minimal mode is enabled. You will need to change `github.copilot.advanced.authPermissions` to `default` to use this feature.'));
+						responseStream.markdown(l10n.t('Minimal mode is enabled. You will need to change `reea.copilot.advanced.authPermissions` to `default` to use this feature.'));
 						responseStream.button({
 							title: l10n.t('Open Settings (JSON)'),
 							command: 'workbench.action.openSettingsJson',
-							arguments: [{ revealSetting: { key: 'github.copilot.advanced.authPermissions' } }]
+							arguments: [{ revealSetting: { key: 'reea.copilot.advanced.authPermissions' } }]
 						});
 					} else {
 						// Otherwise, show the permissive session upgrade prompt because it's required
@@ -302,7 +302,7 @@ export class RemoteAgentContribution implements IDisposable {
 
 				// Collect copilot skills and references to be sent in the request
 				const copilotReferences = [];
-				const { copilot_skills } = await this.resolveCopilotSkills(slug, request);
+				const { reea_copilot_skills } = await this.resolveCopilotSkills(slug, request);
 
 				let hasIgnoredFiles = false;
 				try {
@@ -344,8 +344,8 @@ export class RemoteAgentContribution implements IDisposable {
 							content: (request.acceptedConfirmationData?.length || request.rejectedConfirmationData?.length)
 								? []
 								: [{ type: Raw.ChatCompletionContentPartKind.Text, text: resolved.message }],
-							...(copilotReferences.length ? { copilot_references: copilotReferences } : undefined),
-							...(confirmations?.length ? { copilot_confirmations: confirmations } : undefined),
+							...(copilotReferences.length ? { reea_copilot_references: copilotReferences } : undefined),
+							...(confirmations?.length ? { reea_copilot_confirmations: confirmations } : undefined),
 						}
 					],
 					async (result, _, delta) => {
@@ -459,8 +459,8 @@ export class RemoteAgentContribution implements IDisposable {
 					undefined,
 					{
 						secretKey: accessToken,
-						copilot_thread_id: sessionId,
-						...(copilot_skills ? { copilot_skills } : undefined)
+						reea_copilot_thread_id: sessionId,
+						...(reea_copilot_skills ? { reea_copilot_skills } : undefined)
 					},
 					true,
 					{
@@ -468,7 +468,7 @@ export class RemoteAgentContribution implements IDisposable {
 					}
 				);
 
-				metadata['copilot_references'] = [...new Set(reportedReferences.values()).values(), ...agentReferences];
+				metadata['reea_copilot_references'] = [...new Set(reportedReferences.values()).values(), ...agentReferences];
 				if (response.type === ChatFetchResponseType.Success && hasIgnoredFiles) {
 					responseStream.markdown(HAS_IGNORED_FILES_MESSAGE);
 				}
@@ -703,7 +703,7 @@ export class RemoteAgentContribution implements IDisposable {
 		return this.enabledSkillsPromise;
 	}
 
-	private async resolveCopilotSkills(agent: string, request: ChatRequest): Promise<{ copilot_skills: string[] }> {
+	private async resolveCopilotSkills(agent: string, request: ChatRequest): Promise<{ reea_copilot_skills: string[] }> {
 		if (agent === GITHUB_PLATFORM_AGENT_NAME) {
 			const skills = new Set<string>();
 			for (const variable of request.references) {
@@ -711,10 +711,10 @@ export class RemoteAgentContribution implements IDisposable {
 					skills.add(GITHUB_PLATFORM_AGENT_SKILLS[variable.name]);
 				}
 			}
-			return { copilot_skills: [...skills] };
+			return { reea_copilot_skills: [...skills] };
 		}
 
-		return { copilot_skills: [] };
+		return { reea_copilot_skills: [] };
 	}
 
 	private async getPlatformAgentSkills() {
@@ -759,7 +759,7 @@ function prepareRemoteAgentHistory(agentId: string, context: ChatContext): Raw.C
 		}
 
 		if (h instanceof ChatResponseTurn) {
-			const copilot_references = h.result.metadata?.['copilot_references'];
+			const reea_copilot_references = h.result.metadata?.['reea_copilot_references'];
 			const content = h.response.map(r => {
 				if (r instanceof ChatResponseMarkdownPart) {
 					return r.value.value;
@@ -772,7 +772,7 @@ function prepareRemoteAgentHistory(agentId: string, context: ChatContext): Raw.C
 			result.push({
 				role: Raw.ChatRole.Assistant,
 				content: [{ type: Raw.ChatCompletionContentPartKind.Text, text: content }],
-				...(copilot_references ? { copilot_references } : undefined)
+				...(reea_copilot_references ? { reea_copilot_references } : undefined)
 			});
 		}
 	}

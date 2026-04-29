@@ -90,7 +90,7 @@ export class CopilotCLITerminalIntegration extends Disposable implements ICopilo
 		}
 
 		const storageLocation = path.join(globalStorageUri.fsPath, 'copilotCli');
-		this.terminalService.contributePath('copilot-cli', storageLocation, { command: COPILOT_CLI_COMMAND }, true);
+		this.terminalService.contributePath('reea-copilot-cli', storageLocation, { command: COPILOT_CLI_COMMAND }, true);
 
 		await fs.mkdir(storageLocation, { recursive: true });
 
@@ -120,7 +120,7 @@ ELECTRON_RUN_AS_NODE=1 "${process.execPath}" "${path.join(storageLocation, COPIL
 				return;
 			}
 			this.sendTerminalOpenTelemetry('new', shellInfo.shell, 'newFromTerminalProfile', 'panel');
-			const options = await getCommonTerminalOptions('GitHub Copilot CLI', this._authenticationService, this._otelService, 'panel');
+			const options = await getCommonTerminalOptions('Reea Copilot CLI', this._authenticationService, this._otelService, 'panel');
 			return new TerminalProfile({
 				...options,
 				titleTemplate: '${sequence}',
@@ -129,7 +129,7 @@ ELECTRON_RUN_AS_NODE=1 "${process.execPath}" "${path.join(storageLocation, COPIL
 				iconPath: shellInfo.iconPath,
 			});
 		};
-		this._register(window.registerTerminalProfileProvider('copilot-cli', { provideTerminalProfile }));
+		this._register(window.registerTerminalProfileProvider('reea-copilot-cli', { provideTerminalProfile }));
 
 	}
 

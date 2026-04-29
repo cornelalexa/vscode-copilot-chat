@@ -220,7 +220,7 @@ export class LanguageModelAccess extends Disposable implements IExtensionContrib
 			provideLanguageModelChatResponse: this._provideLanguageModelChatResponse.bind(this),
 			provideTokenCount: this._provideTokenCount.bind(this)
 		};
-		this._register(vscode.lm.registerLanguageModelChatProvider('copilot', provider));
+		this._register(vscode.lm.registerLanguageModelChatProvider('reea-copilot', provider));
 		this._register(this._authenticationService.onDidAuthenticationChange(() => {
 			if (!this._authenticationService.anyGitHubSession) {
 				this._currentModels = [];

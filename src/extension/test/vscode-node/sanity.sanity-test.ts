@@ -41,7 +41,7 @@ suite('Copilot Chat Sanity Test', function () {
 			sessionItemProviders.set(scheme, sessionItemProvider);
 			return { dispose: () => { } };
 		});
-		const extension = vscode.extensions.getExtension('Github.copilot-chat');
+		const extension = vscode.extensions.getExtension('Github.reea-copilot-chat');
 		assert.ok(extension, 'Extension is not available');
 		realContext = await extension.activate();
 		assert.ok(realContext, '`extension.activate()` did not return context`');

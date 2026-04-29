@@ -48,8 +48,8 @@ export class ToolsService extends BaseToolsService {
 		const contributedTools = [...input]
 			.sort((a, b) => {
 				// Sort builtin tools to the top
-				const aIsBuiltin = a.name.startsWith('vscode_') || a.name.startsWith('copilot_');
-				const bIsBuiltin = b.name.startsWith('vscode_') || b.name.startsWith('copilot_');
+				const aIsBuiltin = a.name.startsWith('vscode_') || a.name.startsWith('reea_copilot_');
+				const bIsBuiltin = b.name.startsWith('vscode_') || b.name.startsWith('reea_copilot_');
 				if (aIsBuiltin && bIsBuiltin) {
 					return a.name.localeCompare(b.name);
 				} else if (!aIsBuiltin && !bIsBuiltin) {

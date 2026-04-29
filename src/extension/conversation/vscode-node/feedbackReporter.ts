@@ -106,7 +106,7 @@ export class FeedbackReporter extends Disposable implements IFeedbackReporter {
 				let content = getTextPart(message.content);
 
 				if (message.content.some(part => part.type === Raw.ChatCompletionContentPartKind.CacheBreakpoint)) {
-					content += `\ncopilot_cache_control: { type: 'ephemeral' }`;
+					content += `\nreea_copilot_cache_control: { type: 'ephemeral' }`;
 				}
 				if (message.role === Raw.ChatRole.Assistant && message.toolCalls?.length) {
 					if (content) {

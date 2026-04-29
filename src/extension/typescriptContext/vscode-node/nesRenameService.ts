@@ -149,7 +149,7 @@ export class NesRenameContribution implements vscode.Disposable {
 	) {
 		this.telemetrySender = new TelemetrySender(telemetryService, logService);
 		this.disposables = new DisposableStore();
-		this.disposables.add(vscode.commands.registerCommand('github.copilot.nes.prepareRename', async (uri: vscode.Uri | undefined, position: vscode.Position | undefined, oldName: string | undefined, newName: string | undefined, requestId: string | undefined, lastSymbolRename: vscode.Range | undefined): Promise<protocol.PrepareNesRenameResult> => {
+		this.disposables.add(vscode.commands.registerCommand('reea.copilot.nes.prepareRename', async (uri: vscode.Uri | undefined, position: vscode.Position | undefined, oldName: string | undefined, newName: string | undefined, requestId: string | undefined, lastSymbolRename: vscode.Range | undefined): Promise<protocol.PrepareNesRenameResult> => {
 			const no: protocol.PrepareNesRenameResult.No = { canRename: protocol.RenameKind.no, timedOut: false };
 			const params = this.resolvePrepareParams(uri, position, oldName, newName, requestId);
 			if (params === undefined) {
@@ -186,7 +186,7 @@ export class NesRenameContribution implements vscode.Disposable {
 				tokenSource.dispose();
 			}
 		}));
-		this.disposables.add(vscode.commands.registerCommand('github.copilot.nes.postRename', async (uri: vscode.Uri | undefined, position: vscode.Position | undefined, oldName: string | undefined, newName: string | undefined, lastSymbolRename: vscode.Range | undefined): Promise<RenameGroup[]> => {
+		this.disposables.add(vscode.commands.registerCommand('reea.copilot.nes.postRename', async (uri: vscode.Uri | undefined, position: vscode.Position | undefined, oldName: string | undefined, newName: string | undefined, lastSymbolRename: vscode.Range | undefined): Promise<RenameGroup[]> => {
 			const params = this.resolveRenameParams(uri, position, oldName, newName);
 			if (params === undefined) {
 				return [];
@@ -213,7 +213,7 @@ export class NesRenameContribution implements vscode.Disposable {
 				tokenSource.dispose();
 			}
 		}));
-		this.disposables.add(vscode.commands.registerCommand('github.copilot.debug.validateNesRename', async () => {
+		this.disposables.add(vscode.commands.registerCommand('reea.copilot.debug.validateNesRename', async () => {
 			const params = await this.getUserParams();
 			if (params === undefined) {
 				return;

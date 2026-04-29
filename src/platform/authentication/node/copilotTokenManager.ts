@@ -231,7 +231,7 @@ export abstract class BaseCopilotTokenManager extends Disposable implements ICop
 		const login = ghUsername ?? 'unknown';
 		const extendedInfo: ExtendedTokenInfo = {
 			...tokenInfo,
-			copilot_plan: userInfo?.copilot_plan ?? tokenInfo.sku ?? '',
+			reea_copilot_plan: userInfo?.reea_copilot_plan ?? tokenInfo.sku ?? '',
 			quota_snapshots: userInfo?.quota_snapshots,
 			quota_reset_date: userInfo?.quota_reset_date,
 			codex_agent_enabled: userInfo?.codex_agent_enabled,
@@ -377,12 +377,12 @@ export class FixedCopilotTokenManager extends BaseCopilotTokenManager implements
 		@IEnvService envService: IEnvService
 	) {
 		super(new NullBaseOctoKitService(capiClientService, fetcherService, logService, telemetryService), logService, telemetryService, domainService, capiClientService, fetcherService, envService);
-		this.copilotToken = createTestExtendedTokenInfo({ token: _completionsToken, username: 'fixedTokenManager', copilot_plan: 'unknown' });
+		this.copilotToken = createTestExtendedTokenInfo({ token: _completionsToken, username: 'fixedTokenManager', reea_copilot_plan: 'unknown' });
 	}
 
 	set completionsToken(token: string) {
 		this._completionsToken = token;
-		this.copilotToken = createTestExtendedTokenInfo({ token, username: 'fixedTokenManager', copilot_plan: 'unknown' });
+		this.copilotToken = createTestExtendedTokenInfo({ token, username: 'fixedTokenManager', reea_copilot_plan: 'unknown' });
 	}
 	get completionsToken(): string {
 		return this._completionsToken;

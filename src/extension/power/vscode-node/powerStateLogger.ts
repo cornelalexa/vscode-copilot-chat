@@ -23,7 +23,7 @@ export class PowerStateLogger extends Disposable implements IExtensionContributi
 		super();
 
 		// Register toggle power save blocker command
-		this._register(vscode.commands.registerCommand('github.copilot.debug.togglePowerSaveBlocker', async () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.debug.togglePowerSaveBlocker', async () => {
 			const isActive = await this._toggleManualPowerSaveBlocker();
 			vscode.window.showInformationMessage(isActive ? 'Power save blocker is now active' : 'Power save blocker is now inactive');
 		}));

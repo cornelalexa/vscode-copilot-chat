@@ -41,7 +41,7 @@ export class CompletionsCoreContribution extends Disposable {
 						provider,
 						{
 							debounceDelayMs: 0,
-							excludes: ['github.copilot'],
+							excludes: ['reea.copilot'],
 							groupId: 'completions'
 						}
 					)
@@ -49,7 +49,7 @@ export class CompletionsCoreContribution extends Disposable {
 				hasInstantiatedProvider = true;
 			}
 
-			void commands.executeCommand('setContext', 'github.copilot.extensionUnification.activated', extensionUnification);
+			void commands.executeCommand('setContext', 'reea.copilot.extensionUnification.activated', extensionUnification);
 
 			if (extensionUnification && hasInstantiatedProvider) {
 				const completionsInstaService = _copilotInlineCompletionItemProviderService.getOrCreateInstantiationService();
@@ -59,7 +59,7 @@ export class CompletionsCoreContribution extends Disposable {
 
 		this._register(autorun(reader => {
 			const token = this._copilotToken.read(reader);
-			void commands.executeCommand('setContext', 'github.copilot.activated', token !== undefined);
+			void commands.executeCommand('setContext', 'reea.copilot.activated', token !== undefined);
 		}));
 	}
 }

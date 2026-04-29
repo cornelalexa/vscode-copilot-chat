@@ -111,7 +111,7 @@ import { IToolGroupingCache, IToolGroupingService } from '../../tools/common/vir
 
 export function registerServices(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext): void {
 	const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
-	const isStandaloneMode = workspace.getConfiguration('github.copilot.chat').get<string>('providerMode') === 'standalone';
+	const isStandaloneMode = workspace.getConfiguration('reea.copilot.chat').get<string>('providerMode') === 'standalone';
 
 	builder.define(IInteractionService, new SyncDescriptor(InteractionService));
 	builder.define(ICopilotTokenStore, new CopilotTokenStore());

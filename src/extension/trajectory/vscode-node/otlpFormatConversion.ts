@@ -99,7 +99,7 @@ export function wrapInResourceSpans(
 				})),
 			},
 			scopeSpans: [{
-				scope: { name: 'copilot-chat' },
+				scope: { name: 'reea-copilot-chat' },
 				spans: spans.map(completedSpanToOtlpSpan),
 			}],
 		}],

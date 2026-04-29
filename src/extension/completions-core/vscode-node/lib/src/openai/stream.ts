@@ -30,10 +30,10 @@ class APIJsonDataStreaming {
 	text: string[] = [];
 	tokens: string[][] = [];
 	text_offset: number[][] = [];
-	copilot_annotations: CopilotAnnotations = new StreamCopilotAnnotations();
+	reea_copilot_annotations: CopilotAnnotations = new StreamCopilotAnnotations();
 	tool_calls: StreamingToolCalls = new StreamingToolCalls();
 	function_call: StreamingFunctionCall = new StreamingFunctionCall();
-	copilot_references: CopilotReference[] = [];
+	reea_copilot_references: CopilotReference[] = [];
 	finish_reason?: string;
 	yielded = false;
 
@@ -51,11 +51,11 @@ class APIJsonDataStreaming {
 			this.logprobs.push(choice.logprobs.token_logprobs ?? []);
 			this.top_logprobs.push(choice.logprobs.top_logprobs ?? []);
 		}
-		if (choice.copilot_annotations) {
-			this.copilot_annotations.update(choice.copilot_annotations);
+		if (choice.reea_copilot_annotations) {
+			this.reea_copilot_annotations.update(choice.reea_copilot_annotations);
 		}
-		if (choice.delta?.copilot_annotations) {
-			this.copilot_annotations.update(choice.delta.copilot_annotations);
+		if (choice.delta?.reea_copilot_annotations) {
+			this.reea_copilot_annotations.update(choice.delta.reea_copilot_annotations);
 		}
 		if (choice.delta?.tool_calls && choice.delta.tool_calls.length > 0) {
 			this.tool_calls.update(choice.delta.tool_calls);
@@ -175,22 +175,22 @@ interface ChoiceJSON {
 	 * See https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format
 	 */
 	text: string;
-	copilot_annotations: { [key: string]: CopilotAnnotation[] };
+	reea_copilot_annotations: { [key: string]: CopilotAnnotation[] };
 	/**
 	 * The delta attribute as defined in chat streaming.
 	 * See https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.ipynb
 	 */
 	delta: {
 		content: string;
-		copilot_annotations?: { [key: string]: CopilotAnnotation[] };
+		reea_copilot_annotations?: { [key: string]: CopilotAnnotation[] };
 		role?: string;
 		function_call?: FunctionCallJSON;
 		tool_calls?: ToolCallJSON[];
 	};
 	finish_reason: string | null;
 	logprobs?: APILogprobs;
-	copilot_annotation?: CopilotNamedAnnotationList;
-	copilot_references?: CopilotReference[];
+	reea_copilot_annotation?: CopilotNamedAnnotationList;
+	reea_copilot_references?: CopilotReference[];
 }
 
 /**
@@ -313,9 +313,9 @@ export class SSEProcessor {
 				interface StreamingResponse {
 					choices?: ChoiceJSON[];
 					error?: { message: string };
-					copilot_references?: CopilotReference[];
-					copilot_confirmation?: unknown;
-					copilot_errors: CopilotError[];
+					reea_copilot_references?: CopilotReference[];
+					reea_copilot_confirmation?: unknown;
+					reea_copilot_errors: CopilotError[];
 					model?: string; // Note: model should only be expected from CAPI, not copilot-proxy
 					usage?: ModelUsage;
 				}
@@ -329,25 +329,25 @@ export class SSEProcessor {
 				}
 
 				// A message with a confirmation may or may not have 'choices'
-				if (json.copilot_confirmation && isCopilotConfirmation(json.copilot_confirmation)) {
+				if (json.reea_copilot_confirmation && isCopilotConfirmation(json.reea_copilot_confirmation)) {
 					await finishedCb('', {
 						text: '',
 						requestId: this.requestId,
-						copilotConfirmation: json.copilot_confirmation,
+						copilotConfirmation: json.reea_copilot_confirmation,
 					});
 				}
 
-				// we do not process the data from role=function right now because copilot_references seem to contain the same data in a more structured way
-				if (json.copilot_references) {
+				// we do not process the data from role=function right now because reea_copilot_references seem to contain the same data in a more structured way
+				if (json.reea_copilot_references) {
 					await finishedCb('', {
 						text: '',
 						requestId: this.requestId,
-						copilotReferences: json.copilot_references,
+						copilotReferences: json.reea_copilot_references,
 					});
 				}
 
 				if (json.choices === undefined) {
-					if (!json.copilot_references && !json.copilot_confirmation) {
+					if (!json.reea_copilot_references && !json.reea_copilot_confirmation) {
 						if (json.error !== undefined) {
 							streamChoicesLogger.error(this.logTarget, 'Error in response:', json.error!.message);
 						} else {
@@ -357,9 +357,9 @@ export class SSEProcessor {
 						}
 					}
 
-					// There are also messages with a null 'choices' that include copilot_errors- report these
-					if (json.copilot_errors) {
-						await finishedCb('', { text: '', requestId: this.requestId, copilotErrors: json.copilot_errors });
+					// There are also messages with a null 'choices' that include reea_copilot_errors- report these
+					if (json.reea_copilot_errors) {
+						await finishedCb('', { text: '', requestId: this.requestId, copilotErrors: json.reea_copilot_errors });
 					}
 
 					continue;
@@ -407,8 +407,8 @@ export class SSEProcessor {
 								text,
 								index: choice.index,
 								requestId: this.requestId,
-								annotations: solution.copilot_annotations,
-								copilotReferences: solution.copilot_references,
+								annotations: solution.reea_copilot_annotations,
+								copilotReferences: solution.reea_copilot_references,
 								getAPIJsonData: () => convertToAPIJsonData(solution),
 								finished: choice.finish_reason ? true : false,
 								telemetryData: this.telemetryData,
@@ -562,8 +562,8 @@ export class SSEProcessor {
 				text,
 				index: solutionIndex,
 				requestId: this.requestId,
-				annotations: solution.copilot_annotations,
-				copilotReferences: solution.copilot_references,
+				annotations: solution.reea_copilot_annotations,
+				copilotReferences: solution.reea_copilot_references,
 				getAPIJsonData: () => convertToAPIJsonData(solution), // observation from @ulugbekna: this conversion will make `finishReason` for this object 'stop' while we're yielding with 'DONE' below
 				finished: true,
 				telemetryData: this.telemetryData,
@@ -645,11 +645,11 @@ export function prepareSolutionForReturn(
 // Function to convert from APIJsonDataStreaming to APIJsonData format
 function convertToAPIJsonData(streamingData: APIJsonDataStreaming): APIJsonData {
 	const joinedText = streamingData.text.join('');
-	const annotations = streamingData.copilot_annotations.current;
+	const annotations = streamingData.reea_copilot_annotations.current;
 	const out: APIJsonData = {
 		text: joinedText,
 		tokens: streamingData.text,
-		copilot_annotations: annotations,
+		reea_copilot_annotations: annotations,
 		finish_reason: streamingData.finish_reason ?? 'stop',
 	};
 	if (streamingData.logprobs.length === 0) {
@@ -671,7 +671,7 @@ function convertToAPIJsonData(streamingData: APIJsonDataStreaming): APIJsonData 
 	};
 }
 
-// data: {"choices":null,"copilot_confirmation":{"type":"action","title":"Are you sure you want to proceed?","message":"This action is irreversible.","confirmation":{"id":"123"}},"id":null}
+// data: {"choices":null,"reea_copilot_confirmation":{"type":"action","title":"Are you sure you want to proceed?","message":"This action is irreversible.","confirmation":{"id":"123"}},"id":null}
 function isCopilotConfirmation(obj: unknown): obj is CopilotConfirmation {
 	return (
 		typeof (obj as CopilotConfirmation).title === 'string' &&

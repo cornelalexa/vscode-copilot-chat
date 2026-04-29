@@ -82,7 +82,7 @@ export class ProductionEndpointProvider extends Disposable implements IEndpointP
 			return this.getChatEndpoint('copilot-base');
 		}
 
-		if (model.vendor !== 'copilot') {
+		if (model.vendor !== 'reea-copilot') {
 			return this._instantiationService.createInstance(ExtensionContributedChatEndpoint, model);
 		}
 
@@ -129,12 +129,12 @@ export class ProductionEndpointProvider extends Disposable implements IEndpointP
 	private async resolveStandaloneEndpoint(role: 'default' | 'fast' | 'reasoning'): Promise<IChatEndpoint> {
 		const models = await this.selectStandaloneModels();
 		const configuredModel = this.getStandaloneRoleConfig(role);
-		const model = configuredModel ? this.findStandaloneModel(models, configuredModel) : models.find(model => model.vendor !== 'copilot');
+		const model = configuredModel ? this.findStandaloneModel(models, configuredModel) : models.find(model => model.vendor !== 'reea-copilot');
 
 		if (!model) {
 			throw new Error(configuredModel
-				? `Standalone model '${configuredModel}' is not available. Configure github.copilot.chat.standalone.model.${role} with a valid vendor/model-id.`
-				: 'No standalone language model is available. Configure a BYOK provider or set github.copilot.chat.standalone.model.default.');
+				? `Standalone model '${configuredModel}' is not available. Configure reea.copilot.chat.standalone.model.${role} with a valid vendor/model-id.`
+				: 'No standalone language model is available. Configure a BYOK provider or set reea.copilot.chat.standalone.model.default.');
 		}
 
 		return this._instantiationService.createInstance(ExtensionContributedChatEndpoint, model);

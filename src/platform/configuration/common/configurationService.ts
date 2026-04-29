@@ -26,7 +26,7 @@ import { AlternativeNotebookFormat } from '../../notebook/common/alternativeCont
 import { IExperimentationService } from '../../telemetry/common/nullExperimentationService';
 import { IValidator, vBoolean, vNumber, vString } from './validator';
 
-export const CopilotConfigPrefix = 'github.copilot';
+export const CopilotConfigPrefix = 'reea.copilot';
 
 export const IConfigurationService = createServiceIdentifier<IConfigurationService>('IConfigurationService');
 
@@ -324,13 +324,13 @@ export abstract class AbstractConfigurationService extends Disposable implements
 
 export interface BaseConfig<T> {
 	/**
-	 * Key as it appears in settings.json minus the "github.copilot." prefix.
+	 * Key as it appears in settings.json minus the "reea.copilot." prefix.
 	 * e.g. "advanced.debug.overrideProxyUrl"
 	 */
 	readonly id: string;
 
 	/**
-	 * The old key as it appears in settings.json minus the "github.copilot." prefix.
+	 * The old key as it appears in settings.json minus the "reea.copilot." prefix.
 	 */
 	readonly oldId?: string;
 
@@ -340,18 +340,18 @@ export interface BaseConfig<T> {
 	readonly isPublic: boolean;
 
 	/**
-	 * The fully qualified id, e.g. "github.copilot.advanced.debug.overrideProxyUrl".
+	 * The fully qualified id, e.g. "reea.copilot.advanced.debug.overrideProxyUrl".
 	 * Use this with `affectsConfiguration` from the ConfigurationChangeEvent
 	 */
 	readonly fullyQualifiedId: string;
 
 	/**
-	 * The fully qualified old id, e.g. "github.copilot.advanced.debug.overrideProxyUrl".
+	 * The fully qualified old id, e.g. "reea.copilot.advanced.debug.overrideProxyUrl".
 	 */
 	readonly fullyQualifiedOldId?: string | undefined;
 
 	/**
-	 * The `X` in `github.copilot.advanced.X` settings.
+	 * The `X` in `reea.copilot.advanced.X` settings.
 	 */
 	readonly advancedSubKey: string | undefined;
 
@@ -418,13 +418,13 @@ function toBaseConfig<T>(key: string, defaultValue: T, options: ConfigOptions | 
 	if (isPublic && options?.valueIgnoredForExternals) {
 		throw new BugIndicatingError(`The setting ${key} is public, it therefore cannot be restricted to internal!`);
 	}
-	const advancedSubKey = fullyQualifiedId.startsWith('github.copilot.advanced.') ? fullyQualifiedId.substring('github.copilot.advanced.'.length) : undefined;
+	const advancedSubKey = fullyQualifiedId.startsWith('reea.copilot.advanced.') ? fullyQualifiedId.substring('reea.copilot.advanced.'.length) : undefined;
 	return { id: key, oldId: options?.oldKey, isPublic, fullyQualifiedId, fullyQualifiedOldId, advancedSubKey, defaultValue, options };
 }
 
 class ConfigRegistry {
 	/**
-	 * A map of all registered configs, keyed by their full id, eg `github.copilot.advanced.debug.overrideProxyUrl`.
+	 * A map of all registered configs, keyed by their full id, eg `reea.copilot.advanced.debug.overrideProxyUrl`.
 	 */
 	public readonly configs: Map<string, Config<any> | ExperimentBasedConfig<any>> = new Map();
 
@@ -465,7 +465,7 @@ function defineSetting<T extends ExperimentBasedConfigType>(key: string, configT
 	if (configType === ConfigType.ExperimentBased) {
 		const value: ExperimentBasedConfig<T> = { ...toBaseConfig(key, defaultValue, options), configType: ConfigType.ExperimentBased, experimentName: expOptions?.experimentName, validator };
 		if (value.advancedSubKey) {
-			// This is a `github.copilot.advanced.*` setting
+			// This is a `reea.copilot.advanced.*` setting
 			throw new BugIndicatingError('Shared settings cannot be experiment based');
 		}
 		globalConfigRegistry.registerConfig(value);
@@ -589,7 +589,7 @@ export namespace ConfigKey {
 	 * Advanced settings that are available for all users to configure.
 	 */
 	export namespace Advanced {
-		export const ProviderMode = defineSetting<ChatProviderMode>('chat.providerMode', ConfigType.Simple, 'copilot');
+		export const ProviderMode = defineSetting<ChatProviderMode>('chat.providerMode', ConfigType.Simple, 'standalone');
 		export const StandaloneDefaultModel = defineSetting<string>('chat.standalone.model.default', ConfigType.Simple, '');
 		export const StandaloneFastModel = defineSetting<string>('chat.standalone.model.fast', ConfigType.Simple, '');
 		export const StandaloneReasoningModel = defineSetting<string>('chat.standalone.model.reasoning', ConfigType.Simple, '');

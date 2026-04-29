@@ -247,7 +247,7 @@ function getRateLimitMessage(fetchResult: ChatFetchError): string {
 	}
 	if (fetchResult.capiError?.code?.startsWith('integration_rate_limited')) {
 		return l10n.t({
-			message: 'Sorry, GitHub Copilot Chat is currently experiencing high demand. Please try again in {0}. [Learn More]({1})',
+			message: 'Sorry, Reea Copilot Chat is currently experiencing high demand. Please try again in {0}. [Learn More]({1})',
 			args: [retryAfterString, 'https://aka.ms/github-copilot-rate-limit-error'],
 			comment: [`{Locked=']({'}`]
 		});
@@ -403,8 +403,8 @@ export function getFilteredMessage(category: FilterReason, supportsMarkdown: boo
 			if (supportsMarkdown) {
 				return l10n.t({
 					message:
-						`Sorry, the response matched public code so it was blocked. Please rephrase your prompt. [Learn more](https://aka.ms/copilot-chat-filtered-docs).`,
-					comment: [`{Locked='](https://aka.ms/copilot-chat-filtered-docs)'}`]
+						`Sorry, the response matched public code so it was blocked. Please rephrase your prompt. [Learn more](https://aka.ms/reea-copilot-chat-filtered-docs).`,
+					comment: [`{Locked='](https://aka.ms/reea-copilot-chat-filtered-docs)'}`]
 				});
 			} else {
 				return l10n.t(`Sorry, the response matched public code so it was blocked. Please rephrase your prompt.`);
@@ -413,8 +413,8 @@ export function getFilteredMessage(category: FilterReason, supportsMarkdown: boo
 			if (supportsMarkdown) {
 				return l10n.t({
 					message:
-						`Sorry, your prompt was filtered by the Responsible AI Service. Please rephrase your prompt and try again. [Learn more](https://aka.ms/copilot-chat-filtered-docs).`,
-					comment: [`{Locked='](https://aka.ms/copilot-chat-filtered-docs)'}`]
+						`Sorry, your prompt was filtered by the Responsible AI Service. Please rephrase your prompt and try again. [Learn more](https://aka.ms/reea-copilot-chat-filtered-docs).`,
+					comment: [`{Locked='](https://aka.ms/reea-copilot-chat-filtered-docs)'}`]
 				});
 			} else {
 				return l10n.t(`Sorry, your prompt was filtered by the Responsible AI Service. Please rephrase your prompt and try again.`);
@@ -423,8 +423,8 @@ export function getFilteredMessage(category: FilterReason, supportsMarkdown: boo
 			if (supportsMarkdown) {
 				return l10n.t({
 					message:
-						`Sorry, the response was filtered by the Responsible AI Service. Please rephrase your prompt and try again. [Learn more](https://aka.ms/copilot-chat-filtered-docs).`,
-					comment: [`{Locked='](https://aka.ms/copilot-chat-filtered-docs)'}`]
+						`Sorry, the response was filtered by the Responsible AI Service. Please rephrase your prompt and try again. [Learn more](https://aka.ms/reea-copilot-chat-filtered-docs).`,
+					comment: [`{Locked='](https://aka.ms/reea-copilot-chat-filtered-docs)'}`]
 				});
 			} else {
 				return l10n.t(`Sorry, the response was filtered by the Responsible AI Service. Please rephrase your prompt and try again.`);

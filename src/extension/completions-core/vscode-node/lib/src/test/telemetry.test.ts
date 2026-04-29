@@ -30,14 +30,14 @@ suite('Telemetry unit tests', function () {
 
 		await telemetry.makeReadyForSending(accessor, TelemetryStore.Standard, 'SkipExp', 2000);
 
-		assert.ok(telemetry.properties.copilot_build);
-		assert.ok(telemetry.properties.copilot_buildType);
-		// assert.ok(telemetry.properties.copilot_trackingId);
+		assert.ok(telemetry.properties.reea_copilot_build);
+		assert.ok(telemetry.properties.reea_copilot_buildType);
+		// assert.ok(telemetry.properties.reea_copilot_trackingId);
 		assert.ok(telemetry.properties.editor_version);
 		assert.ok(telemetry.properties.editor_plugin_version);
 		assert.ok(telemetry.properties.client_machineid);
 		assert.ok(telemetry.properties.client_sessionid);
-		assert.ok(telemetry.properties.copilot_version);
+		assert.ok(telemetry.properties.reea_copilot_version);
 		assert.ok(telemetry.properties.runtime_version);
 		assert.ok(telemetry.properties.common_extname);
 		assert.ok(telemetry.properties.common_extversion);

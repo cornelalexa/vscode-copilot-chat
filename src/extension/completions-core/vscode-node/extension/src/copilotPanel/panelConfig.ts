@@ -7,10 +7,10 @@ import * as constants from '../constants';
 import { CopilotPanelVisible } from '../constants';
 import { PanelConfig } from '../panelShared/basePanelTypes';
 
-// Configuration for the GitHub Copilot Suggestions Panel
+// Configuration for the Reea Copilot Suggestions Panel
 export const copilotPanelConfig: PanelConfig = {
-	panelTitle: 'GitHub Copilot Suggestions',
-	webviewId: 'GitHub Copilot Suggestions',
+	panelTitle: 'Reea Copilot Suggestions',
+	webviewId: 'Reea Copilot Suggestions',
 	webviewScriptName: 'suggestionsPanelWebview.js',
 	contextVariable: CopilotPanelVisible,
 	commands: {

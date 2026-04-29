@@ -46,7 +46,7 @@ suite('Microsoft Telemetry Sender', function () {
 			organization_list: ['4535c7beffc844b46bb1ed4aa04d759a'],
 			isVscodeTeamMember: true,
 			username: 'testUser',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		mockTokenStore = {
@@ -125,9 +125,9 @@ suite('GitHub Telemetry Sender', function () {
 	// These are all common properties & measurements that the telemetry sender will add to every event
 	const commonTelemetryData = {
 		properties: {
-			copilot_build: new TelemetryTrustedValue('1'),
-			copilot_buildType: new TelemetryTrustedValue('dev'),
-			copilot_trackingId: new TelemetryTrustedValue('testId'),
+			reea_copilot_build: new TelemetryTrustedValue('1'),
+			reea_copilot_buildType: new TelemetryTrustedValue('dev'),
+			reea_copilot_trackingId: new TelemetryTrustedValue('testId'),
 			editor_plugin_version: new TelemetryTrustedValue('simulation-tests-plugin/2'),
 			client_machineid: new TelemetryTrustedValue('test-machine'),
 			client_sessionid: new TelemetryTrustedValue('test-session'),
@@ -149,7 +149,7 @@ suite('GitHub Telemetry Sender', function () {
 			organization_list: ['4535c7beffc844b46bb1ed4aa04d759a'],
 			isVscodeTeamMember: true,
 			username: 'testUser',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 		}));
 
 		mockTokenStore = {
@@ -225,7 +225,7 @@ suite('GitHub Telemetry Sender', function () {
 				properties: {
 					...commonTelemetryData.properties,
 					unique_id: new TelemetryTrustedValue(lastCall![1].properties.unique_id.value),
-					copilot_version: new TelemetryTrustedValue(lastCall![1].properties.copilot_version.value),
+					reea_copilot_version: new TelemetryTrustedValue(lastCall![1].properties.reea_copilot_version.value),
 					editor_version: new TelemetryTrustedValue(lastCall![1].properties.editor_version.value),
 					common_vscodeversion: new TelemetryTrustedValue(lastCall![1].properties.common_vscodeversion.value),
 					foo: new TelemetryTrustedValue('bar'),
@@ -250,7 +250,7 @@ suite('GitHub Telemetry Sender', function () {
 				properties: {
 					...commonTelemetryData.properties,
 					unique_id: new TelemetryTrustedValue(lastCall![1].properties.unique_id.value),
-					copilot_version: new TelemetryTrustedValue(lastCall![1].properties.copilot_version.value),
+					reea_copilot_version: new TelemetryTrustedValue(lastCall![1].properties.reea_copilot_version.value),
 					editor_version: new TelemetryTrustedValue(lastCall![1].properties.editor_version.value),
 					common_vscodeversion: new TelemetryTrustedValue(lastCall![1].properties.common_vscodeversion.value),
 					stack: new TelemetryTrustedValue('testStack'),
@@ -275,7 +275,7 @@ suite('GitHub Telemetry Sender', function () {
 				properties: {
 					...commonTelemetryData.properties,
 					unique_id: new TelemetryTrustedValue(lastCall![1].properties.unique_id.value),
-					copilot_version: new TelemetryTrustedValue(lastCall![1].properties.copilot_version.value),
+					reea_copilot_version: new TelemetryTrustedValue(lastCall![1].properties.reea_copilot_version.value),
 					editor_version: new TelemetryTrustedValue(lastCall![1].properties.editor_version.value),
 					common_vscodeversion: new TelemetryTrustedValue(lastCall![1].properties.common_vscodeversion.value),
 					foo: new TelemetryTrustedValue('bar'),
@@ -300,7 +300,7 @@ suite('GitHub Telemetry Sender', function () {
 				properties: {
 					...commonTelemetryData.properties,
 					unique_id: new TelemetryTrustedValue(lastCall![1].properties.unique_id.value),
-					copilot_version: new TelemetryTrustedValue(lastCall![1].properties.copilot_version.value),
+					reea_copilot_version: new TelemetryTrustedValue(lastCall![1].properties.reea_copilot_version.value),
 					editor_version: new TelemetryTrustedValue(lastCall![1].properties.editor_version.value),
 					common_vscodeversion: new TelemetryTrustedValue(lastCall![1].properties.common_vscodeversion.value),
 					stack: new TelemetryTrustedValue('testStack'),

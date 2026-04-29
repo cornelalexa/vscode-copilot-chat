@@ -18,9 +18,9 @@ interface InternalComment {
 	thread: vscode.CommentThread;
 }
 
-const reviewDiffContextKey = 'github.copilot.chat.reviewDiff.enabled';
-const reviewDiffReposContextKey = 'github.copilot.chat.reviewDiff.enabledRootUris';
-const numberOfReviewCommentsKey = 'github.copilot.chat.review.numberOfComments';
+const reviewDiffContextKey = 'reea.copilot.chat.reviewDiff.enabled';
+const reviewDiffReposContextKey = 'reea.copilot.chat.reviewDiff.enabledRootUris';
+const numberOfReviewCommentsKey = 'reea.copilot.chat.review.numberOfComments';
 
 export class ReviewServiceImpl implements IReviewService {
 	declare _serviceBrand: undefined;
@@ -28,7 +28,7 @@ export class ReviewServiceImpl implements IReviewService {
 	private _repositoryDisposables = new DisposableStore();
 	private _reviewDiffReposString: string | undefined;
 	private _diagnosticCollection: vscode.DiagnosticCollection | undefined;
-	private _commentController = vscode.comments.createCommentController('github-copilot-review', 'Code Review');
+	private _commentController = vscode.comments.createCommentController('reea-copilot-review', 'Code Review');
 	private _comments: InternalComment[] = [];
 	private _monitorActiveThread: any | undefined;
 	private _activeThread: vscode.CommentThread | undefined;
@@ -43,7 +43,7 @@ export class ReviewServiceImpl implements IReviewService {
 			if (e.affectsConfiguration(ConfigKey.CodeFeedback.fullyQualifiedId)) {
 				vscode.commands.executeCommand('setContext', ConfigKey.CodeFeedback.fullyQualifiedId, this.isCodeFeedbackEnabled());
 			}
-			if (e.affectsConfiguration('github.copilot.advanced') || e.affectsConfiguration('github.copilot.advanced.review.intent')) {
+			if (e.affectsConfiguration('reea.copilot.advanced') || e.affectsConfiguration('reea.copilot.advanced.review.intent')) {
 				vscode.commands.executeCommand('setContext', ConfigKey.Advanced.ReviewIntent.fullyQualifiedId, this.isIntentEnabled());
 			}
 		}));
@@ -114,7 +114,7 @@ export class ReviewServiceImpl implements IReviewService {
 	}
 
 	getDiagnosticCollection(): ReviewDiagnosticCollection {
-		return this._diagnosticCollection || this._disposables.add(this._diagnosticCollection = vscode.languages.createDiagnosticCollection('github.copilot.chat.review'));
+		return this._diagnosticCollection || this._disposables.add(this._diagnosticCollection = vscode.languages.createDiagnosticCollection('reea.copilot.chat.review'));
 	}
 
 	getReviewComments(): ReviewComment[] {
@@ -132,14 +132,14 @@ export class ReviewServiceImpl implements IReviewService {
 			this._comments.push({ comment, thread });
 			this.updateThreadLabels();
 			if (this._comments.length === 1) {
-				vscode.commands.executeCommand('github.copilot.chat.review.next');
+				vscode.commands.executeCommand('reea.copilot.chat.review.next');
 				this._monitorActiveThread = setInterval(() => {
 					const raw = this._commentController.activeCommentThread;
 					const active = raw && this._comments.find(c => c.thread.label === raw.label)?.thread; // https://github.com/microsoft/vscode/issues/223025
 					if (active !== this._activeThread) {
 						this._activeThread = active;
 						if (active) {
-							vscode.commands.executeCommand('github.copilot.chat.review.current', active);
+							vscode.commands.executeCommand('reea.copilot.chat.review.current', active);
 						}
 					}
 				}, 500);

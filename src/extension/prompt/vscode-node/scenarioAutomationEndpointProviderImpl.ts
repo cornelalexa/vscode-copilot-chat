@@ -33,7 +33,7 @@ export class ScenarioAutomationEndpointProviderImpl extends ProductionEndpointPr
 
 			// Check if a copilot model was explicitly requested in the picker
 			const model = 'model' in requestOrFamilyOrModel ? requestOrFamilyOrModel.model : requestOrFamilyOrModel;
-			if (model.vendor === 'copilot') {
+			if (model.vendor === 'reea-copilot') {
 				return getFirstNonCopilotModel();
 			}
 		}

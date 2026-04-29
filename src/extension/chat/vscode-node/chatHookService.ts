@@ -157,8 +157,8 @@ export class ChatHookService implements IChatHookService {
 						kind: SpanKind.INTERNAL,
 						attributes: {
 							[GenAiAttr.OPERATION_NAME]: GenAiOperationName.EXECUTE_HOOK,
-							'copilot_chat.hook_type': hookType,
-							'copilot_chat.hook_command': hookCommand.command,
+							'reea_copilot_chat.hook_type': hookType,
+							'reea_copilot_chat.hook_command': hookCommand.command,
 							...(chatSessionId ? { [CopilotChatAttr.CHAT_SESSION_ID]: chatSessionId } : {}),
 						},
 					});
@@ -166,7 +166,7 @@ export class ChatHookService implements IChatHookService {
 					try {
 						// Capture hook input for debug panel resolve
 						try {
-							span.setAttribute('copilot_chat.hook_input', truncateForOTel(JSON.stringify(commandInput)));
+							span.setAttribute('reea_copilot_chat.hook_input', truncateForOTel(JSON.stringify(commandInput)));
 						} catch { /* swallow serialization errors */ }
 
 						const sw = StopWatch.create();
@@ -179,13 +179,13 @@ export class ChatHookService implements IChatHookService {
 						const resultKind = commandResult.kind === HookCommandResultKind.Success ? 'success'
 							: commandResult.kind === HookCommandResultKind.NonBlockingError ? 'non_blocking_error'
 								: 'error';
-						span.setAttribute('copilot_chat.hook_result_kind', resultKind);
+						span.setAttribute('reea_copilot_chat.hook_result_kind', resultKind);
 
 						if (commandResult.kind === HookCommandResultKind.Error || commandResult.kind === HookCommandResultKind.NonBlockingError) {
 							hasError = true;
 							// Record exit code on error
 							if (commandResult.exitCode !== undefined) {
-								span.setAttribute('copilot_chat.hook_exit_code', commandResult.exitCode);
+								span.setAttribute('reea_copilot_chat.hook_exit_code', commandResult.exitCode);
 							}
 							// Error output goes to span status message (displayed as errorMessage in resolve)
 							span.setStatus(SpanStatusCode.ERROR, typeof commandResult.result === 'string' ? commandResult.result : undefined);
@@ -195,7 +195,7 @@ export class ChatHookService implements IChatHookService {
 							try {
 								const output = typeof commandResult.result === 'string' ? commandResult.result : JSON.stringify(commandResult.result);
 								if (output) {
-									span.setAttribute('copilot_chat.hook_output', truncateForOTel(output));
+									span.setAttribute('reea_copilot_chat.hook_output', truncateForOTel(output));
 								}
 							} catch { /* swallow serialization errors */ }
 						}

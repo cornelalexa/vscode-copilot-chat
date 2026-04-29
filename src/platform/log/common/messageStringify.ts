@@ -65,7 +65,7 @@ export function messageToMarkdown(message: Raw.ChatMessage, ignoreStatefulMarker
 	}
 
 	if (message.content.some(part => part.type === Raw.ChatCompletionContentPartKind.CacheBreakpoint)) {
-		str += `\n[copilot_cache_control: { type: 'ephemeral' }]`;
+		str += `\n[reea_copilot_cache_control: { type: 'ephemeral' }]`;
 	}
 
 	const statefulMarker = mapFindFirst(message.content, c => c.type === Raw.ChatCompletionContentPartKind.Opaque ? rawPartAsStatefulMarker(c) : undefined);

@@ -980,18 +980,18 @@ export class ChatDebugFileLoggerService extends Disposable implements IChatDebug
 					parentSpanId: span.parentSpanId,
 					status: isError ? 'error' : 'ok',
 					attrs: {
-						...(span.attributes['copilot_chat.event_details'] !== undefined
-							? { details: truncate(String(span.attributes['copilot_chat.event_details']), MAX_ATTR_VALUE_LENGTH) }
+						...(span.attributes['reea_copilot_chat.event_details'] !== undefined
+							? { details: truncate(String(span.attributes['reea_copilot_chat.event_details']), MAX_ATTR_VALUE_LENGTH) }
 							: {}),
-						...(span.attributes['copilot_chat.event_category'] !== undefined
-							? { category: String(span.attributes['copilot_chat.event_category']) }
+						...(span.attributes['reea_copilot_chat.event_category'] !== undefined
+							? { category: String(span.attributes['reea_copilot_chat.event_category']) }
 							: {}),
 					},
 				};
 			}
 
 			case GenAiOperationName.EXECUTE_HOOK: {
-				const hookType = asString(span.attributes['copilot_chat.hook_type']) ?? span.name;
+				const hookType = asString(span.attributes['reea_copilot_chat.hook_type']) ?? span.name;
 				return {
 					ts: span.startTime,
 					dur: duration,
@@ -1002,17 +1002,17 @@ export class ChatDebugFileLoggerService extends Disposable implements IChatDebug
 					parentSpanId: span.parentSpanId,
 					status: isError ? 'error' : 'ok',
 					attrs: {
-						...(span.attributes['copilot_chat.hook_command'] !== undefined
-							? { command: truncate(String(span.attributes['copilot_chat.hook_command']), MAX_ATTR_VALUE_LENGTH) }
+						...(span.attributes['reea_copilot_chat.hook_command'] !== undefined
+							? { command: truncate(String(span.attributes['reea_copilot_chat.hook_command']), MAX_ATTR_VALUE_LENGTH) }
 							: {}),
-						...(span.attributes['copilot_chat.hook_input'] !== undefined
-							? { input: truncate(String(span.attributes['copilot_chat.hook_input']), MAX_ATTR_VALUE_LENGTH) }
+						...(span.attributes['reea_copilot_chat.hook_input'] !== undefined
+							? { input: truncate(String(span.attributes['reea_copilot_chat.hook_input']), MAX_ATTR_VALUE_LENGTH) }
 							: {}),
-						...(span.attributes['copilot_chat.hook_output'] !== undefined
-							? { output: truncate(String(span.attributes['copilot_chat.hook_output']), MAX_ATTR_VALUE_LENGTH) }
+						...(span.attributes['reea_copilot_chat.hook_output'] !== undefined
+							? { output: truncate(String(span.attributes['reea_copilot_chat.hook_output']), MAX_ATTR_VALUE_LENGTH) }
 							: {}),
-						...(span.attributes['copilot_chat.hook_result_kind'] !== undefined
-							? { resultKind: String(span.attributes['copilot_chat.hook_result_kind']) }
+						...(span.attributes['reea_copilot_chat.hook_result_kind'] !== undefined
+							? { resultKind: String(span.attributes['reea_copilot_chat.hook_result_kind']) }
 							: {}),
 						...(isError && span.status.message ? { error: span.status.message } : {}),
 					},

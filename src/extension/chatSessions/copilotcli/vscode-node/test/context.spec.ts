@@ -67,7 +67,7 @@ describe('registerCommandContext', () => {
 
 		expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			false,
 		);
 	});
@@ -78,7 +78,7 @@ describe('registerCommandContext', () => {
 
 		expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			true,
 		);
 	});
@@ -93,7 +93,7 @@ describe('registerCommandContext', () => {
 
 		expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			true,
 		);
 	});
@@ -108,7 +108,7 @@ describe('registerCommandContext', () => {
 
 		expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			false,
 		);
 	});
@@ -123,7 +123,7 @@ describe('registerCommandContext', () => {
 
 		expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			true,
 		);
 	});
@@ -161,7 +161,7 @@ describe('registerCommandContext', () => {
 		mockServer.fireConnect();
 		expect(vscode.commands.executeCommand).toHaveBeenLastCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			true,
 		);
 
@@ -170,7 +170,7 @@ describe('registerCommandContext', () => {
 		mockServer.fireConnect();
 		expect(vscode.commands.executeCommand).toHaveBeenLastCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			true,
 		);
 
@@ -179,7 +179,7 @@ describe('registerCommandContext', () => {
 		mockServer.fireDisconnect();
 		expect(vscode.commands.executeCommand).toHaveBeenLastCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			true,
 		);
 
@@ -188,7 +188,7 @@ describe('registerCommandContext', () => {
 		mockServer.fireDisconnect();
 		expect(vscode.commands.executeCommand).toHaveBeenLastCalledWith(
 			'setContext',
-			'github.copilot.chat.copilotCLI.hasSession',
+			'reea.copilot.chat.copilotCLI.hasSession',
 			false,
 		);
 	});

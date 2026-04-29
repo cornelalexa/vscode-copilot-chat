@@ -124,7 +124,7 @@ class ChatAgents implements IDisposable {
 	}
 
 	private registerTerminalPanelAgent(): IDisposable {
-		const terminalPanelAgent = this.createAgent(terminalAgentName, Intent.Terminal, { id: 'github.copilot.terminalPanel' });
+		const terminalPanelAgent = this.createAgent(terminalAgentName, Intent.Terminal, { id: 'reea.copilot.terminalPanel' });
 
 		terminalPanelAgent.iconPath = new vscode.ThemeIcon('terminal');
 
@@ -173,11 +173,11 @@ class ChatAgents implements IDisposable {
 
 You can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).
 
-Learn more about [GitHub Copilot](https://docs.github.com/copilot/using-github-copilot/getting-started-with-github-copilot?tool=vscode&utm_source=editor&utm_medium=chat-panel&utm_campaign=2024q3-em-MSFT-getstarted) in [Visual Studio Code](https://code.visualstudio.com/docs/copilot/overview). Or explore the [Copilot walkthrough](command:github.copilot.open.walkthrough).`,
+Learn more about [Reea Copilot](https://docs.github.com/copilot/using-github-copilot/getting-started-with-github-copilot?tool=vscode&utm_source=editor&utm_medium=chat-panel&utm_campaign=2024q3-em-MSFT-getstarted) in [Visual Studio Code](https://code.visualstudio.com/docs/copilot/overview). Or explore the [Copilot walkthrough](command:reea.copilot.open.walkthrough).`,
 			comment: `{Locked='](command:inlineChat.start)'}`
 		});
 		const markdownString = new vscode.MarkdownString(helpPostfix);
-		markdownString.isTrusted = { enabledCommands: ['inlineChat.start', 'github.copilot.open.walkthrough'] };
+		markdownString.isTrusted = { enabledCommands: ['inlineChat.start', 'reea.copilot.open.walkthrough'] };
 		defaultAgent.helpTextPostfix = markdownString;
 
 		defaultAgent.additionalWelcomeMessage = this.additionalWelcomeMessage;
@@ -278,7 +278,7 @@ Learn more about [GitHub Copilot](https://docs.github.com/copilot/using-github-c
 		const endpoint = await this.endpointProvider.getChatEndpoint(request);
 		const baseEndpoint = await this.endpointProvider.getChatEndpoint('copilot-base');
 		// If it has a 0x multipler, it's free so don't switch them. If it's BYOK, it's free so don't switch them.
-		if (endpoint.multiplier === 0 || request.model.vendor !== 'copilot' || endpoint.multiplier === undefined) {
+		if (endpoint.multiplier === 0 || request.model.vendor !== 'reea-copilot' || endpoint.multiplier === undefined) {
 			return request;
 		}
 		if (this._chatQuotaService.overagesEnabled || !this._chatQuotaService.quotaExhausted) {
@@ -315,7 +315,7 @@ Learn more about [GitHub Copilot](https://docs.github.com/copilot/using-github-c
 		await vscode.commands.executeCommand('workbench.action.chat.changeModel', { vendor: autoModel.vendor, id: autoModel.id, family: autoModel.family });
 		request = { ...request, model: autoModel };
 		if (alwaysSwitchToAuto) {
-			await vscode.workspace.getConfiguration('github.copilot').update('chat.rateLimitAutoSwitchToAuto', true, vscode.ConfigurationTarget.Global);
+			await vscode.workspace.getConfiguration('reea.copilot').update('chat.rateLimitAutoSwitchToAuto', true, vscode.ConfigurationTarget.Global);
 		}
 		stream.warning(new vscode.MarkdownString(vscode.l10n.t('You were rate-limited on the selected model. Switching to Auto and retrying your request.')));
 		return request;

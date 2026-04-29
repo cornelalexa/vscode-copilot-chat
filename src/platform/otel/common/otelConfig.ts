@@ -168,7 +168,7 @@ export function resolveOTelConfig(input: OTelConfigInput): OTelConfig {
 	const httpInstrumentation = envBool(env['COPILOT_OTEL_HTTP_INSTRUMENTATION']) ?? false;
 
 	// Service name
-	const serviceName = env['OTEL_SERVICE_NAME'] ?? 'copilot-chat';
+	const serviceName = env['OTEL_SERVICE_NAME'] ?? 'reea-copilot-chat';
 
 	// Resource attributes
 	const resourceAttributes = parseResourceAttributes(env['OTEL_RESOURCE_ATTRIBUTES']);
@@ -204,7 +204,7 @@ function createDisabledConfig(input: OTelConfigInput): OTelConfig {
 		dbSpanExporter: false,
 		logLevel: 'info' as const,
 		httpInstrumentation: false,
-		serviceName: 'copilot-chat',
+		serviceName: 'reea-copilot-chat',
 		serviceVersion: input.extensionVersion,
 		sessionId: input.sessionId,
 		resourceAttributes: {},

@@ -120,18 +120,18 @@ describe('Agent Trace Hierarchy', () => {
 
 		// Session event
 		expect(otel.logRecords).toHaveLength(2); // session.start + agent.turn
-		expect(otel.logRecords[0].attributes?.['event.name']).toBe('copilot_chat.session.start');
+		expect(otel.logRecords[0].attributes?.['event.name']).toBe('reea_copilot_chat.session.start');
 
 		// Agent turn event
-		expect(otel.logRecords[1].attributes?.['event.name']).toBe('copilot_chat.agent.turn');
+		expect(otel.logRecords[1].attributes?.['event.name']).toBe('reea_copilot_chat.agent.turn');
 		expect(otel.logRecords[1].attributes?.['turn.index']).toBe(0);
 
 		// Metrics
 		expect(otel.counters).toHaveLength(1);
-		expect(otel.counters[0].name).toBe('copilot_chat.session.count');
+		expect(otel.counters[0].name).toBe('reea_copilot_chat.session.count');
 		expect(otel.metrics).toHaveLength(2);
-		expect(otel.metrics[0].name).toBe('copilot_chat.agent.invocation.duration');
-		expect(otel.metrics[1].name).toBe('copilot_chat.agent.turn.count');
+		expect(otel.metrics[0].name).toBe('reea_copilot_chat.agent.invocation.duration');
+		expect(otel.metrics[1].name).toBe('reea_copilot_chat.agent.turn.count');
 	});
 
 	it('propagates trace context for subagent via store/retrieve', () => {
@@ -235,28 +235,28 @@ describe('Agent Trace Hierarchy', () => {
 
 		// Acceptance counters
 		expect(otel.counters).toHaveLength(3);
-		expect(otel.counters[0].name).toBe('copilot_chat.edit.acceptance.count');
+		expect(otel.counters[0].name).toBe('reea_copilot_chat.edit.acceptance.count');
 		expect(otel.counters[0].attributes?.[CopilotChatAttr.EDIT_SOURCE]).toBe('inline_chat');
 		expect(otel.counters[0].attributes?.[CopilotChatAttr.EDIT_OUTCOME]).toBe('accepted');
 		expect(otel.counters[0].attributes?.[CopilotChatAttr.LANGUAGE_ID]).toBe('typescript');
 
-		expect(otel.counters[1].name).toBe('copilot_chat.edit.acceptance.count');
+		expect(otel.counters[1].name).toBe('reea_copilot_chat.edit.acceptance.count');
 		expect(otel.counters[1].attributes?.[CopilotChatAttr.EDIT_OUTCOME]).toBe('rejected');
 
 		// Chat edit outcome counter
-		expect(otel.counters[2].name).toBe('copilot_chat.chat_edit.outcome.count');
+		expect(otel.counters[2].name).toBe('reea_copilot_chat.chat_edit.outcome.count');
 		expect(otel.counters[2].attributes?.[CopilotChatAttr.EDIT_SOURCE]).toBe('chat_editing');
 		expect(otel.counters[2].attributes?.[CopilotChatAttr.EDIT_OUTCOME]).toBe('accepted');
 		expect(otel.counters[2].attributes?.[CopilotChatAttr.HAS_REMAINING_EDITS]).toBe(false);
 
 		// Survival histograms
 		expect(otel.metrics).toHaveLength(2);
-		expect(otel.metrics[0].name).toBe('copilot_chat.edit.survival.four_gram');
+		expect(otel.metrics[0].name).toBe('reea_copilot_chat.edit.survival.four_gram');
 		expect(otel.metrics[0].value).toBe(0.85);
 		expect(otel.metrics[0].attributes?.[CopilotChatAttr.EDIT_SOURCE]).toBe('inline_chat');
 		expect(otel.metrics[0].attributes?.[CopilotChatAttr.TIME_DELAY_MS]).toBe(30000);
 
-		expect(otel.metrics[1].name).toBe('copilot_chat.edit.survival.no_revert');
+		expect(otel.metrics[1].name).toBe('reea_copilot_chat.edit.survival.no_revert');
 		expect(otel.metrics[1].value).toBe(0.92);
 	});
 

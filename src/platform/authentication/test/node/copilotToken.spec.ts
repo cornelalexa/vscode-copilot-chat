@@ -44,7 +44,7 @@ class RefreshFakeCopilotTokenManager extends BaseCopilotTokenManager {
 		if (!force && this.copilotToken) {
 			return new CopilotToken(this.copilotToken);
 		}
-		this.copilotToken = createTestExtendedTokenInfo({ token: 'done', username: 'fake', copilot_plan: 'unknown' });
+		this.copilotToken = createTestExtendedTokenInfo({ token: 'done', username: 'fake', reea_copilot_plan: 'unknown' });
 		return new CopilotToken(this.copilotToken);
 	}
 }
@@ -169,7 +169,7 @@ describe('Copilot token unit tests', function () {
 		const token =
 			'0123456789abcdef0123456789abcdef:org1.com:1674258990:0000000000000000000000000000000000000000000000000000000000000000';
 
-		const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token, username: 'fake', copilot_plan: 'unknown' }));
+		const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token, username: 'fake', reea_copilot_plan: 'unknown' }));
 		expect(copilotToken.getTokenValue('tid')).toBeUndefined();
 	});
 
@@ -177,7 +177,7 @@ describe('Copilot token unit tests', function () {
 		const token =
 			'tid=0123456789abcdef0123456789abcdef;dom=org1.com;ol=org1,org2;exp=1674258990:0000000000000000000000000000000000000000000000000000000000000000';
 
-		const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token, username: 'fake', copilot_plan: 'unknown' }));
+		const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token, username: 'fake', reea_copilot_plan: 'unknown' }));
 		expect(copilotToken.getTokenValue('tid')).toBe('0123456789abcdef0123456789abcdef');
 	});
 
@@ -185,7 +185,7 @@ describe('Copilot token unit tests', function () {
 		const token =
 			'tid=0123456789abcdef0123456789abcdef;rt=1;ssc=0;dom=org1.com;ol=org1,org2;exp=1674258990:0000000000000000000000000000000000000000000000000000000000000000';
 
-		const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token, username: 'fake', copilot_plan: 'unknown' }));
+		const copilotToken = new CopilotToken(createTestExtendedTokenInfo({ token, username: 'fake', reea_copilot_plan: 'unknown' }));
 		expect(copilotToken.getTokenValue('rt')).toBe('1');
 		expect(copilotToken.getTokenValue('ssc')).toBe('0');
 		expect(copilotToken.getTokenValue('foo')).toBeUndefined();
@@ -304,7 +304,7 @@ describe('Token envelope validators', function () {
 			message: 'Access denied',
 			error_details: {
 				message: 'You do not have access',
-				notification_id: 'no_copilot_access',
+				notification_id: 'no_reea_copilot_access',
 				title: 'No Access',
 				url: 'https://github.com/settings/copilot',
 			},
@@ -520,10 +520,10 @@ describe('CopilotToken class', function () {
 	});
 
 	it('copilotPlan returns correct plan type', function () {
-		const freeToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'free_limited_copilot', copilot_plan: 'free' }));
-		const individualToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'copilot_individual', copilot_plan: 'individual' }));
-		const businessToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'copilot_business', copilot_plan: 'business' }));
-		const enterpriseToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'copilot_enterprise', copilot_plan: 'enterprise' }));
+		const freeToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'free_limited_copilot', reea_copilot_plan: 'free' }));
+		const individualToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'reea_copilot_individual', reea_copilot_plan: 'individual' }));
+		const businessToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'reea_copilot_business', reea_copilot_plan: 'business' }));
+		const enterpriseToken = new CopilotToken(createTestExtendedTokenInfo({ sku: 'reea_copilot_enterprise', reea_copilot_plan: 'enterprise' }));
 
 		expect(freeToken.copilotPlan).toBe('free');
 		expect(individualToken.copilotPlan).toBe('individual');
@@ -541,7 +541,7 @@ describe('CopilotToken class', function () {
 			limited_user_quotas: { chat: 5, completions: 10 }
 		}));
 		const nonFreeToken = new CopilotToken(createTestExtendedTokenInfo({
-			sku: 'copilot_individual',
+			sku: 'reea_copilot_individual',
 			limited_user_quotas: { chat: 0, completions: 0 }
 		}));
 
@@ -631,14 +631,14 @@ class StaticFetcherService implements IFetcherService {
 	}
 	async fetch(url: string, options: FetchOptions): Promise<Response> {
 		this.requests.set(url, options);
-		if (url.endsWith('copilot_internal/v2/token')) {
+		if (url.endsWith('reea_copilot_internal/v2/token')) {
 			if (this.tokenResponse === 'NETWORK_FAILURE') {
 				// Simulate network failure - fetch throws
 				throw new Error('Network request failed');
 			}
 			// null will parse successfully as JSON (returns null) but fails tokenInfo check
 			return createFakeResponse(200, this.tokenResponse);
-		} else if (url.endsWith('copilot_internal/notification')) {
+		} else if (url.endsWith('reea_copilot_internal/notification')) {
 			return createFakeResponse(200, '');
 		}
 		return createFakeResponse(404, '');

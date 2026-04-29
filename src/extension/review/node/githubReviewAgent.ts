@@ -289,7 +289,7 @@ export async function githubReview(
 
 /**
  * Review files specified as URI pairs (current + base content).
- * This is the entry point for the `github.copilot.chat.codeReview.run` command,
+ * This is the entry point for the `reea.copilot.chat.codeReview.run` command,
  * bypassing git-based change collection.
  */
 export async function githubReviewFileUris(
@@ -513,7 +513,7 @@ interface RawReference {
  * Raw parsed response structure from the streaming API.
  */
 interface ParsedResponse {
-	copilot_references?: RawReference[];
+	reea_copilot_references?: RawReference[];
 }
 
 /**
@@ -531,8 +531,8 @@ export function parseLine(line: string): ResponseReference[] {
 
 	const parsedLine: ParsedResponse = JSON.parse(line.replace('data: ', ''));
 
-	if (Array.isArray(parsedLine.copilot_references) && parsedLine.copilot_references.length > 0) {
-		return parsedLine.copilot_references.filter(hasType) as ResponseReference[];
+	if (Array.isArray(parsedLine.reea_copilot_references) && parsedLine.reea_copilot_references.length > 0) {
+		return parsedLine.reea_copilot_references.filter(hasType) as ResponseReference[];
 	} else {
 		return [];
 	}
@@ -568,7 +568,7 @@ async function fetchComments(logService: ILogService, authService: IAuthenticati
 					]
 				})),
 			} : {}),
-			copilot_references: [
+			reea_copilot_references: [
 				{
 					type: 'github.pull_request',
 					id: '1',

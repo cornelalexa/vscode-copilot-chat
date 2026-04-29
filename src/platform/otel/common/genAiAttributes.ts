@@ -99,54 +99,54 @@ export const GenAiAttr = {
  * Extension-specific attribute keys (custom namespace).
  */
 export const CopilotChatAttr = {
-	LOCATION: 'copilot_chat.location',
-	INTENT: 'copilot_chat.intent',
-	TURN_INDEX: 'copilot_chat.turn.index',
-	TURN_COUNT: 'copilot_chat.turn_count',
-	TOOL_CALL_ROUND: 'copilot_chat.tool_call_round',
-	API_TYPE: 'copilot_chat.api_type',
-	FETCHER: 'copilot_chat.fetcher',
-	DEBUG_NAME: 'copilot_chat.debug_name',
-	ENDPOINT_TYPE: 'copilot_chat.endpoint_type',
-	MAX_PROMPT_TOKENS: 'copilot_chat.request.max_prompt_tokens',
-	TIME_TO_FIRST_TOKEN: 'copilot_chat.time_to_first_token',
-	SESSION_ID: 'copilot_chat.session_id',
-	SERVER_REQUEST_ID: 'copilot_chat.server_request_id',
-	CANCELED: 'copilot_chat.canceled',
+	LOCATION: 'reea_copilot_chat.location',
+	INTENT: 'reea_copilot_chat.intent',
+	TURN_INDEX: 'reea_copilot_chat.turn.index',
+	TURN_COUNT: 'reea_copilot_chat.turn_count',
+	TOOL_CALL_ROUND: 'reea_copilot_chat.tool_call_round',
+	API_TYPE: 'reea_copilot_chat.api_type',
+	FETCHER: 'reea_copilot_chat.fetcher',
+	DEBUG_NAME: 'reea_copilot_chat.debug_name',
+	ENDPOINT_TYPE: 'reea_copilot_chat.endpoint_type',
+	MAX_PROMPT_TOKENS: 'reea_copilot_chat.request.max_prompt_tokens',
+	TIME_TO_FIRST_TOKEN: 'reea_copilot_chat.time_to_first_token',
+	SESSION_ID: 'reea_copilot_chat.session_id',
+	SERVER_REQUEST_ID: 'reea_copilot_chat.server_request_id',
+	CANCELED: 'reea_copilot_chat.canceled',
 	/** Extended thinking/reasoning content (content-gated) */
-	REASONING_CONTENT: 'copilot_chat.reasoning_content',
+	REASONING_CONTENT: 'reea_copilot_chat.reasoning_content',
 	/** User's actual typed message text, extracted from prompt context */
-	USER_REQUEST: 'copilot_chat.user_request',
+	USER_REQUEST: 'reea_copilot_chat.user_request',
 	/** Resolved context section (code snippets, file contents, etc.) */
-	PROMPT_CONTEXT: 'copilot_chat.prompt_context',
+	PROMPT_CONTEXT: 'reea_copilot_chat.prompt_context',
 	/** Custom instructions section */
-	PROMPT_INSTRUCTIONS: 'copilot_chat.prompt_instructions',
+	PROMPT_INSTRUCTIONS: 'reea_copilot_chat.prompt_instructions',
 	/** VS Code chat session ID from CapturingToken — the definitive session identifier */
-	CHAT_SESSION_ID: 'copilot_chat.chat_session_id',
+	CHAT_SESSION_ID: 'reea_copilot_chat.chat_session_id',
 	/** Parent chat session ID for linking child sessions (e.g., title, categorization) to their parent */
-	PARENT_CHAT_SESSION_ID: 'copilot_chat.parent_chat_session_id',
+	PARENT_CHAT_SESSION_ID: 'reea_copilot_chat.parent_chat_session_id',
 	/** Debug log label for child sessions (e.g., 'title', 'categorization', 'runSubagent') */
-	DEBUG_LOG_LABEL: 'copilot_chat.debug_log_label',
+	DEBUG_LOG_LABEL: 'reea_copilot_chat.debug_log_label',
 	/** Markdown content for standalone content events */
-	MARKDOWN_CONTENT: 'copilot_chat.markdown_content',
+	MARKDOWN_CONTENT: 'reea_copilot_chat.markdown_content',
 	/** Edit source: inline_chat, chat_editing, chat_editing_hunk, apply_patch, replace_string, code_mapper */
-	EDIT_SOURCE: 'copilot_chat.edit.source',
+	EDIT_SOURCE: 'reea_copilot_chat.edit.source',
 	/** Edit outcome: accepted, rejected, saved, unknown */
-	EDIT_OUTCOME: 'copilot_chat.edit.outcome',
+	EDIT_OUTCOME: 'reea_copilot_chat.edit.outcome',
 	/** Language identifier of the document */
-	LANGUAGE_ID: 'copilot_chat.language_id',
+	LANGUAGE_ID: 'reea_copilot_chat.language_id',
 	/** Time delay in milliseconds between acceptance and measurement */
-	TIME_DELAY_MS: 'copilot_chat.time_delay_ms',
+	TIME_DELAY_MS: 'reea_copilot_chat.time_delay_ms',
 	/** Whether additional unactioned edits remain */
-	HAS_REMAINING_EDITS: 'copilot_chat.has_remaining_edits',
+	HAS_REMAINING_EDITS: 'reea_copilot_chat.has_remaining_edits',
 	/** Git branch name (HEAD) */
-	REPO_HEAD_BRANCH_NAME: 'copilot_chat.repo.head_branch_name',
+	REPO_HEAD_BRANCH_NAME: 'reea_copilot_chat.repo.head_branch_name',
 	/** Git commit hash (HEAD) */
-	REPO_HEAD_COMMIT_HASH: 'copilot_chat.repo.head_commit_hash',
+	REPO_HEAD_COMMIT_HASH: 'reea_copilot_chat.repo.head_commit_hash',
 	/** Normalized remote fetch URL */
-	REPO_REMOTE_URL: 'copilot_chat.repo.remote_url',
+	REPO_REMOTE_URL: 'reea_copilot_chat.repo.remote_url',
 	/** File path relative to the repository root */
-	FILE_RELATIVE_PATH: 'copilot_chat.file.relative_path',
+	FILE_RELATIVE_PATH: 'reea_copilot_chat.file.relative_path',
 } as const;
 
 export type EditSource = 'inline_chat' | 'chat_editing' | 'chat_editing_hunk' | 'apply_patch' | 'replace_string' | 'code_mapper';

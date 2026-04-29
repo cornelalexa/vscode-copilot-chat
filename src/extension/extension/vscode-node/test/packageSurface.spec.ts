@@ -29,15 +29,28 @@ function collectObjects(value: unknown, predicate: (obj: Record<string, unknown>
 describe('standalone package surface', () => {
 	it('contributes a command to select the standalone embeddings model', () => {
 		const commands = packageJson.contributes.commands as Array<{ command: string; title: string }>;
-		expect(commands.some(command => command.command === 'github.copilot.chat.standalone.selectEmbeddingsModel')).toBe(true);
+		expect(commands.some(command => command.command === 'reea.copilot.chat.standalone.selectEmbeddingsModel')).toBe(true);
+	});
+
+	it('does not contribute global GitHub Copilot ids that collide with built-in Copilot', () => {
+		const serialized = JSON.stringify(packageJson.contributes);
+		expect(serialized).not.toMatch(/"command":"github\.copilot\./);
+		expect(serialized).not.toMatch(/"command":"copilot\./);
+		expect(serialized).not.toMatch(/"id":"github\.copilot\./);
+		expect(serialized).not.toMatch(/"vendor":"copilot"/);
+		expect(serialized).not.toContain('"name":"copilot_');
+		expect(serialized).not.toContain('"name":"execution_subagent"');
+		expect(serialized).not.toContain('"name":"search_subagent"');
+		expect(serialized).not.toContain('"id":"copilot-chat"');
+		expect(serialized).not.toContain('"id":"context-inspector"');
 	});
 
 	it('hides Copilot sign-in and subscription welcome surfaces in standalone mode', () => {
 		const authWelcomeEntries = collectObjects(packageJson.contributes.chatViewsWelcome, obj => typeof obj.when === 'string' && /interactiveSession|offline|chatDisabled|switchToReleaseChannel/.test(obj.when));
-		const walkthroughEntries = collectObjects(packageJson.contributes.walkthroughs, obj => typeof obj.id === 'string' && /^copilot\.setup\.(signIn|signUp)/.test(obj.id));
+		const walkthroughEntries = collectObjects(packageJson.contributes.walkthroughs, obj => typeof obj.id === 'string' && /^reeaCopilot\.setup\.(signIn|signUp)/.test(obj.id));
 
 		for (const entry of [...authWelcomeEntries, ...walkthroughEntries]) {
-			expect(entry.when).toContain('!github.copilot.chat.standalone');
+			expect(entry.when).toContain('!reea.copilot.chat.standalone');
 		}
 	});
 
@@ -45,12 +58,12 @@ describe('standalone package surface', () => {
 		const menuEntries = collectObjects(packageJson.contributes.menus, obj => {
 			const command = String(obj.command ?? obj.submenu ?? '');
 			const when = String(obj.when ?? '');
-			return command.includes('github.copilot.chat.review') || command.includes('github.copilot.cloud.sessions') || when.includes('copilot-cloud-agent') || when.includes('github-copilot-review') || when.includes('reviewDiff.enabled');
+			return command.includes('reea.copilot.chat.review') || command.includes('reea.copilot.cloud.sessions') || when.includes('copilot-cloud-agent') || when.includes('reea-copilot-review') || when.includes('reviewDiff.enabled');
 		});
 
 		for (const entry of menuEntries) {
 			const when = String(entry.when ?? '');
-			expect(when === 'false' || when.includes('!github.copilot.chat.standalone')).toBe(true);
+			expect(when === 'false' || when.includes('!reea.copilot.chat.standalone')).toBe(true);
 		}
 	});
 });

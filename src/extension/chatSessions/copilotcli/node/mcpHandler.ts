@@ -83,7 +83,7 @@ export class CopilotCLIMCPHandler implements ICopilotCLIMCPHandler {
 		const mcpConfig: Record<string, MCPServerConfig> = {};
 		const disposable = new DisposableStore();
 		try {
-			const gateway = await this.mcpService.startMcpGateway(URI.from({ scheme: 'copilot-cli', path: `mcp-gateway-${generateUuid()}` }));
+			const gateway = await this.mcpService.startMcpGateway(URI.from({ scheme: 'reea-copilot-cli', path: `mcp-gateway-${generateUuid()}` }));
 			if (gateway) {
 				disposable.add(gateway);
 				for (const server of gateway.servers) {

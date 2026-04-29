@@ -246,7 +246,7 @@ describe('Claude Session OTel Tool Spans', () => {
 		expect(toolSpan!.attributes['gen_ai.operation.name']).toBe('execute_tool');
 		expect(toolSpan!.attributes['gen_ai.tool.name']).toBe('Read');
 		expect(toolSpan!.attributes['gen_ai.tool.call.id']).toBe('tu-1');
-		expect(toolSpan!.attributes['copilot_chat.chat_session_id']).toBe(sessionId);
+		expect(toolSpan!.attributes['reea_copilot_chat.chat_session_id']).toBe(sessionId);
 		expect(toolSpan!.status.code).toBe(1); // SpanStatusCode.OK
 		expect(toolSpan!.attributes['gen_ai.tool.call.arguments']).toContain('file_path');
 		expect(toolSpan!.attributes['gen_ai.tool.call.result']).toContain('file contents here');
@@ -363,7 +363,7 @@ describe('Claude Session OTel Tool Spans', () => {
 
 		const userMsgSpan = spans.find(s => s.name === 'user_message');
 		expect(userMsgSpan).toBeDefined();
-		expect(userMsgSpan!.attributes['copilot_chat.chat_session_id']).toBe(sessionId);
+		expect(userMsgSpan!.attributes['reea_copilot_chat.chat_session_id']).toBe(sessionId);
 	});
 
 	it('records tool_input as TOOL_CALL_ARGUMENTS', async () => {
@@ -434,11 +434,11 @@ describe('Claude Session OTel Tool Spans', () => {
 		const hookSpan = spans.find(s => s.name === 'execute_hook SessionStart');
 		expect(hookSpan).toBeDefined();
 		expect(hookSpan!.attributes['gen_ai.operation.name']).toBe('execute_hook');
-		expect(hookSpan!.attributes['copilot_chat.hook_type']).toBe('SessionStart');
-		expect(hookSpan!.attributes['copilot_chat.hook_command']).toBe('SessionStart');
-		expect(hookSpan!.attributes['copilot_chat.chat_session_id']).toBe(sessionId);
-		expect(hookSpan!.attributes['copilot_chat.hook_result_kind']).toBe('success');
-		expect(hookSpan!.attributes['copilot_chat.hook_input']).toContain('test');
+		expect(hookSpan!.attributes['reea_copilot_chat.hook_type']).toBe('SessionStart');
+		expect(hookSpan!.attributes['reea_copilot_chat.hook_command']).toBe('SessionStart');
+		expect(hookSpan!.attributes['reea_copilot_chat.chat_session_id']).toBe(sessionId);
+		expect(hookSpan!.attributes['reea_copilot_chat.hook_result_kind']).toBe('success');
+		expect(hookSpan!.attributes['reea_copilot_chat.hook_input']).toContain('test');
 		expect(hookSpan!.status.code).toBe(1); // SpanStatusCode.OK
 	});
 
@@ -472,6 +472,6 @@ describe('Claude Session OTel Tool Spans', () => {
 
 		const hookSpan = spans.find(s => s.name === 'execute_hook SessionStart');
 		expect(hookSpan).toBeDefined();
-		expect(hookSpan!.attributes['copilot_chat.hook_input']).toBeDefined();
+		expect(hookSpan!.attributes['reea_copilot_chat.hook_input']).toBeDefined();
 	});
 });

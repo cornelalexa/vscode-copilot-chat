@@ -169,7 +169,7 @@ export class NewNotebookResponseProcessor {
 				const sourceStream = new AsyncIterableSource<string>();
 				const newNotebook = new Lazy(async () => {
 					const notebook = await this.workspaceService.openNotebookDocument('jupyter-notebook');
-					const updateMetadata = NotebookEdit.updateNotebookMetadata(Object.assign({ new_copilot_notebook: true }, notebook.metadata));
+					const updateMetadata = NotebookEdit.updateNotebookMetadata(Object.assign({ new_reea_copilot_notebook: true }, notebook.metadata));
 					const workspaceEdit = new WorkspaceEdit();
 					workspaceEdit.set(notebook.uri, [updateMetadata]);
 					await this.workspaceService.applyEdit(workspaceEdit);

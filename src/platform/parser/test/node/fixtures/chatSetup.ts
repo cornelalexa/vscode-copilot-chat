@@ -455,7 +455,7 @@ class SetupChatAgent extends Disposable implements IChatAgentImplementation {
 			return requestModel;
 		}
 
-		const toolId = toolPart.toolId.replace(/setup.tools\./, `copilot_`.toLowerCase());
+		const toolId = toolPart.toolId.replace(/setup.tools\./, `reea_copilot_`.toLowerCase());
 		const newToolPart = new ChatRequestToolPart(
 			toolPart.range,
 			toolPart.editorRange,
@@ -1267,7 +1267,7 @@ class ChatSetupController extends Disposable {
 	async setupWithProvider(options: { useEnterpriseProvider: boolean }): Promise<boolean> {
 		const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration);
 		registry.registerConfiguration({
-			'id': 'copilot.setup',
+			'id': 'reeaCopilot.setup',
 			'type': 'object',
 			'properties': {
 				[defaultChat.completionsAdvancedSetting]: {

@@ -16,7 +16,7 @@
 // will never change and a new id will be created for a new annotation.
 // For example we could get a second annotation with the same namespace and id:
 //
-// "copilot_annotations": [{ "namespace": [{ id: 0, start_offset: 0, stop_offset: 2, details: {} }]
+// "reea_copilot_annotations": [{ "namespace": [{ id: 0, start_offset: 0, stop_offset: 2, details: {} }]
 //
 // we would then need to update the annotation with the new stop offset.
 

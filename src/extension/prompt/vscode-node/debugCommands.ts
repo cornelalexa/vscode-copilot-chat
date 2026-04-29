@@ -22,7 +22,7 @@ export class DebugCommandsContribution extends Disposable {
 	) {
 		super();
 
-		this._register(vscode.commands.registerCommand('github.copilot.debug.generateSTest', async () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.debug.generateSTest', async () => {
 			if (!this.feedbackReporter.canReport) {
 				return;
 			}
@@ -47,7 +47,7 @@ export class DebugCommandsContribution extends Disposable {
 			}
 		};
 
-		this._register(vscode.commands.registerCommand('github.copilot.createLaunchJsonFileWithContents', async (launchConfig: IStartDebuggingParsedResponse) => {
+		this._register(vscode.commands.registerCommand('reea.copilot.createLaunchJsonFileWithContents', async (launchConfig: IStartDebuggingParsedResponse) => {
 			// Define the path for the .vscode/launch.json file
 			const workspaceFolders = vscode.workspace.workspaceFolders;
 			if (!workspaceFolders?.length) {
@@ -59,7 +59,7 @@ export class DebugCommandsContribution extends Disposable {
 			await launchConfigService.add(workspaceFolders[0].uri, launchConfig);
 			await launchConfigService.show(workspaceFolders[0].uri, launchConfig.configurations[0].name);
 		}));
-		this._register((vscode.commands.registerCommand('github.copilot.startDebugging', async (config: IStartDebuggingParsedResponse, progress) => {
+		this._register((vscode.commands.registerCommand('reea.copilot.startDebugging', async (config: IStartDebuggingParsedResponse, progress) => {
 			const result = await this.launchConfigService.resolveConfigurationInputs(config);
 			if (result?.config) {
 				await ensureTask(undefined, config);

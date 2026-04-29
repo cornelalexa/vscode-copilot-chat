@@ -19,7 +19,7 @@ export class SetupTestsContribution extends Disposable implements IExtensionCont
 				return workspaceMutationManager.get(uri.authority).get(uri.path, token);
 			},
 		}));
-		this._register(vscode.commands.registerCommand('github.copilot.tests.applyMutations', (requestId: string) => {
+		this._register(vscode.commands.registerCommand('reea.copilot.tests.applyMutations', (requestId: string) => {
 			vscode.window.withProgress({
 				location: vscode.ProgressLocation.Notification,
 				cancellable: true,

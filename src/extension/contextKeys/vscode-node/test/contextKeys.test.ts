@@ -69,9 +69,9 @@ suite('ContextKeysContribution', () => {
 			assert.strictEqual(getCopilotToken.callCount, 0);
 			assert.strictEqual(getGitHubSession.callCount, 0);
 			assert.ok(setContextCalls.some(([key, value]) => key === standaloneContextKey && value === true));
-			assert.ok(setContextCalls.some(([key, value]) => key === 'github.copilot-chat.activated' && value === true));
-			assert.ok(setContextCalls.some(([key, value]) => key === 'github.copilot.chat.quotaExceeded' && value === false));
-			assert.ok(setContextCalls.some(([key, value]) => key === 'github.copilot.auth.missingPermissiveSession' && value === false));
+			assert.ok(setContextCalls.some(([key, value]) => key === 'reea.copilot-chat.activated' && value === true));
+			assert.ok(setContextCalls.some(([key, value]) => key === 'reea.copilot.chat.quotaExceeded' && value === false));
+			assert.ok(setContextCalls.some(([key, value]) => key === 'reea.copilot.auth.missingPermissiveSession' && value === false));
 		} finally {
 			contribution.dispose();
 		}

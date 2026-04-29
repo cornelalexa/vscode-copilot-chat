@@ -12,7 +12,7 @@ import { ChatTitleProvider } from '../../../prompt/node/title';
 import { IChatSessionMetadataStore } from '../../common/chatSessionMetadataStore';
 import { ICustomSessionTitleService } from '../common/customSessionTitleService';
 
-const CUSTOM_SESSION_TITLE_MEMENTO_KEY = 'github.copilot.cli.customSessionTitles';
+const CUSTOM_SESSION_TITLE_MEMENTO_KEY = 'reea.copilot.cli.customSessionTitles';
 
 export class CustomSessionTitleService implements ICustomSessionTitleService {
 	declare readonly _serviceBrand: undefined;

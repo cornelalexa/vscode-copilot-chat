@@ -72,7 +72,7 @@ export class PostToolUseLoggingHook implements HookCallbackMatcher {
 				// Record tool response output on the span for the debug panel
 				try {
 					const output = typeof response === 'string' ? response : JSON.stringify(response);
-					span.setAttribute('copilot_chat.hook_output', truncateForOTel(output));
+					span.setAttribute('reea_copilot_chat.hook_output', truncateForOTel(output));
 				} catch { /* swallow */ }
 
 				// Log the tool call to the request logger with the tool response as text content
@@ -125,7 +125,7 @@ export class PostToolUseFailureLoggingHook implements HookCallbackMatcher {
 				this.logService.trace(`[ClaudeCodeSession] PostToolUseFailure Hook: tool=${hookInput.tool_name}, error=${hookInput.error}, isInterrupt=${hookInput.is_interrupt}`);
 
 				// Override the default success status — this hook reports a tool failure
-				span.setAttribute('copilot_chat.hook_result_kind', 'error');
+				span.setAttribute('reea_copilot_chat.hook_result_kind', 'error');
 				span.setStatus(SpanStatusCode.ERROR, hookInput.error);
 
 				// Log the failed tool call to the request logger with the error as text content

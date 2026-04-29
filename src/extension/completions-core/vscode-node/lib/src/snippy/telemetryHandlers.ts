@@ -38,7 +38,7 @@ class CodeQuoteTelemetry {
 
 class CopilotOutputLogTelemetry extends CodeQuoteTelemetry {
 	constructor() {
-		super('github_copilot_log');
+		super('github_reea_copilot_log');
 	}
 
 	handleOpen({ instantiationService }: Base) {

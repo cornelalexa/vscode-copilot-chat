@@ -71,7 +71,7 @@ export class LoggingActionsContrib {
 			const nodeFetchConfig = getShadowedConfig<boolean>(this.configurationService, this.experimentationService, ConfigKey.Shared.DebugUseNodeFetchFetcher, ConfigKey.TeamInternal.DebugExpUseNodeFetchFetcher);
 			const ext = vscode.extensions.getExtension(EXTENSION_ID);
 			const product = require(path.join(vscode.env.appRoot, 'product.json'));
-			await appendText(editor, `## GitHub Copilot Chat
+			await appendText(editor, `## Reea Copilot Chat
 
 - Extension: ${this.envService.getVersion()} (${this.envService.getBuildType()})
 - VS Code: ${vscode.version} (${product.commit || 'out-of-source'})
@@ -84,9 +84,9 @@ export class LoggingActionsContrib {
 
 User Settings:
 \`\`\`json${getNetworkSettings()}
-  "github.copilot.advanced.debug.useElectronFetcher": ${electronConfig},
-  "github.copilot.advanced.debug.useNodeFetcher": ${nodeConfig},
-  "github.copilot.advanced.debug.useNodeFetchFetcher": ${nodeFetchConfig}
+  "reea.copilot.advanced.debug.useElectronFetcher": ${electronConfig},
+  "reea.copilot.advanced.debug.useNodeFetcher": ${nodeConfig},
+  "reea.copilot.advanced.debug.useNodeFetchFetcher": ${nodeFetchConfig}
 \`\`\`${getProxyEnvVariables()}
 `);
 			const proxyAgent = loadVSCodeModule<ProxyAgent>('@vscode/proxy-agent');
@@ -242,15 +242,15 @@ User Settings:
 			await appendText(editor, `
 ## Documentation
 
-In corporate networks: [Troubleshooting firewall settings for GitHub Copilot](https://docs.github.com/en/copilot/troubleshooting-github-copilot/troubleshooting-firewall-settings-for-github-copilot).`);
+In corporate networks: [Troubleshooting firewall settings for Reea Copilot](https://docs.github.com/en/copilot/troubleshooting-github-copilot/troubleshooting-firewall-settings-for-github-copilot).`);
 
 			return document.getText();
 		};
-		this._context.subscriptions.push(vscode.commands.registerCommand('github.copilot.debug.collectDiagnostics', collectDiagnostics));
+		this._context.subscriptions.push(vscode.commands.registerCommand('reea.copilot.debug.collectDiagnostics', collectDiagnostics));
 		// Internal command is not declared in package.json so it can be used from the welcome views while the extension is being activated.
-		this._context.subscriptions.push(vscode.commands.registerCommand('github.copilot.debug.collectDiagnostics.internal', collectDiagnostics));
-		this._context.subscriptions.push(vscode.commands.registerCommand('github.copilot.debug.showOutputChannel.internal', () => outputChannel.show()));
-		this._context.subscriptions.push(vscode.commands.registerCommand('github.copilot.debug.showNodeSystemCertificatesErrors', async () => {
+		this._context.subscriptions.push(vscode.commands.registerCommand('reea.copilot.debug.collectDiagnostics.internal', collectDiagnostics));
+		this._context.subscriptions.push(vscode.commands.registerCommand('reea.copilot.debug.showOutputChannel.internal', () => outputChannel.show()));
+		this._context.subscriptions.push(vscode.commands.registerCommand('reea.copilot.debug.showNodeSystemCertificatesErrors', async () => {
 			const result: Record<string, unknown> = {};
 			try {
 				const certs = tls.getCACertificates('system');
@@ -519,7 +519,7 @@ function collectFetcherTelemetry(accessor: ServicesAccessor): void {
 			const key = library.replace(/-/g, '');
 			const requestStartTime = Date.now();
 			try {
-				const response = await sendRawTelemetry(fetcher, envService, extensionContext, 'GitHub.copilot-chat/fetcherTelemetryProbe', {});
+				const response = await sendRawTelemetry(fetcher, envService, extensionContext, 'reea-srl.reea-copilot/fetcherTelemetryProbe', {});
 				probeResults[key] = `Status: ${response.status}`;
 				logService.debug(`Fetcher telemetry probe: ${library} ${probeResults[key]} (${Date.now() - requestStartTime}ms)`);
 			} catch (e) {
@@ -554,7 +554,7 @@ function collectFetcherTelemetry(accessor: ServicesAccessor): void {
 					remoteName: vscode.env.remoteName ?? 'none',
 					...probeResults,
 				};
-				const response = await sendRawTelemetry(fetcher, envService, extensionContext, 'GitHub.copilot-chat/fetcherTelemetry', properties);
+				const response = await sendRawTelemetry(fetcher, envService, extensionContext, 'reea-srl.reea-copilot/fetcherTelemetry', properties);
 
 				logService.debug(`Fetcher telemetry: Succeeded in ${Date.now() - requestStartTime}ms using ${fetcher.getUserAgentLibrary()} with status ${response.status} (${response.statusText}).`);
 			} catch (e) {
@@ -620,7 +620,7 @@ async function sendRawTelemetry(fetcher: IFetcher, envService: IEnvService, exte
 		'time-delta-to-apply-millis': 'use-collector-delta',
 		'cache-control': 'no-cache, no-store',
 		'content-type': 'application/x-json-stream',
-		'User-Agent': `GitHubCopilotChat/${envService.getVersion()}`,
+		'User-Agent': `ReeaCopilotChat/${envService.getVersion()}`,
 		[userAgentLibraryHeader]: fetcher.getUserAgentLibrary(),
 	};
 	if (fetcher.getUserAgentLibrary() === NodeFetcher.ID) {

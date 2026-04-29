@@ -131,7 +131,7 @@ export abstract class AbstractEnvService implements IEnvService {
 
 	/**
 	 * The name and version of the Copilot chat plugin.
-	 * or `{ name: 'copilot-chat', version: '1.7.21' }`.
+	 * or `{ name: 'reea-copilot-chat', version: '1.7.21' }`.
 	 */
 	abstract getEditorPluginInfo(): NameAndVersion;
 

@@ -9,7 +9,7 @@ import { ICopilotCLISessionTracker } from '../copilotCLISessionTracker';
 import { InProcHttpServer } from '../inProcHttpServer';
 import { sendEditorContextToSession, sendUriToSession } from './sendContext';
 
-export const ADD_FILE_REFERENCE_COMMAND = 'github.copilot.chat.copilotCLI.addFileReference';
+export const ADD_FILE_REFERENCE_COMMAND = 'reea.copilot.chat.copilotCLI.addFileReference';
 
 export function registerAddFileReferenceCommand(logger: ILogger, httpServer: InProcHttpServer, sessionTracker: ICopilotCLISessionTracker): vscode.Disposable {
 	return vscode.commands.registerCommand(ADD_FILE_REFERENCE_COMMAND, async (uri?: vscode.Uri) => {

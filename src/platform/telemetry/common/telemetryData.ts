@@ -67,7 +67,7 @@ export class TelemetryData {
 		this.properties['editor_plugin_version'] = envService.getEditorPluginInfo().format();
 		this.properties['client_machineid'] = envService.machineId;
 		this.properties['client_sessionid'] = envService.sessionId;
-		this.properties['copilot_version'] = `copilot/${envService.getVersion()}`;
+		this.properties['reea_copilot_version'] = `copilot/${envService.getVersion()}`;
 
 		this.properties['common_extname'] = envService.getEditorPluginInfo().name;
 		this.properties['common_extversion'] = envService.getEditorPluginInfo().version;

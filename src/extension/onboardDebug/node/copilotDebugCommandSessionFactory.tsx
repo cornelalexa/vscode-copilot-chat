@@ -17,7 +17,7 @@ import { IDebugCommandToConfigConverter } from './commandToConfigConverter';
 import { IStartOptions, StartResult, StartResultKind } from './copilotDebugWorker/shared';
 import { IStartDebuggingParsedResponse } from './parseLaunchConfigFromResponse';
 
-const STORAGE_KEY = 'copilot-chat.terminalToDebugging.configs';
+const STORAGE_KEY = 'reea-copilot-chat.terminalToDebugging.configs';
 const LRU_SIZE = 30;
 
 interface IStoredData {

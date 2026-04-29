@@ -247,7 +247,7 @@ export class SetupTestsInvocation implements IIntentInvocation {
 		});
 		outputStream.push(chatResponseTree);
 		outputStream.button({
-			command: 'github.copilot.tests.applyMutations',
+			command: 'reea.copilot.tests.applyMutations',
 			title: l10n.t('Apply Changes'),
 			arguments: [requestId],
 		});

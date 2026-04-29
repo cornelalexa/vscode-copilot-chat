@@ -7,8 +7,8 @@ import * as vscode from 'vscode';
 import { DiffStateManager } from '../diffState';
 import { ILogger } from '../../../../../platform/log/common/logService';
 
-export const ACCEPT_DIFF_COMMAND = 'github.copilot.chat.copilotCLI.acceptDiff';
-export const REJECT_DIFF_COMMAND = 'github.copilot.chat.copilotCLI.rejectDiff';
+export const ACCEPT_DIFF_COMMAND = 'reea.copilot.chat.copilotCLI.acceptDiff';
+export const REJECT_DIFF_COMMAND = 'reea.copilot.chat.copilotCLI.rejectDiff';
 
 export function registerDiffCommands(logger: ILogger, diffState: DiffStateManager): vscode.Disposable[] {
 	const disposables: vscode.Disposable[] = [];

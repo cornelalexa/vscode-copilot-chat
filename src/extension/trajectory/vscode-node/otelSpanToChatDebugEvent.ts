@@ -54,8 +54,8 @@ export function completedSpanToDebugEvent(span: ICompletedSpanData): vscode.Chat
 		case 'core_event':
 			return spanToGenericEvent(span);
 		default:
-			// SDK native hook spans use 'github.copilot.hook.type' instead of gen_ai.operation.name
-			if (span.name.startsWith('hook ') && asString(span.attributes['github.copilot.hook.type'])) {
+			// SDK native hook spans use 'reea.copilot.hook.type' instead of gen_ai.operation.name
+			if (span.name.startsWith('hook ') && asString(span.attributes['reea.copilot.hook.type'])) {
 				return spanToSdkHookEvent(span);
 			}
 			return undefined;
@@ -386,10 +386,10 @@ function spanToSubagentEvent(span: ICompletedSpanData): vscode.ChatDebugSubagent
 }
 
 function resolveHookExecutionContent(span: ICompletedSpanData): vscode.ChatDebugEventHookContent {
-	const hookType = asString(span.attributes['copilot_chat.hook_type']) ?? 'unknown';
+	const hookType = asString(span.attributes['reea_copilot_chat.hook_type']) ?? 'unknown';
 	const content = new vscode.ChatDebugEventHookContent(hookType);
-	content.command = asString(span.attributes['copilot_chat.hook_command']);
-	const resultKind = asString(span.attributes['copilot_chat.hook_result_kind']);
+	content.command = asString(span.attributes['reea_copilot_chat.hook_command']);
+	const resultKind = asString(span.attributes['reea_copilot_chat.hook_result_kind']);
 	content.result = resultKind === 'success'
 		? vscode.ChatDebugHookResult.Success
 		: resultKind === 'error'
@@ -398,19 +398,19 @@ function resolveHookExecutionContent(span: ICompletedSpanData): vscode.ChatDebug
 				? vscode.ChatDebugHookResult.NonBlockingError
 				: undefined;
 	content.durationInMillis = span.endTime - span.startTime;
-	content.input = asString(span.attributes['copilot_chat.hook_input']);
-	content.output = asString(span.attributes['copilot_chat.hook_output']);
+	content.input = asString(span.attributes['reea_copilot_chat.hook_input']);
+	content.output = asString(span.attributes['reea_copilot_chat.hook_output']);
 	if (span.status.code === 2 /* ERROR */ && span.status.message) {
 		content.errorMessage = span.status.message;
 	}
-	content.exitCode = asNumber(span.attributes['copilot_chat.hook_exit_code']);
+	content.exitCode = asNumber(span.attributes['reea_copilot_chat.hook_exit_code']);
 	return content;
 }
 
 function spanToHookExecutionEvent(span: ICompletedSpanData): vscode.ChatDebugGenericEvent {
-	const hookType = asString(span.attributes['copilot_chat.hook_type']) ?? 'unknown';
-	const hookCommand = asString(span.attributes['copilot_chat.hook_command']);
-	const resultKind = asString(span.attributes['copilot_chat.hook_result_kind']);
+	const hookType = asString(span.attributes['reea_copilot_chat.hook_type']) ?? 'unknown';
+	const hookCommand = asString(span.attributes['reea_copilot_chat.hook_command']);
+	const resultKind = asString(span.attributes['reea_copilot_chat.hook_result_kind']);
 	const durationMs = Math.round(span.endTime - span.startTime);
 
 	const name = `Hook: ${hookType}`;
@@ -429,11 +429,11 @@ function spanToHookExecutionEvent(span: ICompletedSpanData): vscode.ChatDebugGen
 }
 
 /**
- * Convert an SDK native hook span (github.copilot.hook.*) to a debug panel event.
- * SDK uses span name "hook {type}" and attributes in the github.copilot.hook.* namespace.
+ * Convert an SDK native hook span (reea.copilot.hook.*) to a debug panel event.
+ * SDK uses span name "hook {type}" and attributes in the reea.copilot.hook.* namespace.
  */
 function spanToSdkHookEvent(span: ICompletedSpanData): vscode.ChatDebugGenericEvent {
-	const hookType = asString(span.attributes['github.copilot.hook.type']) ?? 'unknown';
+	const hookType = asString(span.attributes['reea.copilot.hook.type']) ?? 'unknown';
 	const durationMs = span.endTime - span.startTime;
 	const isError = span.status.code === 2; /* ERROR */
 	const level = isError ? vscode.ChatDebugLogLevel.Error : vscode.ChatDebugLogLevel.Info;
@@ -451,8 +451,8 @@ function spanToGenericEvent(span: ICompletedSpanData): vscode.ChatDebugGenericEv
 	evt.id = span.spanId;
 	evt.parentEventId = span.parentSpanId;
 	evt.details = asString(span.attributes[CopilotChatAttr.MARKDOWN_CONTENT])
-		?? asString(span.attributes['copilot_chat.event_details']);
-	evt.category = asString(span.attributes['copilot_chat.event_category']);
+		?? asString(span.attributes['reea_copilot_chat.event_details']);
+	evt.category = asString(span.attributes['reea_copilot_chat.event_category']);
 	return evt;
 }
 

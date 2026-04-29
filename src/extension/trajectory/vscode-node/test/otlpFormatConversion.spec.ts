@@ -132,7 +132,7 @@ describe('OTLP Format Conversion', () => {
 				makeSpan({ name: 'chat gpt-4o', spanId: 'span2id234567890', parentSpanId: 'abcdef0123456789' }),
 			];
 
-			const exported = wrapInResourceSpans(spans, { 'service.name': 'copilot-chat', 'service.version': '1.0.0' });
+			const exported = wrapInResourceSpans(spans, { 'service.name': 'reea-copilot-chat', 'service.version': '1.0.0' });
 			const json = JSON.stringify(exported);
 			const imported = parseResourceSpans(json);
 

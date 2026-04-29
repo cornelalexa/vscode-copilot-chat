@@ -14,7 +14,7 @@ export class FeedbackCommandContribution extends Disposable {
 	) {
 		super();
 
-		this._register(vscode.commands.registerCommand('github.copilot.report', async (title: string = '') => {
+		this._register(vscode.commands.registerCommand('reea.copilot.report', async (title: string = '') => {
 			const token = this.authenticationService.copilotToken;
 			const isTeamMember = token?.isVscodeTeamMember;
 			const output: string[] = isTeamMember ? [`<details><summary>Prompt Details</summary>`] : [`<details><summary>Logs</summary>`];

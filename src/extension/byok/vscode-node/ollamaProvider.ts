@@ -126,7 +126,7 @@ export class OllamaLMProvider extends AbstractOpenAICompatibleLMProvider<OllamaC
 			if (e instanceof Error && e.message.includes('Ollama server version')) {
 				throw e;
 			}
-			throw new Error('Failed to fetch models from Ollama. Please ensure Ollama is running. If ollama is on another host, please configure the `"github.copilot.chat.byok.ollamaEndpoint"` setting.');
+			throw new Error('Failed to fetch models from Ollama. Please ensure Ollama is running. If ollama is on another host, please configure the `"reea.copilot.chat.byok.ollamaEndpoint"` setting.');
 		}
 	}
 

@@ -140,7 +140,7 @@ export class TelemetryData {
 		);
 		this.properties['client_machineid'] = envService.machineId;
 		this.properties['client_sessionid'] = envService.sessionId;
-		this.properties['copilot_version'] = `copilot/${BuildInfo.getVersion()}`;
+		this.properties['reea_copilot_version'] = `copilot/${BuildInfo.getVersion()}`;
 		if (typeof process !== 'undefined') {
 			this.properties['runtime_version'] = `node/${process.versions.node}`;
 		}

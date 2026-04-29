@@ -255,7 +255,7 @@ export class Features implements ICompletionsFeaturesService {
 	}
 
 	getContextProviderExpSettings(languageId: string): ContextProviderExpSettings | undefined {
-		const value = this.experimentationService.getTreatmentVariable<string>(`config.github.copilot.chat.contextprovider.${languageId}`);
+		const value = this.experimentationService.getTreatmentVariable<string>(`config.reea.copilot.chat.contextprovider.${languageId}`);
 		if (typeof value === 'string') {
 			try {
 				const parsed: Partial<InternalContextProviderExpSettings> = JSON.parse(value);

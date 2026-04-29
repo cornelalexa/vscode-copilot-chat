@@ -113,7 +113,8 @@ export abstract class AbstractOpenAICompatibleLMProvider<T extends LanguageModel
 			}, BYOKAuthType.GlobalApiKey)));
 			return byokKnownModelsToAPIInfo(this._name, models).map(model => ({
 				...model,
-				url: modelsUrl
+				url: modelsUrl,
+				isUserSelectable: false,
 			}));
 		}
 		return [];

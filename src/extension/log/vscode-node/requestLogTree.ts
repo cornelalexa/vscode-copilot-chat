@@ -24,8 +24,8 @@ import { IExtensionContribution } from '../../common/contributions';
 import { assembleChatLogExport, createExportedPrompt, ExportedPrompt, serializeChatLogExport } from '../node/chatLogExport';
 
 const showHtmlCommand = 'vscode.copilot.chat.showRequestHtmlItem';
-const exportLogItemCommand = 'github.copilot.chat.debug.exportLogItem';
-const exportPromptArchiveCommand = 'github.copilot.chat.debug.exportPromptArchive';
+const exportLogItemCommand = 'reea.copilot.chat.debug.exportLogItem';
+const exportPromptArchiveCommand = 'reea.copilot.chat.debug.exportPromptArchive';
 
 /**
  * Serialize MCP server definitions to a JSON-safe format.
@@ -52,10 +52,10 @@ function serializeMcpServers(servers: readonly vscode.McpServerDefinition[]): ob
 		}
 	});
 }
-const exportPromptLogsAsJsonCommand = 'github.copilot.chat.debug.exportPromptLogsAsJson';
-const exportAllPromptLogsAsJsonCommand = 'github.copilot.chat.debug.exportAllPromptLogsAsJson';
-const saveCurrentMarkdownCommand = 'github.copilot.chat.debug.saveCurrentMarkdown';
-const showRawRequestBodyCommand = 'github.copilot.chat.debug.showRawRequestBody';
+const exportPromptLogsAsJsonCommand = 'reea.copilot.chat.debug.exportPromptLogsAsJson';
+const exportAllPromptLogsAsJsonCommand = 'reea.copilot.chat.debug.exportAllPromptLogsAsJson';
+const saveCurrentMarkdownCommand = 'reea.copilot.chat.debug.saveCurrentMarkdown';
+const showRawRequestBodyCommand = 'reea.copilot.chat.debug.showRawRequestBody';
 
 export class RequestLogTree extends Disposable implements IExtensionContribution {
 	readonly id = 'requestLogTree';
@@ -67,7 +67,7 @@ export class RequestLogTree extends Disposable implements IExtensionContribution
 	) {
 		super();
 		this.chatRequestProvider = this._register(instantiationService.createInstance(ChatRequestProvider));
-		this._register(vscode.window.registerTreeDataProvider('copilot-chat', this.chatRequestProvider));
+		this._register(vscode.window.registerTreeDataProvider('reea-copilot-chat', this.chatRequestProvider));
 
 		let server: RequestServer | undefined;
 
@@ -439,7 +439,7 @@ export class RequestLogTree extends Disposable implements IExtensionContribution
 			} else {
 				// Generate a default filename based on current timestamp
 				const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
-				const defaultFilename = `copilot_all_prompts_${timestamp}.json`;
+				const defaultFilename = `reea_copilot_all_prompts_${timestamp}.json`;
 
 				// Show save dialog
 				const dialogResult = await vscode.window.showSaveDialog({
@@ -509,7 +509,7 @@ export class RequestLogTree extends Disposable implements IExtensionContribution
 			await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(ChatRequestScheme.buildUri({ kind: 'request', id: requestId }, 'rawrequest')));
 		}));
 
-		this._register(vscode.commands.registerCommand('github.copilot.debug.showOutputChannel', async () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.debug.showOutputChannel', async () => {
 			outputChannel.show();
 		}));
 	}
@@ -831,7 +831,7 @@ class LogTreeFilters extends Disposable {
 	}
 
 	private getStorageKey(name: string): string {
-		return `github.copilot.chat.debug.${name}Hidden`;
+		return `reea.copilot.chat.debug.${name}Hidden`;
 	}
 
 	setElementsShown(value: boolean) {
@@ -904,7 +904,7 @@ class LogTreeFilters extends Disposable {
 	}
 
 	private setShown(name: string, value: boolean): void {
-		vscode.commands.executeCommand('setContext', `github.copilot.chat.debug.${name}Hidden`, !value);
+		vscode.commands.executeCommand('setContext', `reea.copilot.chat.debug.${name}Hidden`, !value);
 		this.vscodeExtensionContext.workspaceState.update(this.getStorageKey(name), !value);
 		this._onDidChangeFilters.fire();
 	}
@@ -914,13 +914,13 @@ class LogTreeFilterCommands extends Disposable {
 	constructor(filters: LogTreeFilters) {
 		super();
 
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.showElements', () => filters.setElementsShown(true)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.hideElements', () => filters.setElementsShown(false)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.showTools', () => filters.setToolsShown(true)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.hideTools', () => filters.setToolsShown(false)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.showNesRequests', () => filters.setNesRequestsShown(true)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.hideNesRequests', () => filters.setNesRequestsShown(false)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.showGhostRequests', () => filters.setGhostRequestsShown(true)));
-		this._register(vscode.commands.registerCommand('github.copilot.chat.debug.hideGhostRequests', () => filters.setGhostRequestsShown(false)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.showElements', () => filters.setElementsShown(true)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.hideElements', () => filters.setElementsShown(false)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.showTools', () => filters.setToolsShown(true)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.hideTools', () => filters.setToolsShown(false)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.showNesRequests', () => filters.setNesRequestsShown(true)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.hideNesRequests', () => filters.setNesRequestsShown(false)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.showGhostRequests', () => filters.setGhostRequestsShown(true)));
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.debug.hideGhostRequests', () => filters.setGhostRequestsShown(false)));
 	}
 }

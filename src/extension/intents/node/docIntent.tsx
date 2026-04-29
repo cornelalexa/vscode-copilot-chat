@@ -190,7 +190,7 @@ class DocPrompt extends PromptElement<Props> {
 			<>
 				<SystemMessage>
 					You are an AI programming assistant.<br />
-					When asked for your name, you must respond with "GitHub Copilot".<br />
+					When asked for your name, you must respond with "Reea Copilot".<br />
 					You must follow user's requirements carefully.<br />
 					You must follow Microsoft content policies.<br />
 					You must avoid content that violates copyrights.<br />

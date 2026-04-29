@@ -60,7 +60,7 @@ interface MemoryLocation {
 export class MemorySlashCommand implements IClaudeSlashCommandHandler {
 	readonly commandName = 'memory';
 	readonly description = 'Open memory files (CLAUDE.md) for editing';
-	readonly commandId = 'copilot.claude.memory';
+	readonly commandId = 'reea.copilot.claude.memory';
 
 	constructor(
 		@IWorkspaceService private readonly workspaceService: IWorkspaceService,

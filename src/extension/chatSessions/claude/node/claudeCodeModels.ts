@@ -12,7 +12,7 @@ import { createServiceIdentifier } from '../../../../util/common/services';
 import { Emitter } from '../../../../util/vs/base/common/event';
 import { Disposable } from '../../../../util/vs/base/common/lifecycle';
 
-const CLAUDE_CODE_MODEL_MEMENTO_KEY = 'github.copilot.claudeCode.sessionModel';
+const CLAUDE_CODE_MODEL_MEMENTO_KEY = 'reea.copilot.claudeCode.sessionModel';
 
 /** Error thrown when no Claude models with Messages API are available */
 export class NoClaudeModelsAvailableError extends Error {

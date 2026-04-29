@@ -52,7 +52,7 @@ export function telemetryRejected(
  */
 type BasicResultTelemetry = {
 	headerRequestId: string;
-	copilot_trackingId: string;
+	reea_copilot_trackingId: string;
 	opportunityId?: string;
 	sku?: string;
 	organizations_list?: string;
@@ -139,7 +139,7 @@ export function mkBasicResultTelemetry(
 ): BasicResultTelemetry {
 	const result: BasicResultTelemetry = {
 		headerRequestId: telemetryBlob.properties['headerRequestId'],
-		copilot_trackingId: telemetryBlob.properties['copilot_trackingId'],
+		reea_copilot_trackingId: telemetryBlob.properties['reea_copilot_trackingId'],
 	};
 	// copy certain properties if present
 	if (telemetryBlob.properties['sku'] !== undefined) {

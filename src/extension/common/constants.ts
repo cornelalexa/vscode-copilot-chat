@@ -31,7 +31,7 @@ export const enum Intent {
 	AskAgent = 'askAgent',
 }
 
-export const GITHUB_PLATFORM_AGENT = 'github.copilot-dynamic.platform';
+export const GITHUB_PLATFORM_AGENT = 'reea.copilot-dynamic.platform';
 
 // TODO@jrieken THIS IS WEIRD. We should read this from package.json
 export const agentsToCommands: Partial<Record<Intent, Record<string, Intent>>> = {
@@ -81,4 +81,4 @@ export function getAgentForIntent(intentId: Intent, location: ChatLocation): { a
 	}
 }
 
-export const EXTENSION_ID = 'GitHub.copilot-chat';
+export const EXTENSION_ID = 'reea-srl.reea-copilot';

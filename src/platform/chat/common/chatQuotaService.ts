@@ -7,7 +7,7 @@ import { createServiceIdentifier } from '../../../util/common/services';
 import { IHeaders } from '../../networking/common/fetcherService';
 
 /**
- * This is the quota info we get from the `copilot_internal/user` endpoint.
+ * This is the quota info we get from the `reea_copilot_internal/user` endpoint.
  * It is accessed via the copilot token object
  */
 export interface CopilotUserQuotaInfo {

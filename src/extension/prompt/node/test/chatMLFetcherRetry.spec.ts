@@ -553,7 +553,7 @@ class TestAuthenticationService extends MockAuthenticationService {
  */
 class TestCAPIClientService extends MockCAPIClientService {
 	get capiPingURL(): string {
-		return 'https://api.github.com/copilot_internal/ping';
+		return 'https://api.github.com/reea_copilot_internal/ping';
 	}
 }
 

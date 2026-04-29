@@ -91,7 +91,7 @@ export namespace GithubPromptHeaderAttributes {
 
 export enum Target {
 	VSCode = 'vscode',
-	GitHubCopilot = 'github-copilot'
+	ReeaCopilot = 'github-copilot'
 }
 
 export class PromptHeader {

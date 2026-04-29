@@ -9,7 +9,7 @@ import { Event } from '../../../util/vs/base/common/event';
 import { Disposable } from '../../../util/vs/base/common/lifecycle';
 import { INotebookService } from '../../../platform/notebook/common/notebookService';
 
-const NOTEBOOK_FOLLOW_IN_SESSION_KEY = 'github.copilot.notebookFollowInSessionEnabled';
+const NOTEBOOK_FOLLOW_IN_SESSION_KEY = 'reea.copilot.notebookFollowInSessionEnabled';
 
 export class NotebookFollowCommands extends Disposable {
 
@@ -34,11 +34,11 @@ export class NotebookFollowCommands extends Disposable {
 		}));
 
 		// commands to change context state
-		this._register(vscode.commands.registerCommand('github.copilot.chat.notebook.enableFollowCellExecution', () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.notebook.enableFollowCellExecution', () => {
 			this.updateFollowContext(true);
 		}));
 
-		this._register(vscode.commands.registerCommand('github.copilot.chat.notebook.disableFollowCellExecution', () => {
+		this._register(vscode.commands.registerCommand('reea.copilot.chat.notebook.disableFollowCellExecution', () => {
 			this.updateFollowContext(false);
 		}));
 	}

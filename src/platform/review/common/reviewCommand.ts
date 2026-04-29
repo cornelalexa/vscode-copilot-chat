@@ -15,7 +15,7 @@ export interface CodeReviewFileInput {
 }
 
 /**
- * Input for the `github.copilot.chat.codeReview.run` command.
+ * Input for the `reea.copilot.chat.codeReview.run` command.
  */
 export interface CodeReviewInput {
 	readonly files: readonly CodeReviewFileInput[];
@@ -50,7 +50,7 @@ export interface CodeReviewComment {
 }
 
 /**
- * Result of the `github.copilot.chat.codeReview.run` command.
+ * Result of the `reea.copilot.chat.codeReview.run` command.
  */
 export type CodeReviewResult =
 	| { readonly type: 'success'; readonly comments: readonly CodeReviewComment[] }

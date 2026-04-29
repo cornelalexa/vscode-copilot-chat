@@ -29,7 +29,7 @@ export function sendEngineMessagesLengthTelemetry(telemetryService: ITelemetrySe
 	// Create messages with content and tool_calls arguments replaced by length
 	const messagesWithLength = messages.map(msg => {
 		const processedMsg: any = {
-			...msg, // This preserves ALL existing fields including tool_calls, tool_call_id, copilot_references, etc.
+			...msg, // This preserves ALL existing fields including tool_calls, tool_call_id, reea_copilot_references, etc.
 			content: typeof msg.content === 'string'
 				? msg.content.length
 				: Array.isArray(msg.content)

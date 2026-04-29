@@ -10,36 +10,36 @@
 // - These IDs should be used in package.json
 // - These IDs should only be registered if they appear in the package.json (meaning the command palette) or if the command needs to be supported when both extensions are loaded/active.
 
-export const CMDOpenPanelClient = 'github.copilot.generate';
-export const CMDOpenPanelChat = 'github.copilot.chat.openSuggestionsPanel'; // "github.copilot.chat.generate" is already being used
+export const CMDOpenPanelClient = 'reea.copilot.generate';
+export const CMDOpenPanelChat = 'reea.copilot.chat.openSuggestionsPanel'; // "reea.copilot.chat.generate" is already being used
 
-export const CMDAcceptCursorPanelSolutionClient = 'github.copilot.acceptCursorPanelSolution';
-export const CMDNavigatePreviousPanelSolutionClient = 'github.copilot.previousPanelSolution';
-export const CMDNavigateNextPanelSolutionClient = 'github.copilot.nextPanelSolution';
+export const CMDAcceptCursorPanelSolutionClient = 'reea.copilot.acceptCursorPanelSolution';
+export const CMDNavigatePreviousPanelSolutionClient = 'reea.copilot.previousPanelSolution';
+export const CMDNavigateNextPanelSolutionClient = 'reea.copilot.nextPanelSolution';
 
-export const CMDToggleStatusMenuClient = 'github.copilot.toggleStatusMenu';
-export const CMDToggleStatusMenuChat = 'github.copilot.chat.toggleStatusMenu';
+export const CMDToggleStatusMenuClient = 'reea.copilot.toggleStatusMenu';
+export const CMDToggleStatusMenuChat = 'reea.copilot.chat.toggleStatusMenu';
 
 // Needs to be supported in both extensions when they are loaded/active. Requires a different ID.
-export const CMDSendCompletionsFeedbackChat = 'github.copilot.chat.sendCompletionFeedback';
+export const CMDSendCompletionsFeedbackChat = 'reea.copilot.chat.sendCompletionFeedback';
 
-export const CMDEnableCompletionsChat = 'github.copilot.chat.completions.enable';
-export const CMDDisableCompletionsChat = 'github.copilot.chat.completions.disable';
-export const CMDToggleCompletionsChat = 'github.copilot.chat.completions.toggle';
-export const CMDEnableCompletionsClient = 'github.copilot.completions.enable';
-export const CMDDisableCompletionsClient = 'github.copilot.completions.disable';
-export const CMDToggleCompletionsClient = 'github.copilot.completions.toggle';
+export const CMDEnableCompletionsChat = 'reea.copilot.chat.completions.enable';
+export const CMDDisableCompletionsChat = 'reea.copilot.chat.completions.disable';
+export const CMDToggleCompletionsChat = 'reea.copilot.chat.completions.toggle';
+export const CMDEnableCompletionsClient = 'reea.copilot.completions.enable';
+export const CMDDisableCompletionsClient = 'reea.copilot.completions.disable';
+export const CMDToggleCompletionsClient = 'reea.copilot.completions.toggle';
 
-export const CMDOpenLogsClient = 'github.copilot.openLogs';
-export const CMDOpenDocumentationClient = 'github.copilot.openDocs';
+export const CMDOpenLogsClient = 'reea.copilot.openLogs';
+export const CMDOpenDocumentationClient = 'reea.copilot.openDocs';
 
 // Existing chat command reused for diagnostics
-export const CMDCollectDiagnosticsChat = 'github.copilot.debug.collectDiagnostics';
+export const CMDCollectDiagnosticsChat = 'reea.copilot.debug.collectDiagnostics';
 
 // Context variable that enable/disable panel-specific commands
-export const CopilotPanelVisible = 'github.copilot.panelVisible';
-export const ComparisonPanelVisible = 'github.copilot.comparisonPanelVisible';
-export const HasMultipleCompletionModels = 'github.copilot.completions.hasMultipleModels';
+export const CopilotPanelVisible = 'reea.copilot.panelVisible';
+export const ComparisonPanelVisible = 'reea.copilot.comparisonPanelVisible';
+export const HasMultipleCompletionModels = 'reea.copilot.completions.hasMultipleModels';
 
-export const CMDOpenModelPickerClient = 'github.copilot.openModelPicker';
-export const CMDOpenModelPickerChat = 'github.copilot.chat.openModelPicker';
+export const CMDOpenModelPickerClient = 'reea.copilot.openModelPicker';
+export const CMDOpenModelPickerChat = 'reea.copilot.chat.openModelPicker';

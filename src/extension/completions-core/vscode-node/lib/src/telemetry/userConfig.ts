@@ -10,7 +10,7 @@ import { Disposable } from '../../../../../../util/vs/base/common/lifecycle';
 import { onCopilotToken } from '../auth/copilotTokenNotifier';
 
 interface UserConfigProperties {
-	copilot_trackingId: string;
+	reea_copilot_trackingId: string;
 	organizations_list?: string;
 	enterprise_list?: string;
 	sku?: string;
@@ -25,7 +25,7 @@ function propertiesFromCopilotToken(copilotToken: Omit<CopilotToken, 'token'>): 
 	if (!trackingId) { return; }
 	// The tracking id is also updated in reporters directly
 	// in the AppInsightsReporter class and set in the `ai.user.id` tag.
-	const props: UserConfigProperties = { copilot_trackingId: trackingId };
+	const props: UserConfigProperties = { reea_copilot_trackingId: trackingId };
 	if (organizationsList) { props.organizations_list = organizationsList.toString(); }
 	if (enterpriseList) { props.enterprise_list = enterpriseList.toString(); }
 	if (sku) { props.sku = sku; }
@@ -65,7 +65,7 @@ export class TelemetryUserConfig extends Disposable implements ICompletionsTelem
 	}
 
 	get trackingId() {
-		return this.#properties.copilot_trackingId;
+		return this.#properties.reea_copilot_trackingId;
 	}
 
 	updateFromToken(copilotToken: Omit<CopilotToken, 'token'>) {

@@ -27,8 +27,8 @@ vi.mock('../../copilotcli/node/cliHelpers', async (importOriginal) => {
 	};
 });
 
-const WORKSPACE_FOLDER_MEMENTO_KEY = 'github.copilot.cli.sessionWorkspaceFolders';
-const WORKTREE_MEMENTO_KEY = 'github.copilot.cli.sessionWorktrees';
+const WORKSPACE_FOLDER_MEMENTO_KEY = 'reea.copilot.cli.sessionWorkspaceFolders';
+const WORKTREE_MEMENTO_KEY = 'reea.copilot.cli.sessionWorktrees';
 
 class MockGlobalState implements vscode.Memento {
 	private data = new Map<string, unknown>();

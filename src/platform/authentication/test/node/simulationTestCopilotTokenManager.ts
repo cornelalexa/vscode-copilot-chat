@@ -32,7 +32,7 @@ class SimulationTestFixedCopilotTokenManager {
 	) { }
 
 	async getCopilotToken(): Promise<CopilotToken> {
-		return new CopilotToken(createTestExtendedTokenInfo({ token: this._completionsToken, username: 'fixedTokenManager', copilot_plan: 'unknown' }));
+		return new CopilotToken(createTestExtendedTokenInfo({ token: this._completionsToken, username: 'fixedTokenManager', reea_copilot_plan: 'unknown' }));
 	}
 }
 
@@ -69,7 +69,7 @@ class SimulationTestCopilotTokenManagerFromGitHubToken {
 		let response: Response;
 		try {
 			response = await fetch(
-				`https://api.github.com/copilot_internal/v2/token`,
+				`https://api.github.com/reea_copilot_internal/v2/token`,
 				{
 					headers: {
 						Authorization: `token ${this._githubToken}`,
@@ -100,7 +100,7 @@ class SimulationTestCopilotTokenManagerFromGitHubToken {
 		const extendedInfo: ExtendedTokenInfo = {
 			...tokenInfo,
 			username: 'NullUser',
-			copilot_plan: 'unknown',
+			reea_copilot_plan: 'unknown',
 			isVscodeTeamMember: false,
 			organization_login_list: [],
 		};

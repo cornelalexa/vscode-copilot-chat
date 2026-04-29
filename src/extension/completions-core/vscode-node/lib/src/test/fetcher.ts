@@ -56,7 +56,7 @@ export function createFakeCompletionResponse(
 		index: i,
 		finishReason: 'stop',
 		logprobs: null,
-		copilot_annotations: options?.annotations,
+		reea_copilot_annotations: options?.annotations,
 		p: 'aaaaaa',
 	}));
 	const responseObject = {
