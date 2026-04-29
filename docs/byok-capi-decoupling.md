@@ -4,6 +4,8 @@ This document summarizes the current GitHub/Copilot CAPI dependency map and a co
 
 The target direction is not to preserve Microsoft/GitHub cloud behavior. The target is to keep local VS Code integration, tools, MCP, editing, diagnostics, terminal/task/test workflows, and provider-neutral chat/agent orchestration working through BYOK or local model providers.
 
+For the dedicated REDEX session and UI ownership refactor that keeps native Copilot Chat untouched, see `docs/byok-redex-dedicated-chat-plan.md`.
+
 ## Goals
 
 - Remove the requirement for a GitHub account or Copilot subscription.

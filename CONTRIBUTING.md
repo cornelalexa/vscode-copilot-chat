@@ -77,6 +77,7 @@ Please include the following with each issue:
 - `npm install`
 - `npm run get_token`
 - Then you can run the build task with `Cmd+Shift+B` (or `Ctrl+Shift+B` if you are on Windows), or just start the "Launch Copilot Extension - Watch Mode" launch config to start the build then start debugging the extension.
+- For local development, use the watch task, `npm run compile`, or the watch-mode launch config. `npm run build` is the packaging path used by release automation and is not the safe local dev entrypoint.
 
 **Tip:** If "Launch Copilot Extension - Watch Mode" doesn't work for you, try using the "Launch Copilot Extension" debug configuration instead.
 
