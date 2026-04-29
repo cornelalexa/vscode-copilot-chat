@@ -3,29 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode';
-import { IAuthenticationService } from '../../../platform/authentication/common/authentication';
 import { IChatAgentService, defaultAgentName, editingSessionAgentEditorName, editingSessionAgentName, editsAgentName, getChatParticipantIdFromName, notebookEditorAgentName, terminalAgentName, vscodeAgentName } from '../../../platform/chat/common/chatAgents';
-import { IChatQuotaService } from '../../../platform/chat/common/chatQuotaService';
 import { IChatSessionService } from '../../../platform/chat/common/chatSessionService';
-import { IInteractionService } from '../../../platform/chat/common/interactionService';
-import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
-import { IEndpointProvider } from '../../../platform/endpoint/common/endpointProvider';
-import { IExperimentationService } from '../../../platform/telemetry/common/nullExperimentationService';
-import { ITelemetryService } from '../../../platform/telemetry/common/telemetry';
-import { ChatExtPerfMark, clearChatExtMarks, markChatExt } from '../../../util/common/performance';
+import { clearChatExtMarks } from '../../../util/common/performance';
 import { DisposableStore, IDisposable } from '../../../util/vs/base/common/lifecycle';
 import { autorun } from '../../../util/vs/base/common/observableInternal';
-import { generateUuid } from '../../../util/vs/base/common/uuid';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
-import { ChatRequest } from '../../../vscodeTypes';
-import { Intent, agentsToCommands } from '../../common/constants';
-import { ICopilotChatResultIn } from '../../prompt/common/conversation';
-import { getSwitchToAutoOnRateLimitConfirmation, isContinueOnError } from '../../prompt/common/specialRequestTypes';
-import { ChatParticipantRequestHandler } from '../../prompt/node/chatParticipantRequestHandler';
+import { Intent } from '../../common/constants';
 import { IFeedbackReporter } from '../../prompt/node/feedbackReporter';
-import { IPromptCategorizerService } from '../../prompt/node/promptCategorizer';
 import { ChatSummarizerProvider } from '../../prompt/node/summarizer';
 import { ChatTitleProvider } from '../../prompt/node/title';
+import { IntentOrGetter, ReeaChatRequestHandlerFactory } from './reeaChatRequestHandlerFactory';
 import { IUserFeedbackService } from './userActions';
 import { getAdditionalWelcomeMessage } from './welcomeMessageProvider';
 
@@ -56,24 +44,17 @@ export class ChatAgentService implements IChatAgentService {
 
 class ChatAgents implements IDisposable {
 	private readonly _disposables = new DisposableStore();
-	private readonly _reeaChatSessionItems = new Map<string, vscode.ChatSessionItem>();
 
 	private additionalWelcomeMessage: vscode.MarkdownString | undefined;
+	private readonly requestHandlerFactory: ReeaChatRequestHandlerFactory;
 
 	constructor(
-		@IAuthenticationService private readonly authenticationService: IAuthenticationService,
 		@IInstantiationService private readonly instantiationService: IInstantiationService,
 		@IUserFeedbackService private readonly userFeedbackService: IUserFeedbackService,
-		@IEndpointProvider private readonly endpointProvider: IEndpointProvider,
 		@IFeedbackReporter private readonly feedbackReporter: IFeedbackReporter,
-		@IInteractionService private readonly interactionService: IInteractionService,
-		@IChatQuotaService private readonly _chatQuotaService: IChatQuotaService,
-		@IConfigurationService private readonly configurationService: IConfigurationService,
-		@IExperimentationService private readonly experimentationService: IExperimentationService,
-		@IPromptCategorizerService private readonly promptCategorizerService: IPromptCategorizerService,
-		@ITelemetryService private readonly telemetryService: ITelemetryService,
 		@IChatSessionService chatSessionService: IChatSessionService,
 	) {
+		this.requestHandlerFactory = this.instantiationService.createInstance(ReeaChatRequestHandlerFactory);
 		this._disposables.add(chatSessionService.onDidDisposeChatSession(sessionId => clearChatExtMarks(sessionId)));
 	}
 
@@ -96,7 +77,7 @@ class ChatAgents implements IDisposable {
 
 	private createAgent(name: string, defaultIntentIdOrGetter: IntentOrGetter, options?: { id?: string }): vscode.ChatParticipant {
 		const id = options?.id || getChatParticipantIdFromName(name);
-		const agent = vscode.chat.createChatParticipant(id, this.getChatParticipantHandler(id, name, defaultIntentIdOrGetter));
+		const agent = vscode.chat.createChatParticipant(id, this.requestHandlerFactory.createRequestHandler(id, name, defaultIntentIdOrGetter));
 		agent.onDidReceiveFeedback(e => {
 			this.userFeedbackService.handleFeedback(e, id);
 		});
@@ -154,33 +135,13 @@ class ChatAgents implements IDisposable {
 		return editingAgent;
 	}
 
+	private getDefaultIntentGetter(): IntentOrGetter {
+		return this.requestHandlerFactory.getDefaultIntentGetter();
+	}
+
 	private registerDefaultAgent(): IDisposable {
-		const intentGetter = (request: vscode.ChatRequest) => {
-			if (this.configurationService.getExperimentBasedConfig(ConfigKey.TeamInternal.AskAgent, this.experimentationService) && request.model.capabilities.supportsToolCalling && this.configurationService.getNonExtensionConfig('chat.agent.enabled')) {
-				return Intent.AskAgent;
-			}
-			return Intent.Unknown;
-		};
+		const intentGetter = this.getDefaultIntentGetter();
 		const defaultAgent = this.createAgent(defaultAgentName, intentGetter);
-		const reeaSessionController = this._disposables.add(vscode.chat.createChatSessionItemController('reea-copilot', () => {
-			reeaSessionController.items.replace(Array.from(this._reeaChatSessionItems.values()));
-			return Promise.resolve();
-		}));
-		reeaSessionController.newChatSessionItemHandler = context => {
-			const id = generateUuid();
-			const item = reeaSessionController.createChatSessionItem(vscode.Uri.from({ scheme: 'reea-copilot', path: `/${id}` }), context.request.prompt || vscode.l10n.t('New Reea Chat'));
-			item.iconPath = new vscode.ThemeIcon('copilot');
-			item.timing = { created: Date.now() };
-			this._reeaChatSessionItems.set(item.resource.toString(), item);
-			return Promise.resolve(item);
-		};
-		this._disposables.add(vscode.chat.registerChatSessionContentProvider('reea-copilot', {
-			provideChatSessionContent: resource => ({
-				title: this._reeaChatSessionItems.get(resource.toString())?.label ?? vscode.l10n.t('Reea Copilot Chat'),
-				history: [],
-				requestHandler: this.getChatParticipantHandler('reea.copilot.default', defaultAgentName, intentGetter) as vscode.ChatRequestHandler,
-			}),
-		}, defaultAgent));
 		defaultAgent.iconPath = new vscode.ThemeIcon('copilot');
 
 		defaultAgent.helpTextPrefix = vscode.l10n.t('You can ask me general programming questions, or chat with the following participants which have specialized expertise and can perform actions:');
@@ -221,125 +182,4 @@ Learn more about [Reea Copilot](https://docs.github.com/copilot/using-github-cop
 		return defaultAgent;
 	}
 
-	private getChatParticipantHandler(id: string, name: string, defaultIntentIdOrGetter: IntentOrGetter): vscode.ChatExtendedRequestHandler {
-		return async (request, context, stream, token): Promise<vscode.ChatResult> => {
-			markChatExt(request.sessionId, ChatExtPerfMark.WillHandleParticipant);
-			try {
-				// If we need to switch to the base model, this function will handle it
-				// Otherwise it just returns the same request passed into it
-				request = await this.switchToBaseModel(request, stream);
-
-				// Handle switch-to-auto confirmation button clicks from rate limit errors
-				const switchToAutoConfirmation = getSwitchToAutoOnRateLimitConfirmation(request);
-				if (switchToAutoConfirmation) {
-					const action = switchToAutoConfirmation.alwaysSwitchToAuto ? 'switchToAutoAlways' : 'switchToAuto';
-					/* __GDPR__
-						"chatRateLimitAction" : {
-							"owner": "lramos15",
-							"comment": "Tracks which action users take when rate limited",
-							"action": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "comment": "The action taken: switchToAuto, switchToAutoAlways, tryAgain, or autoSwitch." },
-							"modelId": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "comment": "The model ID the user was rate limited on." }
-						}
-					*/
-					this.telemetryService.sendMSFTTelemetryEvent('chatRateLimitAction', { action, modelId: request.model?.id });
-					request = await this.switchToAutoModel(request, stream, switchToAutoConfirmation.alwaysSwitchToAuto);
-				} else if (isContinueOnError(request)) {
-					this.telemetryService.sendMSFTTelemetryEvent('chatRateLimitAction', { action: 'tryAgain', modelId: request.model?.id });
-				}
-
-				// The user is starting an interaction with the chat
-				if (!request.subAgentInvocationId) {
-					this.interactionService.startInteraction();
-				}
-
-				// Generate a shared telemetry message ID on the first turn only — subsequent turns have no
-				// categorization event to join and ChatTelemetryBuilder will generate its own ID.
-				const telemetryMessageId = context.history.length === 0 ? generateUuid() : undefined;
-
-				// Categorize the first prompt (fire-and-forget)
-				if (telemetryMessageId !== undefined) {
-					this.promptCategorizerService.categorizePrompt(request, context, telemetryMessageId);
-				}
-
-				const defaultIntentId = typeof defaultIntentIdOrGetter === 'function' ?
-					defaultIntentIdOrGetter(request) :
-					defaultIntentIdOrGetter;
-
-				// empty chatAgentArgs will force InteractiveSession to not use a command or try to parse one out of the query
-				const commandsForAgent = agentsToCommands[defaultIntentId];
-				const intentId = request.command && commandsForAgent ?
-					commandsForAgent[request.command] :
-					defaultIntentId;
-
-				const handler = this.instantiationService.createInstance(ChatParticipantRequestHandler, context.history, request, stream, token, { agentName: name, agentId: id, intentId }, () => context.yieldRequested, telemetryMessageId);
-				let result = await handler.getResult();
-
-				// Auto-retry with Auto model when the setting is enabled and the handler signals it
-				if ((result as ICopilotChatResultIn).metadata?.shouldAutoSwitchToAuto) {
-					const previousModelId = request.model?.id;
-					const switchedRequest = await this.switchToAutoModel(request, stream, false);
-					if (switchedRequest.model?.id !== previousModelId) {
-						this.telemetryService.sendMSFTTelemetryEvent('chatRateLimitAction', { action: 'autoSwitch', modelId: previousModelId });
-						request = switchedRequest;
-						const retryHandler = this.instantiationService.createInstance(ChatParticipantRequestHandler, context.history, request, stream, token, { agentName: name, agentId: id, intentId }, () => context.yieldRequested, telemetryMessageId);
-						result = await retryHandler.getResult();
-					}
-				}
-
-				return result;
-			} finally {
-				markChatExt(request.sessionId, ChatExtPerfMark.DidHandleParticipant);
-				clearChatExtMarks(request.sessionId);
-			}
-		};
-	}
-
-	private async switchToBaseModel(request: vscode.ChatRequest, stream: vscode.ChatResponseStream): Promise<ChatRequest> {
-		const endpoint = await this.endpointProvider.getChatEndpoint(request);
-		const baseEndpoint = await this.endpointProvider.getChatEndpoint('copilot-base');
-		// If it has a 0x multipler, it's free so don't switch them. If it's BYOK, it's free so don't switch them.
-		if (endpoint.multiplier === 0 || request.model.vendor !== 'reea-copilot' || endpoint.multiplier === undefined) {
-			return request;
-		}
-		if (this._chatQuotaService.overagesEnabled || !this._chatQuotaService.quotaExhausted) {
-			return request;
-		}
-		const baseLmModel = (await vscode.lm.selectChatModels({ id: baseEndpoint.model, family: baseEndpoint.family, vendor: 'copilot' }))[0];
-		if (!baseLmModel) {
-			return request;
-		}
-		await vscode.commands.executeCommand('workbench.action.chat.changeModel', { vendor: baseLmModel.vendor, id: baseLmModel.id, family: baseLmModel.family });
-		// Switch to the base model and show a warning
-		request = { ...request, model: baseLmModel };
-		let messageString: vscode.MarkdownString;
-		if (this.authenticationService.copilotToken?.isIndividual) {
-			messageString = new vscode.MarkdownString(vscode.l10n.t({
-				message: 'You have exceeded your premium request allowance. We have automatically switched you to {0} which is included with your plan. [Enable additional paid premium requests]({1}) to continue using premium models.',
-				args: [baseEndpoint.name, 'command:chat.enablePremiumOverages'],
-				// To make sure the translators don't break the link
-				comment: [`{Locked=']({'}`]
-			}));
-			messageString.isTrusted = { enabledCommands: ['chat.enablePremiumOverages'] };
-		} else {
-			messageString = new vscode.MarkdownString(vscode.l10n.t('You have exceeded your premium request allowance. We have automatically switched you to {0} which is included with your plan. To enable additional paid premium requests, contact your organization admin.', baseEndpoint.name));
-		}
-		stream.warning(messageString);
-		return request;
-	}
-
-	private async switchToAutoModel(request: vscode.ChatRequest, stream: vscode.ChatResponseStream, alwaysSwitchToAuto: boolean): Promise<ChatRequest> {
-		const autoModel = (await vscode.lm.selectChatModels({ id: 'auto', vendor: 'copilot' }))[0];
-		if (!autoModel) {
-			return request;
-		}
-		await vscode.commands.executeCommand('workbench.action.chat.changeModel', { vendor: autoModel.vendor, id: autoModel.id, family: autoModel.family });
-		request = { ...request, model: autoModel };
-		if (alwaysSwitchToAuto) {
-			await vscode.workspace.getConfiguration('reea.copilot').update('chat.rateLimitAutoSwitchToAuto', true, vscode.ConfigurationTarget.Global);
-		}
-		stream.warning(new vscode.MarkdownString(vscode.l10n.t('You were rate-limited on the selected model. Switching to Auto and retrying your request.')));
-		return request;
-	}
 }
-
-type IntentOrGetter = Intent | ((request: vscode.ChatRequest) => Intent);

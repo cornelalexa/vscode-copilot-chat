@@ -10,6 +10,8 @@ import { StandaloneEmbeddingsPickerContribution } from '../../byok/vscode-node/s
 import { ChatQuotaContribution } from '../../chat/vscode-node/chatQuota.contribution';
 import { ChatSessionContextContribution } from '../../chatSessionContext/vscode-node/chatSessionContextProvider';
 import { ChatSessionsContrib } from '../../chatSessions/vscode-node/chatSessions';
+import { RedexSurfaceContrib } from '../../chatSessions/vscode-node/redexSurface';
+import { ReeaChatSessionsContrib } from '../../chatSessions/vscode-node/reeaChatSessions';
 import * as chatBlockLanguageContribution from '../../codeBlocks/vscode-node/chatBlockLanguageFeatures.contribution';
 import { IExtensionContributionFactory, asContributionFactory } from '../../common/contributions';
 import { CompletionsUnificationContribution } from '../../completions/vscode-node/completionsUnificationContribution';
@@ -116,6 +118,8 @@ export const vscodeNodeChatContributions: IExtensionContributionFactory[] = [
 	asContributionFactory(SetupTestsContribution),
 	asContributionFactory(FixTestFailureContribution),
 	asContributionFactory(IgnoredFileProviderContribution),
+	asContributionFactory(ReeaChatSessionsContrib),
+	asContributionFactory(RedexSurfaceContrib),
 	asContributionFactory(ChatSessionsContrib),
 	asContributionFactory(BYOKContrib),
 	asContributionFactory(StandaloneEmbeddingsPickerContribution),
@@ -130,6 +134,9 @@ export const vscodeNodeStandaloneChatContributions: IExtensionContributionFactor
 	asContributionFactory(RequestLogTree),
 	asContributionFactory(OnboardTerminalTestsContribution),
 	asContributionFactory(ToolsContribution),
+	asContributionFactory(ReeaChatSessionsContrib),
+	asContributionFactory(RedexSurfaceContrib),
+	asContributionFactory(ChatSessionsContrib),
 	asContributionFactory(AiMappedEditsContrib),
 	asContributionFactory(LogWorkspaceStateContribution),
 	asContributionFactory(BYOKContrib),

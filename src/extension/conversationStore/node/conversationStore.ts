@@ -17,6 +17,7 @@ export interface IConversationStore {
 
 	addConversation(responseId: string, conversation: Conversation): void;
 	getConversation(responseId: string): Conversation | undefined;
+	getLatestConversationForSession(sessionId: string): Conversation | undefined;
 	lastConversation: Conversation | undefined;
 }
 
@@ -49,6 +50,26 @@ export class ConversationStore extends Disposable implements IConversationStore 
 			this.pendingCleanups.deleteAndDispose(conversation.sessionId);
 		}
 		return conversation;
+	}
+
+	getLatestConversationForSession(sessionId: string): Conversation | undefined {
+		let latestConversation: Conversation | undefined;
+
+		this.conversationMap.forEach(conversation => {
+			if (conversation.sessionId !== sessionId) {
+				return;
+			}
+
+			if (!latestConversation || conversation.getLatestTurn().startTime > latestConversation.getLatestTurn().startTime) {
+				latestConversation = conversation;
+			}
+		});
+
+		if (latestConversation) {
+			this.pendingCleanups.deleteAndDispose(sessionId);
+		}
+
+		return latestConversation;
 	}
 
 	get lastConversation(): Conversation | undefined {

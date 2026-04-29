@@ -1264,7 +1264,7 @@
 				"name": "ReeaCopilot",
 				"fullName": "Reea Copilot",
 				"description": "%copilot.description%",
-				"isDefault": true,
+				"isDefault": false,
 				"locations": [
 					"panel"
 				],
@@ -1381,7 +1381,7 @@
 				"name": "ReeaCopilot",
 				"fullName": "Reea Copilot",
 				"description": "%copilot.edits.description%",
-				"isDefault": true,
+				"isDefault": false,
 				"locations": [
 					"panel"
 				],
@@ -1394,7 +1394,7 @@
 				"name": "ReeaCopilot",
 				"fullName": "Reea Copilot",
 				"description": "%copilot.edits.description%",
-				"isDefault": true,
+				"isDefault": false,
 				"locations": [
 					"editor"
 				],
@@ -1483,7 +1483,7 @@
 					"agent"
 				],
 				"isEngine": true,
-				"isDefault": true,
+				"isDefault": false,
 				"isAgent": true,
 				"when": "config.chat.agent.enabled",
 				"commands": [
@@ -1582,7 +1582,7 @@
 				"name": "ReeaCopilot",
 				"fullName": "Reea Copilot",
 				"description": "%copilot.description%",
-				"isDefault": true,
+				"isDefault": false,
 				"locations": [
 					"notebook"
 				],
@@ -1603,7 +1603,7 @@
 				"name": "ReeaCopilot",
 				"fullName": "Reea Copilot",
 				"description": "%copilot.description%",
-				"isDefault": true,
+				"isDefault": false,
 				"locations": [
 					"notebook"
 				],
@@ -1663,7 +1663,7 @@
 				"description": "%copilot.terminal.description%",
 				"when": "!reea.copilot.interactiveSession.disabled",
 				"sampleRequest": "%copilot.terminal.sampleRequest%",
-				"isDefault": true,
+				"isDefault": false,
 				"locations": [
 					"terminal"
 				],
@@ -2033,14 +2033,7 @@
 				}
 			}
 		],
-		"interactiveSession": [
-			{
-				"label": "Reea Copilot",
-				"id": "reea-copilot",
-				"icon": "",
-				"when": "!reea.copilot.interactiveSession.disabled"
-			}
-		],
+		"interactiveSession": [],
 		"mcpServerDefinitionProviders": [
 			{
 				"id": "github",
@@ -2876,6 +2869,12 @@
 				"enablement": "!chatSessionRequestInProgress",
 				"icon": "$(repo)",
 				"category": "Reea Copilot"
+			},
+			{
+				"command": "reea.copilot.redex.newSession",
+				"title": "New REDEX Session",
+				"icon": "$(add)",
+				"category": "REDEX"
 			}
 		],
 		"configuration": [
@@ -5328,6 +5327,11 @@
 					"command": "reea.copilot.debug.showChatLogView",
 					"when": "view == workbench.panel.chat.view.copilot",
 					"group": "3_show"
+				},
+				{
+					"command": "reea.copilot.redex.newSession",
+					"when": "view == reea-copilot-redex.sessions",
+					"group": "navigation"
 				}
 			],
 			"view/item/context": [
@@ -5817,6 +5821,12 @@
 					"icon": "$(inspect)",
 					"when": "reea.copilot.chat.showContextInspectorView"
 				}
+			],
+			"reea-copilot-redex": [
+				{
+					"id": "reea-copilot-redex.sessions",
+					"name": "REDEX"
+				}
 			]
 		},
 		"viewsContainers": {
@@ -5830,6 +5840,11 @@
 					"id": "reea-context-inspector",
 					"title": "Language Context Inspector",
 					"icon": "$(inspect)"
+				},
+				{
+					"id": "reea-copilot-redex",
+					"title": "REDEX",
+					"icon": "assets/copilot.png"
 				}
 			]
 		},
@@ -6036,6 +6051,29 @@
 			}
 		],
 		"chatSessions": [
+			{
+				"type": "reea-copilot",
+				"name": "reea",
+				"displayName": "Reea",
+				"icon": "$(copilot)",
+				"welcomeTitle": "Reea Copilot Chat",
+				"welcomeMessage": "Use Reea Copilot Chat with your configured BYOK or local models.",
+				"inputPlaceholder": "Ask Reea Copilot Chat, type `#` for context",
+				"order": 0,
+				"description": "Reea Copilot Chat standalone local/BYOK assistant",
+				"capabilities": {
+					"supportsFileAttachments": true,
+					"supportsImageAttachments": true,
+					"supportsProblemAttachments": true,
+					"supportsToolAttachments": true,
+					"supportsSymbolAttachments": true,
+					"supportsSearchResultAttachments": true,
+					"supportsSourceControlAttachments": true,
+					"supportsPromptAttachments": true
+				},
+				"autoAttachReferences": true,
+				"useRequestToPopulateBuiltInPickers": true
+			},
 			{
 				"type": "claude-code",
 				"name": "claude",

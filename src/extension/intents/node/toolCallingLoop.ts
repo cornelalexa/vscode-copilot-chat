@@ -642,10 +642,30 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions =
 	 */
 	public async runStartHooks(outputStream: ChatResponseStream | undefined, token: CancellationToken): Promise<void> {
 		const sessionId = this.options.conversation.sessionId;
-		const hasHooks = this.options.request.hasHooksEnabled;
+		const priorTurns = this.options.conversation.turns.slice(0, -1);
+		const history: IHistoricalTurn[] = priorTurns.map(turn => ({
+			userMessage: turn.request.message,
+			timestamp: turn.startTime,
+			rounds: turn.rounds.map(round => ({
+				response: round.response,
+				toolCalls: round.toolCalls.map(tc => ({
+					name: tc.name,
+					arguments: tc.arguments,
+					id: tc.id,
+				})),
+				reasoningText: round.thinking
+					? (Array.isArray(round.thinking.text) ? round.thinking.text.join('') : round.thinking.text)
+					: undefined,
+				timestamp: round.timestamp,
+			})),
+		}));
 
 		// Report which hooks are configured for this request
 		this._chatHookService.logConfiguredHooks(this.options.request.hooks);
+
+		// Start the existing transcript path for every session so custom chat surfaces
+		// can restore history from the same persisted data as the core agent flow.
+		await this._sessionTranscriptService.startSession(sessionId, undefined, history.length > 0 ? history : undefined);
 
 		// Execute SubagentStart hook for subagent requests, or SessionStart hook for first turn of regular sessions
 		if (this.options.request.subAgentInvocationId) {
@@ -659,30 +679,6 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions =
 			}
 		} else {
 			const isFirstTurn = this.options.conversation.turns.length === 1;
-
-			if (hasHooks) {
-				// Build history from prior turns (excluding the current one) for transcript replay
-				const priorTurns = this.options.conversation.turns.slice(0, -1);
-				const history: IHistoricalTurn[] = priorTurns.map(turn => ({
-					userMessage: turn.request.message,
-					timestamp: turn.startTime,
-					rounds: turn.rounds.map(round => ({
-						response: round.response,
-						toolCalls: round.toolCalls.map(tc => ({
-							name: tc.name,
-							arguments: tc.arguments,
-							id: tc.id,
-						})),
-						reasoningText: round.thinking
-							? (Array.isArray(round.thinking.text) ? round.thinking.text.join('') : round.thinking.text)
-							: undefined,
-						timestamp: round.timestamp,
-					})),
-				}));
-
-				// Start the transcript (will replay history if no file exists yet)
-				await this._sessionTranscriptService.startSession(sessionId, undefined, history.length > 0 ? history : undefined);
-			}
 
 			if (isFirstTurn) {
 				const startHookResult = await this.executeSessionStartHook({
@@ -1132,6 +1128,7 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions =
 					break;
 				}
 
+				await this._sessionTranscriptService.flush(sessionId);
 				throw e;
 			}
 		}
@@ -1154,6 +1151,7 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions =
 				}
 			}
 		}
+		await this._sessionTranscriptService.flush(sessionId);
 		return { ...lastResult, toolCallRounds: this.toolCallRounds, toolCallResults: this.toolCallResults };
 	}
 
