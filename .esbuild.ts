@@ -325,6 +325,7 @@ async function moveSourceMapsToSeparateDir(): Promise<void> {
 
 async function main() {
 	if (!isDev) {
+		ensurePackageJsonPatchAllowed();
 		applyPackageJsonPatch(isPreRelease);
 	}
 
@@ -414,6 +415,17 @@ async function main() {
 	}
 }
 
+function ensurePackageJsonPatchAllowed() {
+	const isCI = process.env['CI'] === 'true' || process.env['GITHUB_ACTIONS'] === 'true' || process.env['TF_BUILD'] === 'True';
+	const explicitlyAllowed = process.env['VSCODE_COPILOT_CHAT_ALLOW_MANIFEST_PATCH'] === 'true';
+
+	if (isCI || explicitlyAllowed) {
+		return;
+	}
+
+	throw new Error('Refusing to patch package.json in a local checkout. Use `npm run compile` or the watch tasks for local development. Set VSCODE_COPILOT_CHAT_ALLOW_MANIFEST_PATCH=true only if you intentionally need the packaging flow in this checkout.');
+}
+
 function applyPackageJsonPatch(isPreRelease: boolean) {
 	const packagejsonPath = path.join(import.meta.dirname, './package.json');
 	const json = JSON.parse(fs.readFileSync(packagejsonPath).toString());
@@ -430,7 +442,7 @@ function applyPackageJsonPatch(isPreRelease: boolean) {
 	delete patchedPackageJson['devDependencies'];
 	delete patchedPackageJson['dependencies'];
 
-	fs.writeFileSync(packagejsonPath, JSON.stringify(patchedPackageJson));
+	fs.writeFileSync(packagejsonPath, JSON.stringify(patchedPackageJson, null, '\t') + '\n');
 }
 
 main();

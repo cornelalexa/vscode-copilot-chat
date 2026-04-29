@@ -4,27 +4,24 @@
 		{
 			"label": "Install dependencies",
 			"type": "shell",
-			"command": "npm ci",
-			"inSessions": true,
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && npm ci",
 			"runOptions": { "runOn": "worktreeCreated" }
 		},
 		{
 			"label": "Compile & Launch Extension Host",
 			"type": "shell",
-			"command": "npm run compile && COPILOT_LOG_TELEMETRY=true VSCODE_DEV_DEBUG=1 code-insiders --extensionDevelopmentPath=$(pwd)",
-			"inSessions": true
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && npm run compile && COPILOT_LOG_TELEMETRY=true VSCODE_DEV_DEBUG=1 code --extensionDevelopmentPath=$(pwd)"
 		},
 		{
 			"label": "Typecheck",
 			"type": "shell",
-			"command": "npm run typecheck",
-			"inSessions": true
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && npm run typecheck"
 		},
 		{
 			"label": "compile",
-			"type": "npm",
-			"script": "compile",
-			"problemMatcher": "$esbuild",
+			"type": "shell",
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && npm run compile",
+			"problemMatcher": [],
 		},
 		{
 			"type": "npm",
@@ -44,10 +41,10 @@
 				}
 			},
 			"linux": {
-				"command": "test -d node_modules || npm ci"
+				"command": "test -d node_modules || (export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && npm ci)"
 			},
 			"osx": {
-				"command": "test -d node_modules || npm ci"
+				"command": "test -d node_modules || (export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && npm ci)"
 			},
 			"group": "build",
 			"presentation": {
@@ -85,14 +82,11 @@
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			},
-			"runOptions": {
-				"runOn": "folderOpen"
 			}
 		},
 		{
-			"type": "npm",
-			"script": "watch:tsc-extension",
+			"type": "shell",
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && ./node_modules/.bin/tsc --noEmit --watch --project tsconfig.json",
 			"group": "build",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
@@ -103,8 +97,8 @@
 			}
 		},
 		{
-			"type": "npm",
-			"script": "watch:tsc-extension-web",
+			"type": "shell",
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && ./node_modules/.bin/tsc --noEmit --watch --project tsconfig.worker.json",
 			"group": "build",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
@@ -115,8 +109,8 @@
 			}
 		},
 		{
-			"type": "npm",
-			"script": "watch:tsc-simulation-workbench",
+			"type": "shell",
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && ./node_modules/.bin/tsc --noEmit --watch --project test/simulation/workbench/tsconfig.json",
 			"group": "build",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
@@ -127,10 +121,21 @@
 			}
 		},
 		{
-			"type": "npm",
-			"script": "watch:esbuild",
+			"type": "shell",
+			"command": "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm use >/dev/null && npm run watch:esbuild",
 			"group": "build",
-			"problemMatcher": "$esbuild-watch",
+			"problemMatcher": {
+				"owner": "esbuild",
+				"fileLocation": "absolute",
+				"pattern": {
+					"regexp": "^$"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "^\\[watch\\] build started$",
+					"endsPattern": "^\\[watch\\] build finished$"
+				}
+			},
 			"isBackground": true,
 			"label": "npm: watch:esbuild",
 			"presentation": {
